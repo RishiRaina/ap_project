@@ -1,26 +1,17 @@
 package edu.univ.erp.domain;
 
 public class Instructor {
-    private int id;
-    private String name;
-    private String email;
-    private String specialization;
+    private int userId;
+    private String department;
 
-    public Instructor(int id, String name, String email, String specialization) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.specialization = specialization;
+    public Instructor(int userId, String department) {
+        this.userId = userId;
+        this.department = department;
     }
 
-    
-    public int getId() { return id; }
-    public String getName() { return name; }
-    public String getEmail() { return email; }
-    public String getSpecialization() { return specialization; }
+    public int getUserId() { return userId; }
+    public void setUserId(int userId) { this.userId = userId; }
 
-    public void setId(int id) { this.id = id; }
-    public void setName(String name) { this.name = name; }
-    public void setEmail(String email) { this.email = email; }
-    public void setSpecialization(String specialization) { this.specialization = specialization; }
+    public String getDepartment() { return department; }
+    public void setDepartment(String department) { this.department = department; }
 }

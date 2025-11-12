@@ -1,22 +1,27 @@
 package edu.univ.erp.domain;
 
 public class Grade {
-    private int studentId;
-    private int courseId;
-    private String grade;
+    private int enrollmentId;
+    private String component;
+    private double score;
+    private String finalGrade;
 
-    public Grade(int studentId, int courseId, String grade) {
-        this.studentId = studentId;
-        this.courseId = courseId;
-        this.grade = grade;
+    public Grade(int enrollmentId, String component, double score, String finalGrade) {
+        this.enrollmentId = enrollmentId;
+        this.component = component;
+        this.score = score;
+        this.finalGrade = finalGrade;
     }
 
-   
-    public int getStudentId() { return studentId; }
-    public int getCourseId() { return courseId; }
-    public String getGrade() { return grade; }
+    public int getEnrollmentId() { return enrollmentId; }
+    public void setEnrollmentId(int enrollmentId) { this.enrollmentId = enrollmentId; }
 
-    public void setStudentId(int studentId) { this.studentId = studentId; }
-    public void setCourseId(int courseId) { this.courseId = courseId; }
-    public void setGrade(String grade) { this.grade = grade; }
+    public String getComponent() { return component; }
+    public void setComponent(String component) { this.component = component; }
+
+    public double getScore() { return score; }
+    public void setScore(double score) { this.score = score; }
+
+    public String getFinalGrade() { return finalGrade; }
+    public void setFinalGrade(String finalGrade) { this.finalGrade = finalGrade; }
 }

@@ -6,8 +6,8 @@ public class Course {
     private String title;
     private int credits;
 
-    public Course(int courseid,String code,String title,int credits){
-        this.courseId = courseid;
+    public Course(int courseId, String code, String title, int credits) {
+        this.courseId = courseId;
         this.code = code;
         this.title = title;
         this.credits = credits;
@@ -15,10 +15,13 @@ public class Course {
 
     public int getCourseId() { return courseId; }
     public void setCourseId(int courseId) { this.courseId = courseId; }
+
     public String getCode() { return code; }
     public void setCode(String code) { this.code = code; }
+
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
+
     public int getCredits() { return credits; }
     public void setCredits(int credits) { this.credits = credits; }
 }

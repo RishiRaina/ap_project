@@ -6,14 +6,14 @@ import java.sql.*;
 public class AdminDAO {
 
     public boolean addAdmin(Admin a) {
-        String sql = "INSERT INTO admins(admin_id, name, email, role) VALUES (?, ?, ?, ?)";
-        try (Connection conn = DatabaseConnection.getConnection();
+        String sql = "INSERT INTO admins(admin_id, name, email) VALUES (?, ?, ?)";
+        try (Connection conn = ERPDatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, a.getAdminId());
             ps.setString(2, a.getName());
             ps.setString(3, a.getEmail());
-            ps.setString(4, a.getRole());
+
             return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
@@ -24,17 +24,17 @@ public class AdminDAO {
 
     public Admin getAdminById(int id) {
         String sql = "SELECT * FROM admins WHERE admin_id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
+        try (Connection conn = ERPDatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
+
             if (rs.next()) {
                 return new Admin(
                     rs.getInt("admin_id"),
                     rs.getString("name"),
-                    rs.getString("email"),
-                    rs.getString("role")
+                    rs.getString("email")
                 );
             }
 
