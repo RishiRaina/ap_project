@@ -5,16 +5,16 @@ import java.sql.*;
 import java.util.*;
 
 public class CourseDAO {
-
+    
     public boolean addCourse(Course c) {
-        String sql = "INSERT INTO courses(course_id, code, title, credits) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO courses(code, title, credits) VALUES (?, ?, ?)";
+
         try (Connection conn = ERPDatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, c.getCourseId());
-            ps.setString(2, c.getCode());
-            ps.setString(3, c.getTitle());
-            ps.setInt(4, c.getCredits());
+            ps.setString(1, c.getCode());
+            ps.setString(2, c.getTitle());
+            ps.setInt(3, c.getCredits());
 
             return ps.executeUpdate() > 0;
 
@@ -23,6 +23,7 @@ public class CourseDAO {
             return false;
         }
     }
+
 
     public List<Course> getAllCourses() {
         List<Course> list = new ArrayList<>();
@@ -34,10 +35,10 @@ public class CourseDAO {
 
             while (rs.next()) {
                 list.add(new Course(
-                    rs.getInt("course_id"),
-                    rs.getString("code"),
-                    rs.getString("title"),
-                    rs.getInt("credits")
+                        rs.getInt("course_id"),
+                        rs.getString("code"),
+                        rs.getString("title"),
+                        rs.getInt("credits")
                 ));
             }
 
@@ -48,8 +49,54 @@ public class CourseDAO {
         return list;
     }
 
+    public Course getCourseById(int courseId) {
+        String sql = "SELECT * FROM courses WHERE course_id = ?";
+
+        try (Connection conn = ERPDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, courseId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return new Course(
+                        rs.getInt("course_id"),
+                        rs.getString("code"),
+                        rs.getString("title"),
+                        rs.getInt("credits")
+                );
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching course: " + e.getMessage());
+        }
+
+        return null;
+    }
+
+    public boolean updateCourse(Course c) {
+        String sql = "UPDATE courses SET code = ?, title = ?, credits = ? WHERE course_id = ?";
+
+        try (Connection conn = ERPDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, c.getCode());
+            ps.setString(2, c.getTitle());
+            ps.setInt(3, c.getCredits());
+            ps.setInt(4, c.getCourseId());
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error updating course: " + e.getMessage());
+            return false;
+        }
+    }
+
+   
     public boolean deleteCourse(int courseId) {
         String sql = "DELETE FROM courses WHERE course_id = ?";
+
         try (Connection conn = ERPDatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 

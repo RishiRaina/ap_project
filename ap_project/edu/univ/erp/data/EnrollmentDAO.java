@@ -7,14 +7,14 @@ import java.util.*;
 public class EnrollmentDAO {
 
     public boolean enrollStudent(Enrollment e) {
-        String sql = "INSERT INTO enrollments(enrollment_id, student_id, section_id, status) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO enrollments(student_id, section_id, status) VALUES (?, ?, ?)";
+
         try (Connection conn = ERPDatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, e.getEnrollmentId());
-            ps.setInt(2, e.getStudentId());
-            ps.setInt(3, e.getSectionId());
-            ps.setString(4, e.getStatus());
+            ps.setInt(1, e.getStudentId());
+            ps.setInt(2, e.getSectionId());
+            ps.setString(3, e.getStatus());
 
             return ps.executeUpdate() > 0;
 

@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS grades (
   enrollment_id INT NOT NULL,
   component VARCHAR(50) NOT NULL,
   score DECIMAL(6,2) NOT NULL,
+  final_grade VARCHAR(5),        
   FOREIGN KEY (enrollment_id)
     REFERENCES enrollments(enrollment_id)
     ON DELETE CASCADE

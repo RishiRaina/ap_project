@@ -4,21 +4,14 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import edu.univ.erp.data.AuthDatabaseConnection;
 
-/**
- * AuthHelper — Handles login, password change, logout for ERP system.
- * Uses bcrypt for secure password hashing.
- * Maintains clean separation of auth DB access and session management.
- */
 
 public final class AuthHelper {
 
     private AuthHelper() {
-        // Prevent instantiation of helper class
+       
     }
 
-    /**
-     * Result wrapper for login attempts
-     */
+   
     public static class AuthResult {
         public final boolean success;
         public final int userId;
@@ -33,10 +26,7 @@ public final class AuthHelper {
         }
     }
 
-    /**
-     * Attempt user login given username & plaintext password.
-     * Returns AuthResult indicating success/failure and user details.
-     */
+    
     public static AuthResult login(String username, String password) {
         final String sql = "SELECT user_id, role, password_hash, status FROM users_auth WHERE username = ?";
 
@@ -58,15 +48,15 @@ public final class AuthHelper {
                     return failureResult("Account inactive or locked.");
                 }
 
-                // Verify password with bcrypt
+                
                 if (!PasswordHash.verify(password, storedHash)) {
                     return failureResult("Incorrect username or password.");
                 }
 
-                // Update last login timestamp
+                
                 updateLastLogin(con, userId);
 
-                // Create user session
+                
                 SessionManager.setCurrentUser(userId, role);
 
                 return new AuthResult(true, userId, role, "Login successful.");
@@ -78,10 +68,6 @@ public final class AuthHelper {
         }
     }
 
-    /**
-     * Change user's password, given old password for verification.
-     * Returns true if password changed successfully, false otherwise.
-     */
     public static boolean changePassword(int userId, String oldPassword, String newPassword) {
         final String selectSql = "SELECT password_hash FROM users_auth WHERE user_id = ?";
         final String updateSql = "UPDATE users_auth SET password_hash = ? WHERE user_id = ?";
@@ -118,25 +104,15 @@ public final class AuthHelper {
         }
     }
 
-    /**
-     * Logs out current user by clearing session.
-     */
     public static void logout() {
         SessionManager.clear();
     }
 
-    // ================= Private Helpers =================
-
-    /**
-     * Returns a standard failure AuthResult with generic message.
-     */
     private static AuthResult failureResult(String message) {
         return new AuthResult(false, -1, null, message);
     }
 
-    /**
-     * Updates last_login field for the user.
-     */
+ 
     private static void updateLastLogin(Connection conn, int userId) throws SQLException {
         final String updatelastloginquery = "UPDATE users_auth SET last_login = ? WHERE user_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(updatelastloginquery)) {

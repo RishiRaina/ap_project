@@ -1,17 +1,30 @@
 package edu.univ.erp.domain;
 
 public class Grade {
+    private int gradeId;        
     private int enrollmentId;
     private String component;
     private double score;
     private String finalGrade;
 
+    public Grade(int gradeId, int enrollmentId, String component, double score, String finalGrade) {
+        this.gradeId = gradeId;
+        this.enrollmentId = enrollmentId;
+        this.component = component;
+        this.score = score;
+        this.finalGrade = finalGrade;
+    }
+
+   
     public Grade(int enrollmentId, String component, double score, String finalGrade) {
         this.enrollmentId = enrollmentId;
         this.component = component;
         this.score = score;
         this.finalGrade = finalGrade;
     }
+
+    public int getGradeId() { return gradeId; }
+    public void setGradeId(int gradeId) { this.gradeId = gradeId; }
 
     public int getEnrollmentId() { return enrollmentId; }
     public void setEnrollmentId(int enrollmentId) { this.enrollmentId = enrollmentId; }
