@@ -63,4 +63,32 @@ public class EnrollmentDAO {
             return false;
         }
     }
+
+
+public List<Enrollment> getEnrollmentsBySection(int sectionId) {
+    List<Enrollment> list = new ArrayList<>();
+    String sql = "SELECT * FROM enrollments WHERE section_id = ?";
+
+    try (Connection conn = ERPDatabaseConnection.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setInt(1, sectionId);
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+            list.add(new Enrollment(
+                rs.getInt("enrollment_id"),
+                rs.getInt("student_id"),
+                rs.getInt("section_id"),
+                rs.getString("status")
+            ));
+        }
+
+    } catch (SQLException e) {
+        System.err.println("Error fetching enrollments by section: " + e.getMessage());
+    }
+
+    return list;
+}
+
 }

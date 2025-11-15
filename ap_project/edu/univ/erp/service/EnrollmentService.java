@@ -22,4 +22,8 @@ public class EnrollmentService {
     public boolean deleteEnrollment(int enrollmentId) {
         return enrollmentDAO.deleteEnrollment(enrollmentId);
     }
+
+    public List<Enrollment> getEnrollmentsBySection(int sectionId) {
+        return enrollmentDAO.getEnrollmentsBySection(sectionId);
+    }
 }

@@ -27,7 +27,6 @@ public class UserAuthDAO {
             int affected = ps.executeUpdate();
             if (affected == 0) return false;
 
-            // Retrieve generated user_id
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
                     user.setUserId(rs.getInt(1));

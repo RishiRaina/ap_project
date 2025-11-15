@@ -5,10 +5,11 @@ import edu.univ.erp.domain.Course;
 import java.util.List;
 
 public class CourseService {
+
     private CourseDAO courseDAO;
 
     public CourseService() {
-        courseDAO = new CourseDAO();
+        this.courseDAO = new CourseDAO();
     }
 
     public boolean addCourse(Course c) {
@@ -17,6 +18,14 @@ public class CourseService {
 
     public List<Course> getAllCourses() {
         return courseDAO.getAllCourses();
+    }
+
+    public Course getCourseById(int courseId) {
+        return courseDAO.getCourseById(courseId);
+    }
+
+    public boolean updateCourse(Course c) {
+        return courseDAO.updateCourse(c);
     }
 
     public boolean deleteCourse(int courseId) {
