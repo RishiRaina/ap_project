@@ -7,7 +7,7 @@ import java.sql.*;
 public class SettingDAO {
 
     public boolean addSetting(Setting s) {
-        String sql = "INSERT INTO settings(`key`, `value`) VALUES (?, ?)";
+        String sql = "INSERT INTO settings(`key_name`, `value`) VALUES (?, ?)";
         try (Connection conn = ERPDatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -21,7 +21,7 @@ public class SettingDAO {
     }
 
     public String getSetting(String key) {
-        String sql = "SELECT value FROM settings WHERE `key` = ?";
+        String sql = "SELECT value FROM settings WHERE `key_name` = ?";
         try (Connection conn = ERPDatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -37,7 +37,7 @@ public class SettingDAO {
     }
 
     public boolean updateSetting(String key, String value) {
-        String sql = "UPDATE settings SET value = ? WHERE `key` = ?";
+        String sql = "UPDATE settings SET value = ? WHERE `key_name` = ?";
         try (Connection conn = ERPDatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 

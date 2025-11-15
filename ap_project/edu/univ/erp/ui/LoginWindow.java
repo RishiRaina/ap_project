@@ -12,6 +12,7 @@ public class LoginWindow extends JFrame {
     private AuthService authService;
 
     public LoginWindow() {
+
         setTitle("University ERP Login");
         setSize(400, 250);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

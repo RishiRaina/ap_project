@@ -10,7 +10,7 @@ public class UserAuthDAO {
 
     public boolean addUser(UserAuth user) {
         String sql = "INSERT INTO users_auth (username, role, password_hash, status, last_login) VALUES (?, ?, ?, ?, ?)";
-        try (Connection conn = ERPDatabaseConnection.getConnection();
+        try (Connection conn = AuthDatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, user.getUsername());

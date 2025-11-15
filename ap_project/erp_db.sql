@@ -74,3 +74,7 @@ CREATE TABLE IF NOT EXISTS settings (
   key_name VARCHAR(100) PRIMARY KEY,
   value VARCHAR(255)
 );
+
+INSERT INTO settings (key_name, value)
+SELECT 'maintenance_on', 'false'
+WHERE NOT EXISTS (SELECT 1 FROM settings WHERE key_name = 'maintenance_on');
