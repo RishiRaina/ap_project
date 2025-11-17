@@ -6,6 +6,7 @@ public class Enrollment {
     private int sectionId;
     private String status;
 
+    // Full constructor (used when loading from DB)
     public Enrollment(int enrollmentId, int studentId, int sectionId, String status) {
         this.enrollmentId = enrollmentId;
         this.studentId = studentId;
@@ -13,6 +14,14 @@ public class Enrollment {
         this.status = status;
     }
 
+    // for new registrations from register for section
+    public Enrollment(int studentId, int sectionId) {
+        this.studentId = studentId;
+        this.sectionId = sectionId;
+        this.status = "ENROLLED"; // default for new enrollment
+    }
+
+    // Getters and setters...
     public int getEnrollmentId() { return enrollmentId; }
     public void setEnrollmentId(int enrollmentId) { this.enrollmentId = enrollmentId; }
 

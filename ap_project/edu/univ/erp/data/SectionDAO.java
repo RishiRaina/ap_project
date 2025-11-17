@@ -62,4 +62,34 @@ public class SectionDAO {
         }
         return list;
     }
+
+    public Section getSectionById(int sectionId) {
+        String sql = "SELECT * FROM sections WHERE section_id = ?";
+
+        try (Connection conn = ERPDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, sectionId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return new Section(
+                        rs.getInt("section_id"),
+                        rs.getInt("course_id"),
+                        rs.getObject("instructor_id") == null ? null : rs.getInt("instructor_id"),
+                        rs.getString("day_time"),
+                        rs.getString("room"),
+                        rs.getInt("capacity"),
+                        rs.getString("semester"),
+                        rs.getInt("year"),
+                        rs.getDate("registration_deadline")
+                );
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching section by ID: " + e.getMessage());
+        }
+        return null;
+    }
+
 }
