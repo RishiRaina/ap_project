@@ -22,27 +22,29 @@ public class InstructorDashboard extends JPanel {
         panel.setLayout(new GridLayout(4, 1, 15, 15));
         panel.setBorder(BorderFactory.createEmptyBorder(40, 200, 40, 200));
 
-        JButton mySectionsBtn = new JButton("My Sections");
-        JButton statsBtn = new JButton("View Class Stats");
+        JButton mysecbutton = new JButton("My Sections");
+        JButton statssectionbutton = new JButton("View Class Stats");
         JButton exportCsvBtn = new JButton("Export Grades CSV");
         JButton backBtn = new JButton("Back");
 
         Font btnFont = new Font("Arial", Font.PLAIN, 20);
-        mySectionsBtn.setFont(btnFont);
-        statsBtn.setFont(btnFont);
+        mysecbutton.setFont(btnFont);
+        statssectionbutton.setFont(btnFont);
         exportCsvBtn.setFont(btnFont);
         backBtn.setFont(btnFont);
-
-        panel.add(mySectionsBtn);
-        panel.add(statsBtn);
+        //add all buttons to panel then add panel
+        panel.add(mysecbutton);
+        panel.add(statssectionbutton);
         panel.add(exportCsvBtn);
         panel.add(backBtn);
-
         add(panel, BorderLayout.CENTER);
 
-        mySectionsBtn.addActionListener(e -> mainFrame.showScreen("instructor_my_sections"));
-        statsBtn.addActionListener(e -> mainFrame.showScreen("instructor_stats_select_section"));
+        mysecbutton.addActionListener(e -> mainFrame.showScreen("instructor_my_sections"));
         exportCsvBtn.addActionListener(e -> mainFrame.showScreen("instructor_export_csv"));
+        statssectionbutton.addActionListener(e -> mainFrame.showScreen("instructor_stats_select_section"));
+
+
+        //back button pushes back on to login screen
         backBtn.addActionListener(e -> mainFrame.showScreen(MainFrame.LOGIN_SCREEN));
 
     }

@@ -5,7 +5,7 @@ import edu.univ.erp.domain.Course;
 import edu.univ.erp.domain.Section;
 import edu.univ.erp.service.InstructorQueryService;
 import edu.univ.erp.service.CourseService;
-import edu.univ.erp.ui.common.MainFrame;
+import edu.univ.erp.ui.common.*;
 import edu.univ.erp.ui.student.ButtonEditor;
 import edu.univ.erp.ui.student.ButtonRenderer;
 
@@ -42,8 +42,9 @@ public class InstructorSections extends JPanel {
         table.setRowHeight(30);
         add(new JScrollPane(table), BorderLayout.CENTER);
         // Button column
-        table.getColumn("Action").setCellRenderer(new ButtonRenderer());
-        table.getColumn("Action").setCellEditor(new ButtonEditor(new JCheckBox(), this));
+        table.getColumn("Action").setCellRenderer(new ActionButtonRenderer());
+        table.getColumn("Action").setCellEditor(new ActionButtonEditor(new JCheckBox(), this));
+
 
         // Load data
         loadMySections(model);
@@ -57,9 +58,6 @@ public class InstructorSections extends JPanel {
         add(bottom, BorderLayout.SOUTH);
     }
 
-    // =====================================
-    // LOAD SECTIONS TAUGHT BY THE INSTRUCTOR
-    // =====================================
     public void loadMySections(DefaultTableModel model) {
         model.setRowCount(0);
         int instructorId = SessionManager.getCurrentUserId();
@@ -76,10 +74,8 @@ public class InstructorSections extends JPanel {
         JTable table = (JTable) ((JScrollPane) getComponent(1)).getViewport().getView();
         int sectionId = (Integer) table.getValueAt(row, 0);
 
-        // Pass the section ID to next screen
-        mainFrame.addScreen("instructor_section_students",
-                new InstructorSectionStudents(mainFrame, sectionId));
-
+        // sectio id passed as an argyment to next screen
+        mainFrame.addScreen("instructor_section_students", new InstructorSectionStudents(mainFrame, sectionId));
         mainFrame.showScreen("instructor_section_students");
     }
 }

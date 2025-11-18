@@ -50,4 +50,21 @@ public class GradeDAO {
 
         return list;
     }
+
+    public boolean updateGrade(Grade g) {
+        String sql = "UPDATE grades SET score = ?, final_grade = ? WHERE grade_id = ?";
+
+        try (Connection conn = ERPDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, g.getScore());
+            ps.setString(2, g.getFinalGrade());
+            ps.setInt(3, g.getGradeId());
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error updating grade: " + e.getMessage());
+            return false;
+        }
+    }
+
 }

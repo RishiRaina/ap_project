@@ -32,8 +32,10 @@ public class MainLauncher {
 
         // sub parts of instrcutor dashboard
         frame.addScreen("instructor_my_sections", new InstructorSections(frame));
-        frame.addScreen("instructor_stats_select_section", new InstructorStatsSelectSection(frame));
-        frame.addScreen("instructor_export_csv", new InstructorExportCSV(frame));
+        frame.addScreen("instructor_export_csv", new ExportGrades(frame));
+        frame.addScreen("instructor_stats_select_section", new InstructorStatsSectionSelect(frame));
+        frame.addScreen("instructor_stats_view", new SectionStatsView(frame, -1)); // dummy, replaced dynamically
+
 
 
 
