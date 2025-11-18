@@ -11,6 +11,7 @@ public class SectionService {
     private SectionDAO sectionDAO;
 
     public SectionService() {
+
         this.sectionDAO = new SectionDAO();
     }
     
@@ -39,5 +40,9 @@ public class SectionService {
 
     public List<Section> getAllSections() {
         return sectionDAO.getAllSections();
+    }
+
+    public Section getSectionById(int sectionId) {
+        return sectionDAO.getSectionById(sectionId);
     }
 }

@@ -2,6 +2,7 @@ package edu.univ.erp.ui.student;
 
 import edu.univ.erp.data.CourseDAO;
 import edu.univ.erp.domain.Course;
+import edu.univ.erp.service.CourseService;
 import edu.univ.erp.ui.common.MainFrame;
 
 import javax.swing.*;
@@ -12,11 +13,11 @@ import java.util.List;
 public class ViewCourseCatalog extends JPanel {
 
     private MainFrame mainFrame;
-    private CourseDAO courseDAO;
+    private CourseService courseService;
 
     public ViewCourseCatalog(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-        this.courseDAO = new CourseDAO();
+        this.courseService  = new CourseService();
 
         setLayout(new BorderLayout());
 
@@ -25,45 +26,36 @@ public class ViewCourseCatalog extends JPanel {
         title.setFont(new Font("Arial", Font.BOLD, 28));
         add(title, BorderLayout.NORTH);
 
-        // ===== TABLE =====
+        // table
         String[] columns = {"Course ID", "Code", "Title", "Credits"};
         DefaultTableModel model = new DefaultTableModel(columns, 0);
         JTable table = new JTable(model);
         table.setRowHeight(25);
-
         JScrollPane scrollPane = new JScrollPane(table);
-        add(scrollPane, BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.CENTER);//scrollable
 
-        // ===== BUTTONS (BACK) =====
+        // back button
         JButton backBtn = new JButton("Back");
         backBtn.setFont(new Font("Arial", Font.PLAIN, 16));
 
         JPanel bottomPanel = new JPanel();
         bottomPanel.add(backBtn);
-
         add(bottomPanel, BorderLayout.SOUTH);
 
-        // ===== LOAD DATA INTO TABLE =====
+        //load data into table
         loadCourses(model);
 
-        // ===== BACK EVENT =====
+        //back to student dashhboard upon pressing abck button
         backBtn.addActionListener(e ->
                 mainFrame.showScreen(MainFrame.STUDENT_DASH)
         );
     }
 
-    // Loads all courses from DB
     private void loadCourses(DefaultTableModel model) {
-        model.setRowCount(0); // clear old data
-
-        List<Course> list = courseDAO.getAllCourses();
+        model.setRowCount(0);
+        List<Course> list = courseService.getAllCourses();
         for (Course c : list) {
-            model.addRow(new Object[]{
-                    c.getCourseId(),
-                    c.getCode(),
-                    c.getTitle(),
-                    c.getCredits()
-            });
+            model.addRow(new Object[]{c.getCourseId(), c.getCode(), c.getTitle(), c.getCredits()});
         }
     }
 }

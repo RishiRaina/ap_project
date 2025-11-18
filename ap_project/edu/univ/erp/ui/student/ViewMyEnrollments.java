@@ -1,12 +1,12 @@
 package edu.univ.erp.ui.student;
 
 import edu.univ.erp.auth.SessionManager;
-import edu.univ.erp.data.EnrollmentDAO;
-import edu.univ.erp.data.CourseDAO;
-import edu.univ.erp.data.SectionDAO;
-import edu.univ.erp.domain.Enrollment;
 import edu.univ.erp.domain.Course;
+import edu.univ.erp.domain.Enrollment;
 import edu.univ.erp.domain.Section;
+import edu.univ.erp.access.AccessException;
+import edu.univ.erp.service.StudentQueryService;
+import edu.univ.erp.service.StudentRegistrationService;
 import edu.univ.erp.ui.common.MainFrame;
 
 import javax.swing.*;
@@ -17,15 +17,13 @@ import java.util.List;
 public class ViewMyEnrollments extends JPanel {
 
     private MainFrame mainFrame;
-    private EnrollmentDAO enrollmentDAO;
-    private CourseDAO courseDAO;
-    private SectionDAO sectionDAO;
+    private StudentQueryService queryService;
+    private StudentRegistrationService regService;
 
     public ViewMyEnrollments(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-        this.enrollmentDAO = new EnrollmentDAO();
-        this.courseDAO = new CourseDAO();
-        this.sectionDAO = new SectionDAO();
+        this.queryService = new StudentQueryService();
+        this.regService = new StudentRegistrationService();
 
         setLayout(new BorderLayout());
 
@@ -33,12 +31,13 @@ public class ViewMyEnrollments extends JPanel {
         title.setFont(new Font("Arial", Font.BOLD, 28));
         add(title, BorderLayout.NORTH);
 
-        // TABLE
-        String[] cols = {"Enrollment ID", "Course", "Section", "Status", "Action"};
+        // TABLE MODEL
+        String[] cols = {"Enrollment ID", "Course Code", "Course Title", "Section", "Status", "Action"};
+
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int r, int c) {
-                return c == 4; // Only "Action" column is editable (Drop button)
+                return c == 5; // Only Drop button column
             }
         };
 
@@ -46,82 +45,60 @@ public class ViewMyEnrollments extends JPanel {
         table.setRowHeight(30);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-        // Add DROP BUTTONS
+        // Button column
         table.getColumn("Action").setCellRenderer(new ButtonRenderer());
         table.getColumn("Action").setCellEditor(new ButtonEditor(new JCheckBox(), this));
 
-        // Load data into table
+        // Load enrollments
         loadEnrollments(model);
 
         // Back button
         JButton backBtn = new JButton("Back");
-        backBtn.setFont(new Font("Arial", Font.PLAIN, 16));
-
         JPanel bottom = new JPanel();
         bottom.add(backBtn);
         add(bottom, BorderLayout.SOUTH);
 
-        backBtn.addActionListener(e ->
-                mainFrame.showScreen(MainFrame.STUDENT_DASH)
-        );
+        backBtn.addActionListener(e -> mainFrame.showScreen(MainFrame.STUDENT_DASH));
     }
 
-    // Load enrollments
+    // LOAD TABLE DATA
     public void loadEnrollments(DefaultTableModel model) {
+
         model.setRowCount(0);
 
         int studentId = SessionManager.getCurrentUserId();
-        List<Enrollment> list = enrollmentDAO.getEnrollmentsByStudent(studentId);
-
+        List<Enrollment> list = queryService.getMyEnrollments(studentId);
         for (Enrollment e : list) {
+            Section sec = queryService.getSection(e.getSectionId());
+            if (sec == null) continue;
+            Course c = queryService.getCourseById(sec.getCourseId());
 
-            // IMPORTANT FIX:
-            // 1. Get section using sectionId
-            Section sec = sectionDAO.getSectionById(e.getSectionId());
-
-            // Section may be missing (very rare DB issue)
-            if (sec == null) {
-                model.addRow(new Object[]{
-                        e.getEnrollmentId(),
-                        e.getSectionId(),
-                        "N/A", "N/A",
-                        e.getStatus()
-                });
-                continue;
-            }
-
-            // 2. From section → get courseId
-            int courseId = sec.getCourseId();
-
-            // 3. Get corresponding course
-            Course c = courseDAO.getCourseById(courseId);
-
-            model.addRow(new Object[]{
-                    e.getEnrollmentId(),
-                    e.getSectionId(),
-                    (c != null) ? c.getCode() : "N/A",
-                    (c != null) ? c.getTitle() : "N/A",
-                    e.getStatus()
-            });
+            model.addRow(new Object[]{e.getEnrollmentId(), c != null ? c.getCode() : "N/A", c != null ? c.getTitle() : "N/A", sec.getSectionId(), e.getStatus(), "Drop"});
         }
     }
 
-    // Called when drop button is clicked
+    // DROP ACTION
     public void dropEnrollment(int enrollmentId) {
-        boolean ok = enrollmentDAO.deleteEnrollment(enrollmentId);
-        if (ok) {
+
+        int studentId = SessionManager.getCurrentUserId();
+
+        try {
+            regService.drop(studentId, enrollmentId);
+
             JOptionPane.showMessageDialog(this,
-                    "Section dropped successfully!",
-                    "Success",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } else {
+                    "Enrollment dropped!",
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (AccessException ex) {
+
             JOptionPane.showMessageDialog(this,
-                    "Failed to drop section.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+                    ex.getMessage(),
+                    "Drop Failed", JOptionPane.ERROR_MESSAGE);
         }
 
-        // Reload table
-        loadEnrollments((DefaultTableModel) ((JTable)((JScrollPane)getComponent(1)).getViewport().getView()).getModel());
+        JTable table = (JTable) ((JScrollPane) getComponent(1)).getViewport().getView();
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+
+        loadEnrollments(model);
     }
 }

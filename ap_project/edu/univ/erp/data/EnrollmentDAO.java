@@ -65,30 +65,56 @@ public class EnrollmentDAO {
     }
 
 
-public List<Enrollment> getEnrollmentsBySection(int sectionId) {
-    List<Enrollment> list = new ArrayList<>();
-    String sql = "SELECT * FROM enrollments WHERE section_id = ?";
+    public List<Enrollment> getEnrollmentsBySection(int sectionId) {
+        List<Enrollment> list = new ArrayList<>();
+        String sql = "SELECT * FROM enrollments WHERE section_id = ?";
 
-    try (Connection conn = ERPDatabaseConnection.getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = ERPDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-        ps.setInt(1, sectionId);
-        ResultSet rs = ps.executeQuery();
+            ps.setInt(1, sectionId);
+            ResultSet rs = ps.executeQuery();
 
-        while (rs.next()) {
-            list.add(new Enrollment(
-                rs.getInt("enrollment_id"),
-                rs.getInt("student_id"),
-                rs.getInt("section_id"),
-                rs.getString("status")
-            ));
+            while (rs.next()) {
+                list.add(new Enrollment(
+                    rs.getInt("enrollment_id"),
+                    rs.getInt("student_id"),
+                    rs.getInt("section_id"),
+                    rs.getString("status")
+                ));
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching enrollments by section: " + e.getMessage());
         }
 
-    } catch (SQLException e) {
-        System.err.println("Error fetching enrollments by section: " + e.getMessage());
+        return list;
     }
 
-    return list;
-}
+    public Enrollment getEnrollmentById(int enrollmentId) {
+        String sql = "SELECT * FROM enrollments WHERE enrollment_id = ?";
+
+        try (Connection conn = ERPDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, enrollmentId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return new Enrollment(
+                        rs.getInt("enrollment_id"),
+                        rs.getInt("student_id"),
+                        rs.getInt("section_id"),
+                        rs.getString("status")
+                );
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching enrollment by ID: " + e.getMessage());
+        }
+
+        return null;
+    }
+
 
 }

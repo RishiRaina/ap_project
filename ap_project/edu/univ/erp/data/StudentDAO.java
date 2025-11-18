@@ -34,12 +34,7 @@ public class StudentDAO {
              ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
-                list.add(new Student(
-                    rs.getInt("user_id"),
-                    rs.getString("roll_no"),
-                    rs.getString("program"),
-                    rs.getInt("year")
-                ));
+                list.add(new Student(rs.getInt("user_id"), rs.getString("roll_no"), rs.getString("program"), rs.getInt("year")));
             }
 
         } catch (SQLException e) {
@@ -48,4 +43,25 @@ public class StudentDAO {
 
         return list;
     }
+
+    public Student getStudentById(int userId) {
+        String sql = "SELECT * FROM students WHERE user_id = ?";
+
+        try (Connection conn = ERPDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return new Student(rs.getInt("user_id"), rs.getString("roll_no"), rs.getString("program"), rs.getInt("year"));
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching student: " + e.getMessage());
+        }
+
+        return null;
+    }
+
 }

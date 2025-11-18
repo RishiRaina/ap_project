@@ -5,6 +5,7 @@ import edu.univ.erp.ui.common.MainFrame;
 import edu.univ.erp.ui.auth.LoginScreen;
 import edu.univ.erp.ui.instructor.InstructorDashboard;
 import edu.univ.erp.ui.student.*;
+import edu.univ.erp.ui.instructor.*;
 
 
 public class MainLauncher {
@@ -26,6 +27,13 @@ public class MainLauncher {
         frame.addScreen("timetable", new ViewTimeTable(frame));
         frame.addScreen("grades",new ViewGrades(frame));
         frame.addScreen("download_csv", new DownloadTranscriptCSV(frame));
+        frame.addScreen("download_pdf", new DownloadTranscriptPDF(frame));
+
+
+        // sub parts of instrcutor dashboard
+        frame.addScreen("instructor_my_sections", new InstructorSections(frame));
+        frame.addScreen("instructor_stats_select_section", new InstructorStatsSelectSection(frame));
+        frame.addScreen("instructor_export_csv", new InstructorExportCSV(frame));
 
 
 

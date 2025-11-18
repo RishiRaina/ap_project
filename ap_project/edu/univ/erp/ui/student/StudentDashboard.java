@@ -12,19 +12,14 @@ public class StudentDashboard extends JPanel {
 
     public StudentDashboard(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
-
         //title
-
         JLabel title = new JLabel("Student Dashboard", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 32));
         add(title, BorderLayout.NORTH);
 
-        // ==========================
-        // BUTTON PANEL
-        // ==========================
+        //button panel
         JPanel btnPanel = new JPanel();
         btnPanel.setLayout(new GridLayout(9, 1, 12, 12));
         btnPanel.setBorder(BorderFactory.createEmptyBorder(20, 250, 20, 250));
@@ -58,29 +53,21 @@ public class StudentDashboard extends JPanel {
 
 
         //when course catalog button is clicked
-        CatalogBtn.addActionListener(e -> mainFrame.showScreen("view_catalog")
-        );
-
+        CatalogBtn.addActionListener(e -> mainFrame.showScreen("view_catalog"));
         //when my enrollments clicked
-        enrollmentsBtn.addActionListener(e -> mainFrame.showScreen("view_my_enrollments")
-        );
+        enrollmentsBtn.addActionListener(e -> mainFrame.showScreen("view_my_enrollments"));
         //when register section button clicked
         registerBtn.addActionListener(e-> mainFrame.showScreen("view_register_forsection"));
-
-
         //when view timetables is clicked
         timetableBtn.addActionListener(e -> mainFrame.showScreen("timetable"));
-
         //when grades button is clicked
         gradesBtn.addActionListener(e-> mainFrame.showScreen("grades"));
-
         //when csv download button clicked
         csvBtn.addActionListener(e->mainFrame.showScreen("download_csv"));
+        //when  pdf downlaod button clicked
+        pdfBtn.addActionListener(e->mainFrame.showScreen("download_pdf"));
 
 
-
-        //helper till future buttons work
-        pdfBtn.addActionListener(e -> showNotReady("PDF Download"));
     }
 
     // Reusable button style
@@ -91,13 +78,5 @@ public class StudentDashboard extends JPanel {
         return btn;
     }
 
-    // only and only till all ui panels made
-    private void showNotReady(String feature) {
-        JOptionPane.showMessageDialog(
-                this,
-                feature + " screen is not built yet!",
-                "Coming Soon",
-                JOptionPane.INFORMATION_MESSAGE
-        );
-    }
+
 }
