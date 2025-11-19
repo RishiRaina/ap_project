@@ -1,6 +1,7 @@
 package edu.univ.erp.ui.student;
 
 import edu.univ.erp.access.AccessControl;
+import edu.univ.erp.access.AccessException;
 import edu.univ.erp.auth.SessionManager;
 import edu.univ.erp.domain.Course;
 import edu.univ.erp.domain.Enrollment;
@@ -42,10 +43,7 @@ public class ViewTimeTable extends JPanel {
 
         JLabel title = new JLabel("Timetable", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 28));
-        if (banner != null)
-            add(title, BorderLayout.CENTER);
-        else
-            add(title, BorderLayout.NORTH);
+        add(title, BorderLayout.NORTH);
 
 
         // tbale structure
@@ -67,19 +65,22 @@ public class ViewTimeTable extends JPanel {
         loadTimetable(model);
     }
 
-    private void loadTimetable(DefaultTableModel model) {
+    private void loadTimetable(DefaultTableModel model)  {
         model.setRowCount(0);
-
         int studentId = SessionManager.getCurrentUserId();
+        try {
+            List<Enrollment> enrollments = queryService.getMyEnrollments(studentId);
+            for (Enrollment e : enrollments) {
+                Section sec = queryService.getSection(e.getSectionId());
+                if (sec == null) continue;
+                Course c = queryService.getCourseById(sec.getCourseId());
+                model.addRow(new Object[]{sec.getDayTime(), sec.getRoom(), c != null ? c.getCode() : "N/A", c != null ? c.getTitle() : "N/A"});
+            }
 
-        // Get all enrollments
-        List<Enrollment> enrollments = queryService.getMyEnrollments(studentId);
-        for (Enrollment e : enrollments) {
-            Section sec = queryService.getSection(e.getSectionId());//Get section using sectionId
-            if (sec == null) continue;
-            Course c = queryService.getCourseById(sec.getCourseId());
-
-            model.addRow(new Object[]{sec.getDayTime(), sec.getRoom(), c != null ? c.getCode() : "N/A", c != null ? c.getTitle() : "N/A"});
+        } catch (AccessException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Access Error", JOptionPane.ERROR_MESSAGE);
+            mainFrame.showScreen(MainFrame.STUDENT_DASH);
         }
     }
+
 }

@@ -22,7 +22,7 @@ public class RegisterForSection extends JPanel {
     private CourseService courseService;
     private StudentRegistrationService regService;
 
-    public RegisterForSection(MainFrame mainFrame) {
+    public RegisterForSection(MainFrame mainFrame){
         this.mainFrame = mainFrame;
         this.sectionService = new SectionService();
         this.courseService = new CourseService();
@@ -48,10 +48,7 @@ public class RegisterForSection extends JPanel {
 
         JLabel title = new JLabel("Register for a Section", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 26));
-        if (banner != null)
-            add(title, BorderLayout.CENTER);
-        else
-            add(title, BorderLayout.NORTH);
+        add(title, BorderLayout.NORTH);
 
         String[] cols = {"Section ID", "Course Code", "Course Title", "Instructor ID", "Day/Time", "Room", "Capacity", "Deadline"};//table strcuture
 
@@ -114,9 +111,17 @@ public class RegisterForSection extends JPanel {
         for (Section s : list) {
             Course c = courseService.getCourseById(s.getCourseId());
 
-            model.addRow(new Object[]{s.getSectionId(), (c != null ? c.getCode() : "N/A"), (c != null ? c.getTitle() : "N/A"), (s.getInstructorId() != null ? s.getInstructorId() : "TBA"), s.getDayTime(),
-                    s.getRoom(), s.getCapacity(), s.getRegistrationDeadline()
+            model.addRow(new Object[]{
+                    s.getSectionId(),
+                    c != null ? c.getCode() : "N/A",
+                    c != null ? c.getTitle() : "N/A",
+                    s.getInstructorId() != null ? s.getInstructorId() : "TBA",
+                    s.getDayTime(),
+                    s.getRoom(),
+                    s.getCapacity(),
+                    s.getRegistrationDeadline()
             });
         }
     }
+
 }

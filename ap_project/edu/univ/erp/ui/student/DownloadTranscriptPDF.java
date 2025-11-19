@@ -20,16 +20,20 @@ public class DownloadTranscriptPDF extends JPanel {
         this.mainFrame = mainFrame;
         this.ts = new TranscriptService();
 
+        // Role check
         if (!SessionManager.isLoggedIn() || !"STUDENT".equals(SessionManager.getCurrentUserRole())) {
-            JOptionPane.showMessageDialog(this, "Access Denied: Students only.", "Access Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Access Denied: Students only.",
+                    "Access Error", JOptionPane.ERROR_MESSAGE);
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
-            return;   // stop with this screen after showing back to login screen
+            return;
         }
 
         setLayout(new BorderLayout());
-        JLabel banner=null;
+
+        // Banner
         if (AccessControl.isMaintenanceOn()) {
-            banner = new JLabel("System Under Maintenance - VIEW ONLY", SwingConstants.CENTER);
+            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
             banner.setOpaque(true);
             banner.setBackground(Color.ORANGE);
             banner.setForeground(Color.BLACK);
@@ -37,22 +41,20 @@ public class DownloadTranscriptPDF extends JPanel {
             add(banner, BorderLayout.NORTH);
         }
 
+        // Title
         JLabel title = new JLabel("Transcript (PDF)", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 28));
-        if (banner != null)
-            add(title, BorderLayout.CENTER);
-        else
-            add(title, BorderLayout.NORTH);
+        add(title, BorderLayout.NORTH);
 
-        // strcutre of the table
+        // Table
         String[] cols = {"Course Code", "Title", "Credits", "Status", "Final Grade"};
         DefaultTableModel model = new DefaultTableModel(cols, 0);
-
         JTable table = new JTable(model);
         table.setRowHeight(25);
+
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-
+        // Buttons
         JButton exportBtn = new JButton("Download PDF");
         JButton backBtn = new JButton("Back");
 
@@ -61,35 +63,40 @@ public class DownloadTranscriptPDF extends JPanel {
         bottom.add(backBtn);
         add(bottom, BorderLayout.SOUTH);
 
-
-        loadTranscript(model); // load transcript rows
-
         backBtn.addActionListener(e -> mainFrame.showScreen(MainFrame.STUDENT_DASH));
         exportBtn.addActionListener(e -> exportPDF());
+
+        loadTranscript(model);
     }
 
     private void loadTranscript(DefaultTableModel model) {
         model.setRowCount(0);
+
         int studentId = SessionManager.getCurrentUserId();
         List<String[]> rows = ts.getTranscriptRows(studentId);
+
         for (String[] row : rows) {
             model.addRow(row);
         }
     }
 
     private void exportPDF() {
-
         int studentId = SessionManager.getCurrentUserId();
+
         JFileChooser chooser = new JFileChooser();
         chooser.setSelectedFile(new File("transcript.pdf"));
-        int result = chooser.showSaveDialog(this);
-        if (result == JFileChooser.APPROVE_OPTION) {
+
+        if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             File file = chooser.getSelectedFile();
+
             boolean ok = ts.exportTranscriptPDF(studentId, file);
+
             if (ok) {
-                JOptionPane.showMessageDialog(this, "Transcript PDF downloaded!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Transcript PDF downloaded!",
+                        "Success", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this, "Failed to save PDF.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Failed to save PDF.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

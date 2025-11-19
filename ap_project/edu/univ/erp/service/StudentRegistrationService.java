@@ -62,7 +62,8 @@ public class StudentRegistrationService {
 
     //this bit is for dropping a section
 
-    public void drop(int studentId, int enrollmentId) throws AccessException {AccessControl.assertAllowedWithMaintenance(AccessControl.Role.STUDENT, AccessControl.Actions.DROP_SECTION);
+    public void drop(int studentId, int enrollmentId) throws AccessException {
+        AccessControl.assertAllowedWithMaintenance(AccessControl.Role.STUDENT, AccessControl.Actions.DROP_SECTION);
         AccessControl.assertAllowedWithMaintenance(
                 AccessControl.Role.STUDENT,
                 AccessControl.Actions.DROP_SECTION);
