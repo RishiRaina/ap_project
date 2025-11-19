@@ -1,9 +1,10 @@
 package edu.univ.erp.service;
 
-import edu.univ.erp.data.EnrollmentDAO;
-import edu.univ.erp.data.GradeDAO;
-import edu.univ.erp.domain.Enrollment;
-import edu.univ.erp.domain.Grade;
+import edu.univ.erp.access.AccessControl;
+import edu.univ.erp.access.AccessException;
+import edu.univ.erp.auth.SessionManager;
+import edu.univ.erp.data.*;
+import edu.univ.erp.domain.*;
 
 import java.util.List;
 
@@ -11,56 +12,73 @@ public class InstructorGradeService {
 
     private GradeDAO gradeDAO = new GradeDAO();
     private EnrollmentDAO enrollmentDAO = new EnrollmentDAO();
+    private SectionDAO sectionDAO = new SectionDAO();
 
-    public boolean addOrUpdateComponentGrade(int enrollmentId, String component,double score) {
+    // Add or update a component grade
+    public boolean addOrUpdateComponentGrade(int enrollmentId, String component, double score) throws AccessException {
 
-        // check if this component already exists
+        int instructorId = SessionManager.getCurrentUserId();
+        //role n maintenance check
+        AccessControl.assertAllowedWithMaintenance(AccessControl.Role.INSTRUCTOR, AccessControl.Actions.ENTER_SCORES);
+
+        // ownership check
+        Enrollment e = enrollmentDAO.getEnrollmentById(enrollmentId);
+        if (e == null) throw new AccessException("Invalid enrollment.");
+        //section chek
+        Section sec = sectionDAO.getSectionById(e.getSectionId());
+        if (sec == null) throw new AccessException("Section not found.");
+
+        AccessControl.assertInstructorOwnsSection(instructorId, sec.getInstructorId(), AccessControl.Actions.ENTER_SCORES);
+
+        //main add or update componet grade work
         List<Grade> existing = gradeDAO.getGradesByEnrollment(enrollmentId);
         for (Grade g : existing) {
             if (g.getComponent().equalsIgnoreCase(component)) {
                 g.setScore(score);
-                return gradeDAO.updateGrade(g);  // You may need to implement updateGrade()
+                return gradeDAO.updateGrade(g);
             }
         }
-        // if not existing add new component
         Grade g = new Grade(enrollmentId, component, score, null);
         return gradeDAO.addGrade(g);
     }
 
-    //to save final grade
-    public boolean saveFinalGrade(int enrollmentId, String finalGrade) {
-        // Check if this enrollment has grades
+    public boolean saveFinalGrade(int enrollmentId, String finalGrade) throws AccessException {
+
+        int instructorId = SessionManager.getCurrentUserId();
+        // role + maintenance
+        AccessControl.assertAllowedWithMaintenance(AccessControl.Role.INSTRUCTOR, AccessControl.Actions.COMPUTE_FINAL_GRADES);
+
+        // ownership check
+        Enrollment e = enrollmentDAO.getEnrollmentById(enrollmentId);
+        if (e == null) throw new AccessException("Invalid enrollment.");
+
+        Section sec = sectionDAO.getSectionById(e.getSectionId());
+        if (sec == null) throw new AccessException("Section not found.");
+
+        AccessControl.assertInstructorOwnsSection(instructorId, sec.getInstructorId(), AccessControl.Actions.COMPUTE_FINAL_GRADES);
+
+        //actual saving
         List<Grade> existing = gradeDAO.getGradesByEnrollment(enrollmentId);
-        if (existing.isEmpty()) {
-            // Create a dummy row ONLY for storing final grade
-            Grade g = new Grade(enrollmentId, "FINAL", 0.0, finalGrade);
-            return gradeDAO.addGrade(g);
-        }
-        // update grade
+        // if final row exists ,update it
         for (Grade g : existing) {
-            if (g.getComponent().equalsIgnoreCase("FINAL")) {
+            if ("FINAL".equalsIgnoreCase(g.getComponent())) {
                 g.setFinalGrade(finalGrade);
                 return gradeDAO.updateGrade(g);
             }
         }
-        // add new if not found
+        //if row not exist add a new row
         Grade g = new Grade(enrollmentId, "FINAL", 0.0, finalGrade);
         return gradeDAO.addGrade(g);
     }
 
-
-    // optional weighted grade calculation like 20/30/50 using 3 components
     public double computeWeightedScore(List<Grade> components, double w1, double w2, double w3) {
         double total = 0;
-        if (components.size() >= 1) {
+        if (components.size() >= 1)
             total += components.get(0).getScore() * w1;
-        }
-        if (components.size() >= 2) {
+        if (components.size() >= 2)
             total += components.get(1).getScore() * w2;
-        }
-        if (components.size() >= 3) {
+        if (components.size() >= 3)
             total += components.get(2).getScore() * w3;
-        }
         return total;
     }
 }
