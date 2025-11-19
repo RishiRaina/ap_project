@@ -2,6 +2,7 @@ package edu.univ.erp.ui.student;
 
 import edu.univ.erp.ui.common.MainFrame;
 import edu.univ.erp.auth.SessionManager;
+import edu.univ.erp.access.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,6 +15,18 @@ public class StudentDashboard extends JPanel {
         this.mainFrame = mainFrame;
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
+
+        if (AccessControl.isMaintenanceOn()) {
+            JLabel banner = new JLabel("System Under Maintenance - VIEW ONLY", SwingConstants.CENTER);
+            banner.setOpaque(true);
+            banner.setBackground(Color.ORANGE);
+            banner.setForeground(Color.BLACK);
+            banner.setFont(new Font("Arial", Font.BOLD, 16));
+            add(banner, BorderLayout.SOUTH);
+        }
+
+
+
         //title
         JLabel title = new JLabel("Student Dashboard", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 32));
@@ -48,24 +61,42 @@ public class StudentDashboard extends JPanel {
         // back to login when logout pressed
         logoutBtn.addActionListener(e -> {
             SessionManager.clear();
-            mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
+            mainFrame.showScreen(MainFrame.LOGIN_SCREEN);});
+
+
+        CatalogBtn.addActionListener(e -> {
+            mainFrame.addScreen("view_catalog", new ViewCourseCatalog(mainFrame));
+            mainFrame.showScreen("view_catalog");});
+
+        enrollmentsBtn.addActionListener(e -> {
+            mainFrame.addScreen("view_my_enrollments", new ViewMyEnrollments(mainFrame));
+            mainFrame.showScreen("view_my_enrollments");
         });
 
+        registerBtn.addActionListener(e -> {
+            mainFrame.addScreen("view_register_forsection", new RegisterForSection(mainFrame));
+            mainFrame.showScreen("view_register_forsection");
+        });
 
-        //when course catalog button is clicked
-        CatalogBtn.addActionListener(e -> mainFrame.showScreen("view_catalog"));
-        //when my enrollments clicked
-        enrollmentsBtn.addActionListener(e -> mainFrame.showScreen("view_my_enrollments"));
-        //when register section button clicked
-        registerBtn.addActionListener(e-> mainFrame.showScreen("view_register_forsection"));
-        //when view timetables is clicked
-        timetableBtn.addActionListener(e -> mainFrame.showScreen("timetable"));
-        //when grades button is clicked
-        gradesBtn.addActionListener(e-> mainFrame.showScreen("grades"));
-        //when csv download button clicked
-        csvBtn.addActionListener(e->mainFrame.showScreen("download_csv"));
-        //when  pdf downlaod button clicked
-        pdfBtn.addActionListener(e->mainFrame.showScreen("download_pdf"));
+        timetableBtn.addActionListener(e -> {
+            mainFrame.addScreen("timetable", new ViewTimeTable(mainFrame));
+            mainFrame.showScreen("timetable");
+        });
+
+        gradesBtn.addActionListener(e -> {
+            mainFrame.addScreen("grades", new ViewGrades(mainFrame));
+            mainFrame.showScreen("grades");
+        });
+
+        csvBtn.addActionListener(e -> {
+            mainFrame.addScreen("download_csv", new DownloadTranscriptCSV(mainFrame));
+            mainFrame.showScreen("download_csv");
+        });
+
+        pdfBtn.addActionListener(e -> {
+            mainFrame.addScreen("download_pdf", new DownloadTranscriptPDF(mainFrame));
+            mainFrame.showScreen("download_pdf");
+        });
 
 
     }

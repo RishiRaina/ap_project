@@ -1,5 +1,6 @@
 package edu.univ.erp.ui.student;
 
+import edu.univ.erp.access.AccessControl;
 import edu.univ.erp.access.AccessException;
 import edu.univ.erp.auth.SessionManager;
 import edu.univ.erp.domain.Course;
@@ -27,11 +28,30 @@ public class RegisterForSection extends JPanel {
         this.courseService = new CourseService();
         this.regService = new StudentRegistrationService();
 
+        //role check
+        if (!SessionManager.isLoggedIn() || !"STUDENT".equals(SessionManager.getCurrentUserRole())) {
+            JOptionPane.showMessageDialog(this, "Access Denied: Students only.", "Access Error", JOptionPane.ERROR_MESSAGE);
+            mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
+            return;   // stop with this screen after showing back to login screen
+        }
+
         setLayout(new BorderLayout());
+        JLabel banner=null;
+        if (AccessControl.isMaintenanceOn()) {
+            banner = new JLabel("System Under Maintenance - VIEW ONLY", SwingConstants.CENTER);
+            banner.setOpaque(true);
+            banner.setBackground(Color.ORANGE);
+            banner.setForeground(Color.BLACK);
+            banner.setFont(new Font("Arial", Font.BOLD, 16));
+            add(banner, BorderLayout.NORTH);
+        }
 
         JLabel title = new JLabel("Register for a Section", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 26));
-        add(title, BorderLayout.NORTH);
+        if (banner != null)
+            add(title, BorderLayout.CENTER);
+        else
+            add(title, BorderLayout.NORTH);
 
         String[] cols = {"Section ID", "Course Code", "Course Title", "Instructor ID", "Day/Time", "Room", "Capacity", "Deadline"};//table strcuture
 
@@ -54,6 +74,12 @@ public class RegisterForSection extends JPanel {
 
         // register click handling
         registerBtn.addActionListener(e -> {
+
+            //maintenance check
+            if (AccessControl.isMaintenanceOn() && !"ADMIN".equals(SessionManager.getCurrentUserRole())) {
+                JOptionPane.showMessageDialog(this, "Can't Register. Maintenance Mode ON ", "Maintenance ON", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
             int selectedRow = table.getSelectedRow();
             if (selectedRow == -1) {
                 JOptionPane.showMessageDialog(this, "Please select a section first.", "No Selection", JOptionPane.WARNING_MESSAGE);

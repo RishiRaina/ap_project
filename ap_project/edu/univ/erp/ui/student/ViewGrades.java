@@ -1,5 +1,6 @@
 package edu.univ.erp.ui.student;
 
+import edu.univ.erp.access.AccessControl;
 import edu.univ.erp.auth.SessionManager;
 import edu.univ.erp.domain.Course;
 import edu.univ.erp.domain.Enrollment;
@@ -21,16 +22,35 @@ public class ViewGrades extends JPanel {
     public ViewGrades(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         this.queryService = new StudentQueryService();
+        //role check
+        if (!SessionManager.isLoggedIn() || !"STUDENT".equals(SessionManager.getCurrentUserRole())) {
+            JOptionPane.showMessageDialog(this, "Access Denied: Students only.", "Access Error", JOptionPane.ERROR_MESSAGE);
+            mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
+            return;   // stop with this screen after showing back to login screen
+        }
 
         setLayout(new BorderLayout());
+        JLabel banner=null;
+        if (AccessControl.isMaintenanceOn()) {
+            banner = new JLabel("System Under Maintenance - VIEW ONLY", SwingConstants.CENTER);
+            banner.setOpaque(true);
+            banner.setBackground(Color.ORANGE);
+            banner.setForeground(Color.BLACK);
+            banner.setFont(new Font("Arial", Font.BOLD, 16));
+            add(banner, BorderLayout.NORTH);
+        }
 
         JLabel title = new JLabel("My Grades", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 28));
-        add(title, BorderLayout.NORTH);
+        if (banner != null)
+            add(title, BorderLayout.CENTER);
+        else
+            add(title, BorderLayout.NORTH);
+
+
 
         //table
-        String[] columns = {"Course Code", "Course Title",
-                "Component", "Score", "Final Grade"};
+        String[] columns = {"Course Code", "Course Title", "Component", "Score", "Final Grade"};
         DefaultTableModel model = new DefaultTableModel(columns, 0);
 
         JTable table = new JTable(model);

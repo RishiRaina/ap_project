@@ -20,20 +20,9 @@ public class MainLauncher {
         frame.addScreen(MainFrame.INSTRUCTOR_DASH, new InstructorDashboard(frame));
         frame.addScreen(MainFrame.ADMIN_DASH, new AdminDashboard(frame));
 
-        //sub parts of student dashboard
-        frame.addScreen("view_catalog", new ViewCourseCatalog(frame));
-        frame.addScreen("view_my_enrollments", new ViewMyEnrollments(frame));
-        frame.addScreen("view_register_forsection", new RegisterForSection(frame));
-        frame.addScreen("timetable", new ViewTimeTable(frame));
-        frame.addScreen("grades",new ViewGrades(frame));
-        frame.addScreen("download_csv", new DownloadTranscriptCSV(frame));
-        frame.addScreen("download_pdf", new DownloadTranscriptPDF(frame));
 
 
         // sub parts of instrcutor dashboard
-        frame.addScreen("instructor_my_sections", new InstructorSections(frame));
-        frame.addScreen("instructor_export_csv", new ExportGrades(frame));
-        frame.addScreen("instructor_stats_select_section", new InstructorStatsSectionSelect(frame));
         frame.addScreen("instructor_stats_view", new SectionStatsView(frame, -1)); // dummy, replaced dynamically
 
 

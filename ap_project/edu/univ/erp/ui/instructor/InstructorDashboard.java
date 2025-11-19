@@ -39,9 +39,20 @@ public class InstructorDashboard extends JPanel {
         panel.add(backBtn);
         add(panel, BorderLayout.CENTER);
 
-        mysecbutton.addActionListener(e -> mainFrame.showScreen("instructor_my_sections"));
-        exportCsvBtn.addActionListener(e -> mainFrame.showScreen("instructor_export_csv"));
-        statssectionbutton.addActionListener(e -> mainFrame.showScreen("instructor_stats_select_section"));
+        mysecbutton.addActionListener(e -> {
+            mainFrame.addScreen("instructor_my_sections", new InstructorSections(mainFrame));
+            mainFrame.showScreen("instructor_my_sections");
+        });
+
+        exportCsvBtn.addActionListener(e -> {
+            mainFrame.addScreen("instructor_export_csv", new ExportGrades(mainFrame));
+            mainFrame.showScreen("instructor_export_csv");
+        });
+
+        statssectionbutton.addActionListener(e -> {
+            mainFrame.addScreen("instructor_stats_select_section",new InstructorStatsSectionSelect(mainFrame));
+            mainFrame.showScreen("instructor_stats_select_section");
+        });
 
 
         //back button pushes back on to login screen

@@ -16,18 +16,25 @@ public class StudentRegistrationService {
     private CourseDAO courseDAO = new CourseDAO();
 
     //registering for section
-    public void register(int studentId, int sectionId) throws AccessException {AccessControl.assertAllowedWithMaintenance(AccessControl.Role.STUDENT, AccessControl.Actions.REGISTER_SECTION);
+    public void register(int studentId, int sectionId) throws AccessException {
 
-        // Ensure student modifies only their own enrollments
-        if (studentId != SessionManager.getCurrentUserId())
-            throw new AccessException("You can only register yourself. Cannot register for someone else!");
+        //
+        AccessControl.assertAllowedWithMaintenance(
+                AccessControl.Role.STUDENT,
+                AccessControl.Actions.REGISTER_SECTION
+        );
 
-        //for section which we use to get course details
+        // student ensure modify own enrollment n section
+        if (studentId != SessionManager.getCurrentUserId()) {
+            throw new AccessException("You can only register yourself.");
+        }
+
+        // section exitence check
         Section sec = sectionDAO.getSectionById(sectionId);
         if (sec == null)
             throw new AccessException("Invalid section.");
 
-        //duplicacy check
+        // duplicacy check
         List<Enrollment> existing = enrollmentDAO.getEnrollmentsByStudent(studentId);
         for (Enrollment e : existing) {
             if (e.getSectionId() == sectionId)
@@ -44,34 +51,37 @@ public class StudentRegistrationService {
         if (today.isAfter(sec.getRegistrationDeadline().toLocalDate()))
             throw new AccessException("Registration deadline has passed.");
 
-        // actual registration
+        // registration is done here after all checks pass
         Enrollment newEnroll = new Enrollment(studentId, sectionId);
-        boolean isitsuccessfull = enrollmentDAO.enrollStudent(newEnroll);
-        if (!isitsuccessfull)
+        boolean ok = enrollmentDAO.enrollStudent(newEnroll);
+
+        if (!ok)
             throw new AccessException("Failed to register — database error.");
     }
+
 
     //this bit is for dropping a section
 
     public void drop(int studentId, int enrollmentId) throws AccessException {AccessControl.assertAllowedWithMaintenance(AccessControl.Role.STUDENT, AccessControl.Actions.DROP_SECTION);
-
-        // Fetch enrollment
+        AccessControl.assertAllowedWithMaintenance(
+                AccessControl.Role.STUDENT,
+                AccessControl.Actions.DROP_SECTION);
+        //fetch the enrollment
         Enrollment e = enrollmentDAO.getEnrollmentById(enrollmentId);
-        if (e == null) {
-            throw new AccessException("Invalid enrollment.(not in database)");
-        }
-        // Ownership check
+        if (e == null)
+            throw new AccessException("Invalid enrollment.");
+        // ownership check
         AccessControl.assertStudentOwnsEnrollment(studentId, e.getStudentId(), AccessControl.Actions.DROP_SECTION);
 
-        // Check deadline (same as add )
+        // drop before deadline
         Section sec = sectionDAO.getSectionById(e.getSectionId());
         if (LocalDate.now().isAfter(sec.getRegistrationDeadline().toLocalDate()))
             throw new AccessException("Cannot drop after deadline.");
 
-        // Drop
+        // actual droppinf done here
         boolean removed = enrollmentDAO.deleteEnrollment(enrollmentId);
         if (!removed)
-            throw new AccessException("Failed to drop.");
+            throw new AccessException("Failed to drop enrollment.");
     }
 
 }

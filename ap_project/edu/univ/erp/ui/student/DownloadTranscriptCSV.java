@@ -1,5 +1,6 @@
 package edu.univ.erp.ui.student;
 
+import edu.univ.erp.access.AccessControl;
 import edu.univ.erp.auth.SessionManager;
 import edu.univ.erp.service.TranscriptService;
 import edu.univ.erp.ui.common.MainFrame;
@@ -19,11 +20,31 @@ public class DownloadTranscriptCSV extends JPanel {
         this.mainFrame = mainFrame;
         this.transcriptService = new TranscriptService();
 
+        if (!SessionManager.isLoggedIn() || !"STUDENT".equals(SessionManager.getCurrentUserRole())) {
+            JOptionPane.showMessageDialog(this, "Access Denied: Students only.", "Access Error", JOptionPane.ERROR_MESSAGE);
+            mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
+            return;   // stop with this screen after showing back to login screen
+        }
+
         setLayout(new BorderLayout());
+        JLabel banner=null;
+        if (AccessControl.isMaintenanceOn()) {
+            banner = new JLabel("System Under Maintenance - VIEW ONLY", SwingConstants.CENTER);
+            banner.setOpaque(true);
+            banner.setBackground(Color.ORANGE);
+            banner.setForeground(Color.BLACK);
+            banner.setFont(new Font("Arial", Font.BOLD, 16));
+            add(banner, BorderLayout.NORTH);
+        }
 
         JLabel title = new JLabel("Transcript (CSV)", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 28));
-        add(title, BorderLayout.NORTH);
+        if(banner!=null){
+            add(title, BorderLayout.CENTER);
+        }
+        else{
+            add(title,BorderLayout.NORTH);
+        }
 
         // structure of table defined here
         String[] cols = {"Course Code", "Title", "Credits", "Status", "Final Grade"};
