@@ -94,5 +94,55 @@ public class SectionDAO {
         return list;
     }
 
+    public boolean assignInstructor(int sectionId, int instructorId) {
+        String sql = "UPDATE sections SET instructor_id = ? WHERE section_id = ?";
+
+        try (Connection conn = ERPDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, instructorId);
+            ps.setInt(2, sectionId);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error assigning instructor: " + e.getMessage());
+            return false;
+        }
+    }
+
+
+    public boolean updateCapacity(int sectionId, int newCapacity) {
+        String sql = "UPDATE sections SET capacity = ? WHERE section_id = ?";
+
+        try (Connection conn = ERPDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, newCapacity);
+            ps.setInt(2, sectionId);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error updating capacity: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean deleteSection(int sectionId) {
+        String sql = "DELETE FROM sections WHERE section_id = ?";
+
+        try (Connection conn = ERPDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, sectionId);
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error deleting section: " + e.getMessage());
+            return false;
+        }
+    }
+
 
 }

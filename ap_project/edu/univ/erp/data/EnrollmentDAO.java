@@ -117,4 +117,23 @@ public class EnrollmentDAO {
     }
 
 
+    public boolean removeStudentFromSection(int sectionId, int studentId) {
+        String sql = "DELETE FROM enrollments WHERE section_id = ? AND student_id = ?";
+
+        try (Connection conn = ERPDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, sectionId);
+            ps.setInt(2, studentId);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error removing student from section: " + e.getMessage());
+            return false;
+        }
+    }
+
+
+
 }
