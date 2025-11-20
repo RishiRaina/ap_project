@@ -13,6 +13,8 @@ public class Course {
         this.credits = credits;
     }
 
+    public Course() {}
+
     public int getCourseId() { return courseId; }
     public void setCourseId(int courseId) { this.courseId = courseId; }
 
