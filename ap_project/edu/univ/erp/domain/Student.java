@@ -13,6 +13,8 @@ public class Student {
         this.year = year;
     }
 
+    public Student(){}
+
     public int getUserId() { return userId; }
     public void setUserId(int userId) { this.userId = userId; }
 

@@ -26,6 +26,8 @@ public class Section {
         this.registrationDeadline = registrationDeadline;
     }
 
+    public Section(){}
+
     public Section(int courseId, Integer instructorId, String dayTime, String room,
                    int capacity, String semester, int year, Date registrationDeadline) {
         this.courseId = courseId;

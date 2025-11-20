@@ -8,6 +8,7 @@ public class Instructor {
         this.userId = userId;
         this.department = department;
     }
+    public Instructor(){}
 
     public int getUserId() { return userId; }
     public void setUserId(int userId) { this.userId = userId; }
