@@ -21,10 +21,7 @@ public class MainLauncher {
         frame.addScreen(MainFrame.ADMIN_DASH, new AdminDashboard(frame));
 
 
-
-        // sub parts of instrcutor dashboard
-        frame.addScreen("instructor_stats_view", new SectionStatsView(frame, -1)); // dummy, replaced dynamically
-
+        // dummy, replaced dynamically
 
 
 

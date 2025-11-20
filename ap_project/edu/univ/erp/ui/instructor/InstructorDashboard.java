@@ -14,13 +14,6 @@ public class InstructorDashboard extends JPanel {
     public InstructorDashboard(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
 
-        // role check
-        if (!SessionManager.isLoggedIn() || !"INSTRUCTOR".equals(SessionManager.getCurrentUserRole())) {
-            JOptionPane.showMessageDialog(this, "Access Denied: Instructors only.", "Access Error", JOptionPane.ERROR_MESSAGE);
-            mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
-            return;
-        }
-
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
 
