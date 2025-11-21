@@ -60,9 +60,10 @@ public class AdminService {
 
 
     // Section operations
-    public boolean addSection(Section s) {
-        return sectionDAO.addSection(s);
+    public boolean addSection(Section s, String courseCode) {
+        return sectionDAO.addSection(s, courseCode);
     }
+
 
     public boolean setInstructor(int sectionId, int instructorId) {
         return sectionDAO.assignInstructor(sectionId, instructorId);

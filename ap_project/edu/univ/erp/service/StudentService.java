@@ -18,9 +18,7 @@ public class StudentService {
         this.userAuthDAO = new UserAuthDAO();
     }
 
-    /**
-     * Adds a new student into auth_db and erp_db in a transaction-safe way
-     */
+
     public boolean addStudent(Student student, String username, String passwordHash) {
         Connection authConn = null;
         Connection erpConn = null;
