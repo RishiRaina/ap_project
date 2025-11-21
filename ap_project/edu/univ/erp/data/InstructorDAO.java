@@ -63,6 +63,25 @@ public class InstructorDAO {
         return list;
     }
 
+    public List<Integer> getAllInstructorIds() {
+        List<Integer> list = new ArrayList<>();
+        String sql = "SELECT user_id FROM instructors";
+
+        try (Connection conn = ERPDatabaseConnection.getConnection();
+             Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+
+            while (rs.next()) {
+                list.add(rs.getInt("user_id"));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+
     public boolean updateInstructor(Instructor i) {
         String sql = "UPDATE instructors SET department = ? WHERE user_id = ?";
         try (Connection conn = ERPDatabaseConnection.getConnection();
