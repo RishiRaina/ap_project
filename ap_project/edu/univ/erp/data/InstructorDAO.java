@@ -110,4 +110,48 @@ public class InstructorDAO {
             return false;
         }
     }
+
+    public Map<Integer, String> getInstructorIdUsernameMap() {
+        Map<Integer, String> map = new HashMap<>();
+
+        String sql = """
+        SELECT i.user_id, u.username
+        FROM instructors i
+        JOIN users_auth u ON i.user_id = u.user_id
+    """;
+
+        try (Connection conn = ERPDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                map.put(rs.getInt("user_id"), rs.getString("username"));
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching instructor usernames: " + e.getMessage());
+        }
+
+        return map;
+    }
+
+    public String getUsernameById(int userId) {
+        String sql = "SELECT username FROM users_auth WHERE user_id = ?";
+        try (Connection conn = AuthDatabaseConnection.getConnection();  // use auth_db connection
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) return rs.getString("username");
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching username: " + e.getMessage());
+        }
+
+        return "Unknown";
+    }
+
+
+
 }

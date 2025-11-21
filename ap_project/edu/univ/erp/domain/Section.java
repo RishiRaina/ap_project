@@ -59,4 +59,10 @@ public class Section {
     public void setSemester(String semester) { this.semester = semester; }
     public void setYear(int year) { this.year = year; }
     public void setRegistrationDeadline(Date registrationDeadline) { this.registrationDeadline = registrationDeadline; }
+
+    @Override
+    public String toString() {
+        return "Section " + sectionId + " - " + dayTime + " @ " + room;
+    }
+
 }

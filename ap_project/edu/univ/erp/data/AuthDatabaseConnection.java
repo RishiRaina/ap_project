@@ -8,7 +8,7 @@ public class AuthDatabaseConnection {
 
     private static final String URL = "jdbc:mysql://localhost:3306/auth_db";
     private static final String USER = "root";
-    private static final String PASSWORD = "nehal-011";
+    private static final String PASSWORD = "qwerty";
 
     public static Connection getConnection() {
         try {

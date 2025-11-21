@@ -5,45 +5,88 @@ import edu.univ.erp.ui.common.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class AddInstructorUI extends JPanel {
 
     private AdminService adminService = new AdminService();
 
+    // ---------- Rounded Panel Class ----------
+    class RoundedPanel extends JPanel {
+        private int cornerRadius = 20;
+
+        public RoundedPanel() {
+            setOpaque(false);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(Color.WHITE);
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
+        }
+    }
+
     public AddInstructorUI(MainFrame mainFrame) {
 
         setLayout(new BorderLayout());
+        setBackground(new Color(245, 245, 245));
+
+        // ---------- Header ----------
         JLabel title = new JLabel("Add Instructor", SwingConstants.CENTER);
-        title.setFont(new Font("Arial", Font.BOLD, 26));
+        title.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        title.setForeground(new Color(52, 152, 219));
+        title.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
         add(title, BorderLayout.NORTH);
 
-        // Form with username, password, and department
-        JPanel form = new JPanel(new GridLayout(3, 2, 10, 10));
-        form.setBorder(BorderFactory.createEmptyBorder(40, 200, 40, 200));
+        // ---------- Form Panel ----------
+        RoundedPanel form = new RoundedPanel();
+        form.setLayout(new GridLayout(3, 2, 15, 15));
+        form.setBorder(BorderFactory.createEmptyBorder(40, 150, 40, 150));
+
+        Font labelFont = new Font("Segoe UI", Font.BOLD, 16);
+        Font inputFont = new Font("Segoe UI", Font.PLAIN, 15);
 
         JTextField usernameField = new JTextField();
         JPasswordField passwordField = new JPasswordField();
         JTextField deptField = new JTextField();
 
-        form.add(new JLabel("Username:"));
+        // Add placeholders
+        addPlaceholder(usernameField, "Enter username...");
+        addPlaceholder(passwordField, "Enter password...");
+        addPlaceholder(deptField, "Enter department...");
+
+        form.add(new JLabel("Username:")).setFont(labelFont);
         form.add(usernameField);
 
-        form.add(new JLabel("Password:"));
+        form.add(new JLabel("Password:")).setFont(labelFont);
         form.add(passwordField);
 
-        form.add(new JLabel("Department:"));
+        form.add(new JLabel("Department:")).setFont(labelFont);
         form.add(deptField);
 
+        add(form, BorderLayout.CENTER);
+
+        // ---------- Buttons ----------
         JButton addBtn = new JButton("Add");
         JButton back = new JButton("Back");
 
-        JPanel btns = new JPanel();
-        btns.add(addBtn);
-        btns.add(back);
+        styleButton(addBtn, new Color(46, 204, 113), new Color(39, 174, 96));
+        styleButton(back, new Color(52, 152, 219), new Color(41, 128, 185));
 
-        add(form, BorderLayout.CENTER);
-        add(btns, BorderLayout.SOUTH);
+        JPanel btnPanel = new JPanel();
+        btnPanel.setBackground(new Color(245, 245, 245));
+        btnPanel.add(addBtn);
+        btnPanel.add(back);
 
+        add(btnPanel, BorderLayout.SOUTH);
+
+        // ---------- Action Listeners ----------
         addBtn.addActionListener(e -> {
             try {
                 String username = usernameField.getText().trim();
@@ -55,11 +98,10 @@ public class AddInstructorUI extends JPanel {
                     return;
                 }
 
-                // Call AdminService to add instructor using username/password/department
                 if (adminService.addInstructor(username, password, dept)) {
-                    JOptionPane.showMessageDialog(this, "Instructor Added!");
+                    JOptionPane.showMessageDialog(this, "Instructor Added Successfully!");
                 } else {
-                    JOptionPane.showMessageDialog(this, "Failed to add instructor. Username may already exist.");
+                    JOptionPane.showMessageDialog(this, "Failed to Add Instructor. Username may already exist.");
                 }
 
             } catch (Exception ex) {
@@ -68,5 +110,48 @@ public class AddInstructorUI extends JPanel {
         });
 
         back.addActionListener(e -> mainFrame.showScreen(MainFrame.ADMIN_DASH));
+    }
+
+    // ---------- Button Styling ----------
+    private void styleButton(JButton btn, Color normal, Color hover) {
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        btn.setForeground(Color.WHITE);
+        btn.setBackground(normal);
+        btn.setFocusPainted(false);
+        btn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        btn.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent evt) {
+                btn.setBackground(hover);
+            }
+
+            public void mouseExited(MouseEvent evt) {
+                btn.setBackground(normal);
+            }
+        });
+    }
+
+    // ---------- Placeholder Helper ----------
+    private void addPlaceholder(JTextField field, String placeholder) {
+        field.setForeground(Color.GRAY);
+        field.setText(placeholder);
+        field.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (field.getText().equals(placeholder)) {
+                    field.setText("");
+                    field.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (field.getText().isEmpty()) {
+                    field.setForeground(Color.GRAY);
+                    field.setText(placeholder);
+                }
+            }
+        });
     }
 }
