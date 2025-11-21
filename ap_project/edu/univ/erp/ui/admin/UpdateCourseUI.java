@@ -22,12 +22,12 @@ public class UpdateCourseUI extends JPanel {
         JPanel form = new JPanel(new GridLayout(4, 2, 10, 10));
         form.setBorder(BorderFactory.createEmptyBorder(40, 200, 40, 200));
 
-        JTextField courseIdField = new JTextField();
+        JTextField codeField = new JTextField();      // 🔥 course code
         JTextField titleField = new JTextField();
         JTextField creditsField = new JTextField();
 
-        form.add(new JLabel("Course ID:"));
-        form.add(courseIdField);
+        form.add(new JLabel("Course Code:"));         // 🔥 changed from ID → Code
+        form.add(codeField);
 
         form.add(new JLabel("Updated Title:"));
         form.add(titleField);
@@ -47,13 +47,13 @@ public class UpdateCourseUI extends JPanel {
 
         submit.addActionListener(e -> {
             try {
-                int id = Integer.parseInt(courseIdField.getText().trim());
-                String text = titleField.getText().trim();
+                String code = codeField.getText().trim();
+                String newTitle = titleField.getText().trim();
                 int credits = Integer.parseInt(creditsField.getText().trim());
 
                 Course c = new Course();
-                c.setCourseId(id);
-                c.setTitle(text);
+                c.setCode(code);          // 🔥 using code
+                c.setTitle(newTitle);
                 c.setCredits(credits);
 
                 if (adminService.updateCourse(c)) {

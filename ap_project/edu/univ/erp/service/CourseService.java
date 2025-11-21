@@ -28,7 +28,7 @@ public class CourseService {
         return courseDAO.updateCourse(c);
     }
 
-    public boolean deleteCourse(int courseId) {
-        return courseDAO.deleteCourse(courseId);
+    public boolean deleteCourse(String coursecode) {
+        return courseDAO.deleteCourse(coursecode);
     }
 }

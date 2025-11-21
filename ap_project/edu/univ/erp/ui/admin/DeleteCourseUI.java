@@ -20,10 +20,10 @@ public class DeleteCourseUI extends JPanel {
         JPanel form = new JPanel(new GridLayout(1, 2, 10, 10));
         form.setBorder(BorderFactory.createEmptyBorder(40, 200, 40, 200));
 
-        JTextField idField = new JTextField();
+        JTextField codeField = new JTextField();
 
-        form.add(new JLabel("Course ID:"));
-        form.add(idField);
+        form.add(new JLabel("Course Code:"));   // 🔥 changed from ID to code
+        form.add(codeField);
 
         JButton delete = new JButton("Delete");
         JButton back = new JButton("Back");
@@ -37,9 +37,9 @@ public class DeleteCourseUI extends JPanel {
 
         delete.addActionListener(e -> {
             try {
-                int id = Integer.parseInt(idField.getText().trim());
+                String code = codeField.getText().trim();
 
-                if (adminService.deleteCourse(id)) {
+                if (adminService.deleteCourse(code)) {
                     JOptionPane.showMessageDialog(this, "Course Deleted Successfully!");
                 } else {
                     JOptionPane.showMessageDialog(this, "Failed to Delete!");
