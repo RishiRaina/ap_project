@@ -5,7 +5,8 @@ import edu.univ.erp.data.UserAuthDAO;
 import edu.univ.erp.domain.Student;
 import edu.univ.erp.domain.UserAuth;
 
-import java.util.List;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class StudentService {
 
@@ -17,22 +18,47 @@ public class StudentService {
         this.userAuthDAO = new UserAuthDAO();
     }
 
-    public boolean addStudent(Student student) {
-        UserAuth user = userAuthDAO.getUserByUsername(String.valueOf(student.getUserId()));
-        if (user == null) return false;
+    /**
+     * Adds a new student into auth_db and erp_db in a transaction-safe way
+     */
+    public boolean addStudent(Student student, String username, String passwordHash) {
+        Connection authConn = null;
+        Connection erpConn = null;
 
-        List<Student> all = studentDAO.getAllStudents();
-        for (Student s : all) {
-            if (s.getRollNo().equals(student.getRollNo())) return false;
+        try {
+            authConn = edu.univ.erp.data.AuthDatabaseConnection.getConnection();
+            erpConn = edu.univ.erp.data.ERPDatabaseConnection.getConnection();
+
+            if (authConn == null || erpConn == null) return false;
+
+            authConn.setAutoCommit(false);
+            erpConn.setAutoCommit(false);
+
+            // Insert user into auth_db
+            UserAuth user = new UserAuth();
+            user.setUsername(username);
+            user.setRole("STUDENT");
+            user.setPasswordHash(passwordHash);
+            user.setStatus("ACTIVE");
+
+            if (!userAuthDAO.addUser(user)) throw new SQLException("Failed to add user to auth_db");
+
+            // Insert student into ERP DB
+            student.setUserId(user.getUserId());
+            if (!studentDAO.addStudent(student, erpConn)) throw new SQLException("Failed to add student to ERP DB");
+
+            authConn.commit();
+            erpConn.commit();
+            return true;
+
+        } catch (Exception e) {
+            try { if (authConn != null) authConn.rollback(); } catch (SQLException ignored) {}
+            try { if (erpConn != null) erpConn.rollback(); } catch (SQLException ignored) {}
+            return false;
+
+        } finally {
+            try { if (authConn != null) authConn.setAutoCommit(true); } catch (SQLException ignored) {}
+            try { if (erpConn != null) erpConn.setAutoCommit(true); } catch (SQLException ignored) {}
         }
-
-        if (student.getProgram() == null || student.getProgram().isBlank()) return false;
-        if (student.getYear() <= 0 || student.getYear() > 6) return false;
-
-        return studentDAO.addStudent(student);
-    }
-
-    public List<Student> getAllStudents() {
-        return studentDAO.getAllStudents();
     }
 }

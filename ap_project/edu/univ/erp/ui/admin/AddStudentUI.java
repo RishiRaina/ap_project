@@ -18,16 +18,21 @@ public class AddStudentUI extends JPanel {
         title.setFont(new Font("Arial", Font.BOLD, 26));
         add(title, BorderLayout.NORTH);
 
-        JPanel form = new JPanel(new GridLayout(4, 2, 10, 10));
+        // Updated to 5 rows: Username, Password, Roll No, Program, Year
+        JPanel form = new JPanel(new GridLayout(5, 2, 10, 10));
         form.setBorder(BorderFactory.createEmptyBorder(40, 200, 40, 200));
 
-        JTextField uidField = new JTextField();
+        JTextField usernameField = new JTextField();
+        JPasswordField passwordField = new JPasswordField(); // Masked input
         JTextField rollField = new JTextField();
         JTextField programField = new JTextField();
         JTextField yearField = new JTextField();
 
-        form.add(new JLabel("User ID:"));
-        form.add(uidField);
+        form.add(new JLabel("Username:"));
+        form.add(usernameField);
+
+        form.add(new JLabel("Password:"));
+        form.add(passwordField);
 
         form.add(new JLabel("Roll No:"));
         form.add(rollField);
@@ -50,18 +55,19 @@ public class AddStudentUI extends JPanel {
 
         addBtn.addActionListener(e -> {
             try {
-                int userId = Integer.parseInt(uidField.getText().trim());
+                String username = usernameField.getText().trim();
+                String password = new String(passwordField.getPassword()).trim();
                 String roll = rollField.getText().trim();
                 String prog = programField.getText().trim();
                 int year = Integer.parseInt(yearField.getText().trim());
 
                 Student s = new Student();
-                s.setUserId(userId);
                 s.setRollNo(roll);
                 s.setProgram(prog);
                 s.setYear(year);
 
-                if (adminService.addStudent(s)) {
+                // Pass username and password to AdminService
+                if (adminService.addStudent(s, username, password)) {
                     JOptionPane.showMessageDialog(this, "Student Added!");
                 } else {
                     JOptionPane.showMessageDialog(this, "Failed to Add.");

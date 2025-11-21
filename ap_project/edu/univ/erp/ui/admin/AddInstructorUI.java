@@ -1,6 +1,5 @@
 package edu.univ.erp.ui.admin;
 
-import edu.univ.erp.domain.Instructor;
 import edu.univ.erp.service.AdminService;
 import edu.univ.erp.ui.common.MainFrame;
 
@@ -18,14 +17,19 @@ public class AddInstructorUI extends JPanel {
         title.setFont(new Font("Arial", Font.BOLD, 26));
         add(title, BorderLayout.NORTH);
 
+        // Form with username, password, and department
         JPanel form = new JPanel(new GridLayout(3, 2, 10, 10));
         form.setBorder(BorderFactory.createEmptyBorder(40, 200, 40, 200));
 
-        JTextField uidField = new JTextField();
+        JTextField usernameField = new JTextField();
+        JPasswordField passwordField = new JPasswordField();
         JTextField deptField = new JTextField();
 
-        form.add(new JLabel("User ID:"));
-        form.add(uidField);
+        form.add(new JLabel("Username:"));
+        form.add(usernameField);
+
+        form.add(new JLabel("Password:"));
+        form.add(passwordField);
 
         form.add(new JLabel("Department:"));
         form.add(deptField);
@@ -42,17 +46,20 @@ public class AddInstructorUI extends JPanel {
 
         addBtn.addActionListener(e -> {
             try {
-                int userId = Integer.parseInt(uidField.getText().trim());
+                String username = usernameField.getText().trim();
+                String password = new String(passwordField.getPassword()).trim();
                 String dept = deptField.getText().trim();
 
-                Instructor i = new Instructor();
-                i.setUserId(userId);
-                i.setDepartment(dept);
+                if (username.isEmpty() || password.isEmpty() || dept.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "All fields are required.");
+                    return;
+                }
 
-                if (adminService.addInstructor(i)) {
+                // Call AdminService to add instructor using username/password/department
+                if (adminService.addInstructor(username, password, dept)) {
                     JOptionPane.showMessageDialog(this, "Instructor Added!");
                 } else {
-                    JOptionPane.showMessageDialog(this, "Failed to Add.");
+                    JOptionPane.showMessageDialog(this, "Failed to add instructor. Username may already exist.");
                 }
 
             } catch (Exception ex) {
