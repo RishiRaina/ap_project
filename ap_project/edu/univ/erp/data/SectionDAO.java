@@ -162,5 +162,35 @@ public class SectionDAO {
         }
     }
 
+    public List<Section> getSectionsByCourse(int courseId) {
+        List<Section> list = new ArrayList<>();
+        String sql = "SELECT * FROM sections WHERE course_id = ?";
+
+        try (Connection conn = ERPDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, courseId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                list.add(new Section(
+                        rs.getInt("section_id"),
+                        rs.getInt("course_id"),
+                        rs.getObject("instructor_id") == null ? null : rs.getInt("instructor_id"),
+                        rs.getString("day_time"),
+                        rs.getString("room"),
+                        rs.getInt("capacity"),
+                        rs.getString("semester"),
+                        rs.getInt("year"),
+                        rs.getDate("registration_deadline")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+
 
 }
