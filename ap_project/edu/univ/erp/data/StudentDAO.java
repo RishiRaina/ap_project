@@ -6,22 +6,17 @@ import java.util.*;
 
 public class StudentDAO {
 
-    public boolean addStudent(Student s) {
-        String sql = "INSERT INTO students(user_id, roll_no, program, year) VALUES (?, ?, ?, ?)";
+    // Updated: Accept existing Connection for transaction management
+    public boolean addStudent(Student s, Connection conn) throws SQLException {
+        String sql = "INSERT INTO students (user_id, roll_no, program, year) VALUES (?, ?, ?, ?)";
 
-        try (Connection conn = ERPDatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, s.getUserId());
             ps.setString(2, s.getRollNo());
             ps.setString(3, s.getProgram());
             ps.setInt(4, s.getYear());
 
             return ps.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            System.err.println("Error adding student: " + e.getMessage());
-            return false;
         }
     }
 
@@ -34,7 +29,12 @@ public class StudentDAO {
              ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
-                list.add(new Student(rs.getInt("user_id"), rs.getString("roll_no"), rs.getString("program"), rs.getInt("year")));
+                list.add(new Student(
+                        rs.getInt("user_id"),
+                        rs.getString("roll_no"),
+                        rs.getString("program"),
+                        rs.getInt("year")
+                ));
             }
 
         } catch (SQLException e) {
@@ -54,7 +54,12 @@ public class StudentDAO {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                return new Student(rs.getInt("user_id"), rs.getString("roll_no"), rs.getString("program"), rs.getInt("year"));
+                return new Student(
+                        rs.getInt("user_id"),
+                        rs.getString("roll_no"),
+                        rs.getString("program"),
+                        rs.getInt("year")
+                );
             }
 
         } catch (SQLException e) {
@@ -63,5 +68,4 @@ public class StudentDAO {
 
         return null;
     }
-
 }

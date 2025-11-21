@@ -7,6 +7,12 @@ import edu.univ.erp.access.*;
 
 import java.util.List;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 public class AdminService {
 
     private AdminDAO adminDAO = new AdminDAO();
@@ -15,6 +21,9 @@ public class AdminService {
     private StudentDAO studentDAO = new StudentDAO();
     private InstructorDAO instructorDAO = new InstructorDAO();
     private EnrollmentDAO enrollmentDAO = new EnrollmentDAO();
+    private StudentService StudentService = new StudentService();
+    private UserAuthDAO UserAuthDAO =   new UserAuthDAO();
+    private InstructorService instructorService = new InstructorService();
 
     private void requireAdminPermission(AccessControl.Actions action) throws Exception {
         String role = SessionManager.getCurrentUserRole();
@@ -64,13 +73,25 @@ public class AdminService {
     }
 
 
-    // Student operations
-    public boolean addStudent(Student s) {
-        return studentDAO.addStudent(s);
+    public boolean addStudent(Student student, String username, String rawPassword) {
+        // Convert raw password to hash using BCrypt
+        String passwordHash = org.mindrot.jbcrypt.BCrypt.hashpw(rawPassword, org.mindrot.jbcrypt.BCrypt.gensalt());
+        return StudentService.addStudent(student, username, passwordHash);
     }
 
     public boolean dropStudentForcefully(int sectionId, int studentId) {
         return enrollmentDAO.removeStudentFromSection(sectionId, studentId);
+    }
+
+    // 1️⃣ Drop student from a section (unenroll only)
+    public boolean dropStudentFromSection(int sectionId, int studentId) {
+        return enrollmentDAO.removeStudentFromSection(sectionId, studentId);
+    }
+
+    // 2️⃣ Delete student completely from system
+    public boolean deleteStudent(int userId) {
+        // Delete from auth_db, cascades will remove from ERP DB
+        return UserAuthDAO.deleteUser(userId);
     }
 
 
@@ -79,9 +100,10 @@ public class AdminService {
     }
 
 
-    // Instructor operations
-    public boolean addInstructor(Instructor i) {
-        return instructorDAO.addInstructor(i);
+    // Instructor operation
+
+    public boolean addInstructor(String username, String rawPassword, String department) {
+        return instructorService.addInstructor(username, rawPassword, department);
     }
 
     public List<Instructor> getAllInstructors() {
