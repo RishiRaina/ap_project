@@ -75,15 +75,14 @@ public class CourseDAO {
     }
 
     public boolean updateCourse(Course c) {
-        String sql = "UPDATE courses SET code = ?, title = ?, credits = ? WHERE course_id = ?";
+        String sql = "UPDATE courses SET title = ?, credits = ? WHERE code = ?";
 
         try (Connection conn = ERPDatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, c.getCode());
-            ps.setString(2, c.getTitle());
-            ps.setInt(3, c.getCredits());
-            ps.setInt(4, c.getCourseId());
+            ps.setString(1, c.getTitle());
+            ps.setInt(2, c.getCredits());
+            ps.setString(3, c.getCode());
 
             return ps.executeUpdate() > 0;
 
@@ -93,14 +92,15 @@ public class CourseDAO {
         }
     }
 
-   
-    public boolean deleteCourse(int courseId) {
-        String sql = "DELETE FROM courses WHERE course_id = ?";
+
+
+    public boolean deleteCourse(String code) {
+        String sql = "DELETE FROM courses WHERE code = ?";
 
         try (Connection conn = ERPDatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, courseId);
+            ps.setString(1, code);
             return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
@@ -108,4 +108,5 @@ public class CourseDAO {
             return false;
         }
     }
+
 }
