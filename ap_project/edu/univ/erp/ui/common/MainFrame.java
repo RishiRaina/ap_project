@@ -1,7 +1,12 @@
 package edu.univ.erp.ui.common;
 
+import edu.univ.erp.ui.admin.AdminDashboard;
+import edu.univ.erp.ui.instructor.InstructorDashboard;
+import edu.univ.erp.ui.student.StudentDashboard;
+
 import javax.swing.*;
 import java.awt.*;
+
 
 public class MainFrame extends JFrame {
 
@@ -32,4 +37,20 @@ public class MainFrame extends JFrame {
     public void showScreen(String name) {
         visiblecard.show(cardholder, name);
     }
+
+    public void refreshStudentDashboard() {
+        addScreen(STUDENT_DASH, new StudentDashboard(this));
+        showScreen(STUDENT_DASH);
+    }
+
+    public void refreshInstructorDashboard() {
+        addScreen(INSTRUCTOR_DASH, new InstructorDashboard(this));
+        showScreen(INSTRUCTOR_DASH);
+    }
+
+    public void refreshAdminDashboard() {
+        addScreen(ADMIN_DASH, new AdminDashboard(this));
+        showScreen(ADMIN_DASH);
+    }
+
 }

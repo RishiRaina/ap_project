@@ -2,6 +2,7 @@ package edu.univ.erp.ui.instructor;
 
 import edu.univ.erp.access.AccessControl;
 import edu.univ.erp.access.AccessException;
+import edu.univ.erp.access.MaintenanceChecker;
 import edu.univ.erp.auth.SessionManager;
 import edu.univ.erp.domain.*;
 import edu.univ.erp.service.CourseService;
@@ -38,18 +39,24 @@ public class InstructorStatsSectionSelect extends JPanel {
         }
 
         // Maintenance banner
-        if (AccessControl.isMaintenanceOn()) {
-            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
+        JLabel banner=null;
+        if (MaintenanceChecker.isMaintenanceOn()) {
+            banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
             banner.setOpaque(true);
             banner.setBackground(Color.ORANGE);
             banner.setForeground(Color.BLACK);
             banner.setFont(new Font("Arial", Font.BOLD, 16));
-            add(banner, BorderLayout.SOUTH);
+            add(banner, BorderLayout.NORTH);
         }
 
         JLabel title = new JLabel("Select Section for Stats", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 28));
-        add(title, BorderLayout.NORTH);
+        if(banner!=null){
+            add(title,BorderLayout.CENTER);
+        }
+        else{
+            add(title,BorderLayout.NORTH);
+        }
 
         String[] cols = {"Section ID", "Course Code", "Course Title", "Action"};
 
@@ -70,7 +77,7 @@ public class InstructorStatsSectionSelect extends JPanel {
         loadSections(model);
 
         JButton back = new JButton("Back");
-        back.addActionListener(e -> mainFrame.showScreen(MainFrame.INSTRUCTOR_DASH));
+        back.addActionListener(e -> mainFrame.refreshInstructorDashboard());
         add(back, BorderLayout.SOUTH);
     }
 

@@ -8,10 +8,7 @@ import edu.univ.erp.data.AuthDatabaseConnection;
 public final class AuthHelper {
 
     private AuthHelper() {
-       
     }
-
-   
     public static class AuthResult {
         public final boolean success;
         public final int userId;

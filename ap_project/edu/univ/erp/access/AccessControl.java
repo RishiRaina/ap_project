@@ -9,13 +9,9 @@ public class AccessControl {
     }
 
     public enum Actions{
-       
-
         LOGIN,
         LOGOUT,
 
-
-        
 
         VIEW_CATALOG,
         REGISTER_SECTION,
@@ -91,11 +87,6 @@ public class AccessControl {
 
     }
 
-   
-    public static boolean isMaintenanceOn() {
-       
-        return MaintenanceChecker.isMaintenanceOn();
-    }
 
 
     public static boolean isAllowed(Role role, Actions action) {
@@ -110,7 +101,7 @@ public class AccessControl {
    
     public static void assertAllowedWithMaintenance(Role role, Actions action) throws AccessException {
         boolean isMutating = ischangingaction(action);
-        if (isMaintenanceOn() && role != Role.ADMIN && isMutating)
+        if (MaintenanceChecker.isMaintenanceOn() && role != Role.ADMIN && isMutating)
             throw new AccessException("Maintenance is ON. Only admins can modify data right now.");
         assertAllowed(role, action);
     }

@@ -69,13 +69,13 @@ public class LoginScreen extends JPanel {
 
             // if login is successful , show dashboard based on role
             if (result.role.equalsIgnoreCase("STUDENT")) {
-                mainFrame.showScreen(MainFrame.STUDENT_DASH);
+                mainFrame.refreshStudentDashboard();
             }
             else if (result.role.equalsIgnoreCase("INSTRUCTOR")) {
-                mainFrame.showScreen(MainFrame.INSTRUCTOR_DASH);
+                mainFrame.refreshInstructorDashboard();
             }
             else if (result.role.equalsIgnoreCase("ADMIN")) {
-                mainFrame.showScreen(MainFrame.ADMIN_DASH);
+                mainFrame.refreshAdminDashboard();
             }
 
             errorLabel.setText(""); // clear errors

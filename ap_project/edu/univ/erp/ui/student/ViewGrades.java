@@ -2,6 +2,7 @@ package edu.univ.erp.ui.student;
 
 import edu.univ.erp.access.AccessControl;
 import edu.univ.erp.access.AccessException;
+import edu.univ.erp.access.MaintenanceChecker;
 import edu.univ.erp.auth.SessionManager;
 import edu.univ.erp.domain.Course;
 import edu.univ.erp.domain.Enrollment;
@@ -34,8 +35,9 @@ public class ViewGrades extends JPanel {
         setLayout(new BorderLayout());
 
         // maintenance banner
-        if (AccessControl.isMaintenanceOn()) {
-            JLabel banner = new JLabel("System Under Maintenance - VIEW ONLY", SwingConstants.CENTER);
+        JLabel banner=null;
+        if (MaintenanceChecker.isMaintenanceOn()) {
+            banner = new JLabel("System Under Maintenance - VIEW ONLY", SwingConstants.CENTER);
             banner.setOpaque(true);
             banner.setBackground(Color.ORANGE);
             banner.setForeground(Color.BLACK);
@@ -46,7 +48,12 @@ public class ViewGrades extends JPanel {
         // title
         JLabel title = new JLabel("My Grades", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 28));
-        add(title, BorderLayout.NORTH);
+        if(banner!=null){
+            add(title,BorderLayout.CENTER);
+        }
+        else{
+            add(title,BorderLayout.NORTH);
+        }
 
         // table
         String[] columns = {"Course Code", "Course Title", "Component", "Score", "Final Grade"};
@@ -62,7 +69,7 @@ public class ViewGrades extends JPanel {
         bottom.add(backBtn);
         add(bottom, BorderLayout.SOUTH);
 
-        backBtn.addActionListener(e -> mainFrame.showScreen(MainFrame.STUDENT_DASH));
+        backBtn.addActionListener(e -> mainFrame.refreshStudentDashboard());
 
         // load
         loadGrades(model);

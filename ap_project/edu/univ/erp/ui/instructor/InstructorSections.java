@@ -2,6 +2,7 @@ package edu.univ.erp.ui.instructor;
 
 import edu.univ.erp.access.AccessControl;
 import edu.univ.erp.access.AccessException;
+import edu.univ.erp.access.MaintenanceChecker;
 import edu.univ.erp.auth.SessionManager;
 import edu.univ.erp.domain.Course;
 import edu.univ.erp.domain.Section;
@@ -38,19 +39,26 @@ public class InstructorSections extends JPanel {
         setLayout(new BorderLayout());
 
         //maintenance banner
-        if (AccessControl.isMaintenanceOn()) {
-            JLabel banner = new JLabel("System Under Maintenance - VIEW ONLY", SwingConstants.CENTER);
+        JLabel banner=null;
+        if (MaintenanceChecker.isMaintenanceOn()) {
+            banner = new JLabel("System Under Maintenance - VIEW ONLY", SwingConstants.CENTER);
             banner.setOpaque(true);
             banner.setBackground(Color.ORANGE);
             banner.setForeground(Color.BLACK);
             banner.setFont(new Font("Arial", Font.BOLD, 16));
-            add(banner, BorderLayout.SOUTH);
+            add(banner, BorderLayout.NORTH);
         }
+
 
         // title
         JLabel title = new JLabel("My Sections", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 28));
-        add(title, BorderLayout.NORTH);
+        if(banner!=null){
+            add(title,BorderLayout.CENTER);
+        }
+        else{
+            add(title,BorderLayout.NORTH);
+        }
 
         String[] cols = {"Section ID", "Course Code", "Course Title", "Day/Time", "Room", "Action"};
 
@@ -74,7 +82,7 @@ public class InstructorSections extends JPanel {
         // ===== BACK BUTTON =====
         JButton backBtn = new JButton("Back");
         backBtn.setFont(new Font("Arial", Font.PLAIN, 16));
-        backBtn.addActionListener(e -> mainFrame.showScreen(MainFrame.INSTRUCTOR_DASH));
+        backBtn.addActionListener(e -> mainFrame.refreshInstructorDashboard());
 
         JPanel bottom = new JPanel();
         bottom.add(backBtn);

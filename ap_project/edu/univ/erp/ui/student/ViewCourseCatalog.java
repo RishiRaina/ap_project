@@ -33,8 +33,9 @@ public class ViewCourseCatalog extends JPanel {
         setLayout(new BorderLayout());
 
         // Maintenance banner (ALWAYS at NORTH)
-        if (AccessControl.isMaintenanceOn()) {
-            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
+        JLabel banner=null;
+        if (MaintenanceChecker.isMaintenanceOn()) {
+            banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
             banner.setOpaque(true);
             banner.setBackground(Color.ORANGE);
             banner.setForeground(Color.BLACK);
@@ -45,7 +46,12 @@ public class ViewCourseCatalog extends JPanel {
         // Title (ALWAYS NORTH, below banner automatically)
         JLabel title = new JLabel("Course Catalog", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 28));
-        add(title, BorderLayout.NORTH);
+        if(banner!=null){
+            add(title,BorderLayout.CENTER);
+        }
+        else{
+            add(title,BorderLayout.NORTH);
+        }
 
         // Table
         String[] columns = {"Course ID", "Code", "Title", "Credits"};
@@ -61,7 +67,7 @@ public class ViewCourseCatalog extends JPanel {
         bottom.add(backBtn);
         add(bottom, BorderLayout.SOUTH);
 
-        backBtn.addActionListener(e -> mainFrame.showScreen(MainFrame.STUDENT_DASH));
+        backBtn.addActionListener(e -> mainFrame.refreshStudentDashboard());
 
         // Load courses
         loadCourses(model);

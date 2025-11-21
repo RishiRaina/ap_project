@@ -1,6 +1,7 @@
 package edu.univ.erp.ui.student;
 
 import edu.univ.erp.access.AccessControl;
+import edu.univ.erp.access.MaintenanceChecker;
 import edu.univ.erp.auth.SessionManager;
 import edu.univ.erp.service.TranscriptService;
 import edu.univ.erp.ui.common.MainFrame;
@@ -32,8 +33,9 @@ public class DownloadTranscriptCSV extends JPanel {
         setLayout(new BorderLayout());
 
         // Banner
-        if (AccessControl.isMaintenanceOn()) {
-            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
+        JLabel banner=null;
+        if (MaintenanceChecker.isMaintenanceOn()) {
+            banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
             banner.setOpaque(true);
             banner.setBackground(Color.ORANGE);
             banner.setForeground(Color.BLACK);
@@ -44,7 +46,12 @@ public class DownloadTranscriptCSV extends JPanel {
         // Title
         JLabel title = new JLabel("Transcript (CSV)", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 28));
-        add(title, BorderLayout.NORTH);
+        if(banner!=null){
+            add(title,BorderLayout.CENTER);
+        }
+        else{
+            add(title,BorderLayout.NORTH);
+        }
 
         // Table
         String[] cols = {"Course Code", "Title", "Credits", "Status", "Final Grade"};
@@ -63,7 +70,7 @@ public class DownloadTranscriptCSV extends JPanel {
         bottom.add(backBtn);
         add(bottom, BorderLayout.SOUTH);
 
-        backBtn.addActionListener(e -> mainFrame.showScreen(MainFrame.STUDENT_DASH));
+        backBtn.addActionListener(e -> mainFrame.refreshStudentDashboard());
         exportBtn.addActionListener(e -> exportCSV());
 
         loadTranscript(model);

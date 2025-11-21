@@ -2,6 +2,7 @@ package edu.univ.erp.ui.student;
 
 import edu.univ.erp.access.AccessControl;
 import edu.univ.erp.access.AccessException;
+import edu.univ.erp.access.MaintenanceChecker;
 import edu.univ.erp.auth.SessionManager;
 import edu.univ.erp.domain.Course;
 import edu.univ.erp.domain.Section;
@@ -37,7 +38,7 @@ public class RegisterForSection extends JPanel {
 
         setLayout(new BorderLayout());
         JLabel banner=null;
-        if (AccessControl.isMaintenanceOn()) {
+        if (MaintenanceChecker.isMaintenanceOn()) {
             banner = new JLabel("System Under Maintenance - VIEW ONLY", SwingConstants.CENTER);
             banner.setOpaque(true);
             banner.setBackground(Color.ORANGE);
@@ -48,7 +49,12 @@ public class RegisterForSection extends JPanel {
 
         JLabel title = new JLabel("Register for a Section", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 26));
-        add(title, BorderLayout.NORTH);
+        if(banner!=null){
+            add(title,BorderLayout.CENTER);
+        }
+        else{
+            add(title,BorderLayout.NORTH);
+        }
 
         String[] cols = {"Section ID", "Course Code", "Course Title", "Instructor ID", "Day/Time", "Room", "Capacity", "Deadline"};//table strcuture
 
@@ -73,7 +79,7 @@ public class RegisterForSection extends JPanel {
         registerBtn.addActionListener(e -> {
 
             //maintenance check
-            if (AccessControl.isMaintenanceOn() && !"ADMIN".equals(SessionManager.getCurrentUserRole())) {
+            if (MaintenanceChecker.isMaintenanceOn() && !"ADMIN".equals(SessionManager.getCurrentUserRole())) {
                 JOptionPane.showMessageDialog(this, "Can't Register. Maintenance Mode ON ", "Maintenance ON", JOptionPane.WARNING_MESSAGE);
                 return;
             }
@@ -98,8 +104,8 @@ public class RegisterForSection extends JPanel {
 
         // back
         backBtn.addActionListener(e ->
-                mainFrame.showScreen(MainFrame.STUDENT_DASH)
-        );
+                mainFrame.refreshStudentDashboard());
+
     }
 
     // load section

@@ -1,6 +1,7 @@
 package edu.univ.erp.ui.instructor;
 
 import edu.univ.erp.access.AccessControl;
+import edu.univ.erp.access.MaintenanceChecker;
 import edu.univ.erp.auth.SessionManager;
 import edu.univ.erp.ui.common.MainFrame;
 
@@ -18,7 +19,7 @@ public class InstructorDashboard extends JPanel {
         setBackground(Color.WHITE);
 
         // maintenance banner
-        if (AccessControl.isMaintenanceOn()) {
+        if (MaintenanceChecker.isMaintenanceOn()) {
             JLabel banner = new JLabel("System Under Maintenance - VIEW ONLY", SwingConstants.CENTER);
             banner.setOpaque(true);
             banner.setBackground(Color.ORANGE);

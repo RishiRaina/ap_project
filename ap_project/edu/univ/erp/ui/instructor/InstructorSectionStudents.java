@@ -2,6 +2,7 @@ package edu.univ.erp.ui.instructor;
 
 import edu.univ.erp.access.AccessControl;
 import edu.univ.erp.access.AccessException;
+import edu.univ.erp.access.MaintenanceChecker;
 import edu.univ.erp.auth.SessionManager;
 import edu.univ.erp.domain.*;
 import edu.univ.erp.service.InstructorQueryService;
@@ -33,18 +34,23 @@ public class InstructorSectionStudents extends JPanel {
         setLayout(new BorderLayout());
 
         JLabel banner = null;
-        if (AccessControl.isMaintenanceOn()) {
+        if (MaintenanceChecker.isMaintenanceOn()) {
             banner = new JLabel("System Under Maintenance – VIEW ONLY", SwingConstants.CENTER);
             banner.setOpaque(true);
             banner.setBackground(Color.ORANGE);
             banner.setForeground(Color.BLACK);
             banner.setFont(new Font("Arial", Font.BOLD, 16));
-            add(banner, BorderLayout.SOUTH);
+            add(banner, BorderLayout.NORTH);
         }
 
         JLabel title = new JLabel("Students in Section " + sectionId, SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 28));
-        add(title, BorderLayout.NORTH);
+        if(banner!=null){
+            add(title,BorderLayout.CENTER);
+        }
+        else{
+            add(title,BorderLayout.NORTH);
+        }
         String[] cols = {"Enrollment ID", "Roll No", "Program", "Year", "Final Grade", "Action"};
 
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
@@ -118,7 +124,7 @@ public class InstructorSectionStudents extends JPanel {
     public void enterGrades(int row) {
 
         // Maintenance check
-        if (AccessControl.isMaintenanceOn() && !"ADMIN".equals(SessionManager.getCurrentUserRole())) {
+        if (MaintenanceChecker.isMaintenanceOn() && !"ADMIN".equals(SessionManager.getCurrentUserRole())) {
             JOptionPane.showMessageDialog(this, "Cannot edit grades while system is in Maintenance Mode.", "Maintenance ON", JOptionPane.WARNING_MESSAGE);
             return;
         }

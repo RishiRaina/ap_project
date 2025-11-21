@@ -71,14 +71,67 @@ public class InstructorGradeService {
         return gradeDAO.addGrade(g);
     }
 
-    public double computeWeightedScore(List<Grade> components, double w1, double w2, double w3) {
-        double total = 0;
-        if (components.size() >= 1)
-            total += components.get(0).getScore() * w1;
-        if (components.size() >= 2)
-            total += components.get(1).getScore() * w2;
-        if (components.size() >= 3)
-            total += components.get(2).getScore() * w3;
-        return total;
+
+    public String autoComputeFinalLetterGrade(int enrollmentId) throws AccessException {
+
+        int instructorId = SessionManager.getCurrentUserId();
+        // Access + maintenance
+        AccessControl.assertAllowedWithMaintenance(AccessControl.Role.INSTRUCTOR, AccessControl.Actions.COMPUTE_FINAL_GRADES);
+
+        // Ownership check
+        Enrollment e = enrollmentDAO.getEnrollmentById(enrollmentId);
+        if (e == null){
+            throw new AccessException("Invalid enrollment.");
+        }
+
+        Section sec = sectionDAO.getSectionById(e.getSectionId());
+        if (sec == null) {
+            throw new AccessException("Section not found.");
+        }
+
+        AccessControl.assertInstructorOwnsSection(instructorId, sec.getInstructorId(), AccessControl.Actions.COMPUTE_FINAL_GRADES);
+
+        // fetch grade component by component
+        List<Grade> list = gradeDAO.getGradesByEnrollment(enrollmentId);
+        Double A = null, Q = null, P = null, M = null, Efinal = null;
+        for (Grade g : list) {
+            String comp = g.getComponent().toUpperCase();
+            switch (comp) {
+                case "ASSIGNMENTS": A = g.getScore(); break;
+                case "QUIZZES": Q = g.getScore(); break;
+                case "PROJECT": P = g.getScore(); break;
+                case "MID": M = g.getScore(); break;
+                case "END": Efinal = g.getScore(); break;
+            }
+        }
+
+        // Validate presence
+        if (A==null || Q==null || P ==null || M==null|| Efinal==null) {
+            throw new AccessException("All 5 components need to have valid values for computing final grade ");
+        }
+        //logic apply here
+        double finalScore = A*0.15 + Q*0.15 + P*0.10 + M*0.25 + Efinal*0.35;
+        // Convert to letter
+        String letter;
+        if (finalScore >= 90) {
+            letter = "A";
+        }
+        else if (finalScore >= 80) {letter = "B";}
+        else if (finalScore >= 70) letter = "C";
+        else if (finalScore >= 60) letter = "D";
+        else letter = "F";
+
+        // Save
+        boolean updated = false;
+        for (Grade g : list) {
+            if (g.getComponent().equalsIgnoreCase("FINAL")) {
+                g.setFinalGrade(letter);
+                updated = gradeDAO.updateGrade(g);
+                return letter;
+            }
+        }
+        Grade g = new Grade(enrollmentId, "FINAL", finalScore, letter);
+        gradeDAO.addGrade(g);
+        return letter;
     }
 }

@@ -16,7 +16,7 @@ public class StudentDashboard extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
 
-        if (AccessControl.isMaintenanceOn()) {
+        if (MaintenanceChecker.isMaintenanceOn()) {
             JLabel banner = new JLabel("System Under Maintenance - VIEW ONLY", SwingConstants.CENTER);
             banner.setOpaque(true);
             banner.setBackground(Color.ORANGE);

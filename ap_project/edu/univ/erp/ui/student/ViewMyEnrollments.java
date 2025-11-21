@@ -2,6 +2,7 @@ package edu.univ.erp.ui.student;
 
 import edu.univ.erp.access.AccessControl;
 import edu.univ.erp.access.AccessException;
+import edu.univ.erp.access.MaintenanceChecker;
 import edu.univ.erp.auth.SessionManager;
 import edu.univ.erp.domain.Course;
 import edu.univ.erp.domain.Enrollment;
@@ -37,8 +38,9 @@ public class ViewMyEnrollments extends JPanel {
         setLayout(new BorderLayout());
 
         // Maintenance banner
-        if (AccessControl.isMaintenanceOn()) {
-            JLabel banner = new JLabel("System Under Maintenance - VIEW ONLY", SwingConstants.CENTER);
+        JLabel banner=null;
+        if (MaintenanceChecker.isMaintenanceOn()) {
+            banner = new JLabel("System Under Maintenance - VIEW ONLY", SwingConstants.CENTER);
             banner.setOpaque(true);
             banner.setBackground(Color.ORANGE);
             banner.setForeground(Color.BLACK);
@@ -49,7 +51,12 @@ public class ViewMyEnrollments extends JPanel {
         // Title
         JLabel title = new JLabel("My Enrollments", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 28));
-        add(title, BorderLayout.NORTH);
+        if(banner!=null){
+            add(title,BorderLayout.CENTER);
+        }
+        else{
+            add(title,BorderLayout.NORTH);
+        }
 
         // Table
         String[] cols = {"Enrollment ID", "Course Code", "Course Title", "Section", "Status", "Action"};
@@ -74,7 +81,7 @@ public class ViewMyEnrollments extends JPanel {
         bottom.add(backBtn);
         add(bottom, BorderLayout.SOUTH);
 
-        backBtn.addActionListener(e -> mainFrame.showScreen(MainFrame.STUDENT_DASH));
+        backBtn.addActionListener(e -> mainFrame.refreshStudentDashboard());
 
         // Load data
         loadEnrollments(model);
@@ -110,7 +117,7 @@ public class ViewMyEnrollments extends JPanel {
 
     public void dropEnrollment(int enrollmentId) {
 
-        if (AccessControl.isMaintenanceOn() && !"ADMIN".equals(SessionManager.getCurrentUserRole())) {
+        if (MaintenanceChecker.isMaintenanceOn() && !"ADMIN".equals(SessionManager.getCurrentUserRole())) {
             JOptionPane.showMessageDialog(this, "Dropping NOT allowed during Maintenance Mode.", "Maintenance Mode", JOptionPane.WARNING_MESSAGE);
             return;
         }

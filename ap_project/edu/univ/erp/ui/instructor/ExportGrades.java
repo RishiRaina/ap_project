@@ -2,6 +2,7 @@ package edu.univ.erp.ui.instructor;
 
 import edu.univ.erp.access.AccessControl;
 import edu.univ.erp.access.AccessException;
+import edu.univ.erp.access.MaintenanceChecker;
 import edu.univ.erp.auth.SessionManager;
 import edu.univ.erp.domain.*;
 import edu.univ.erp.service.InstructorQueryService;
@@ -32,8 +33,9 @@ public class ExportGrades extends JPanel {
         }
 
         // Maintenance banner
-        if (AccessControl.isMaintenanceOn()) {
-            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
+        JLabel banner=null;
+        if (MaintenanceChecker.isMaintenanceOn()) {
+            banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
             banner.setOpaque(true);
             banner.setBackground(Color.ORANGE);
             banner.setForeground(Color.BLACK);
@@ -43,7 +45,12 @@ public class ExportGrades extends JPanel {
 
         JLabel title = new JLabel("Export Grades (CSV)", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 28));
-        add(title, BorderLayout.NORTH);
+        if(banner!=null){
+            add(title,BorderLayout.CENTER);
+        }
+        else{
+            add(title,BorderLayout.NORTH);
+        }
 
         JPanel center = new JPanel(new GridLayout(3, 1, 10, 10));
 
@@ -59,7 +66,7 @@ public class ExportGrades extends JPanel {
         add(center, BorderLayout.CENTER);
 
         JButton backBtn = new JButton("Back");
-        backBtn.addActionListener(e -> mainFrame.showScreen(MainFrame.INSTRUCTOR_DASH));
+        backBtn.addActionListener(e -> mainFrame.refreshInstructorDashboard());
 
         JPanel bottom = new JPanel();
         bottom.add(backBtn);
