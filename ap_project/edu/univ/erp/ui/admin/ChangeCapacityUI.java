@@ -71,7 +71,7 @@ public class ChangeCapacityUI extends JPanel {
             }
         });
 
-        back.addActionListener(e -> mainFrame.showScreen(MainFrame.ADMIN_DASH));
+        back.addActionListener(e -> mainFrame.refreshAdminDashboard());
     }
 }
 

@@ -196,7 +196,7 @@ public class AssignInstructorUI extends JPanel {
                 JOptionPane.showMessageDialog(this, "Assignment failed.");
         });
 
-        backBtn.addActionListener(e -> mainFrame.showScreen(MainFrame.ADMIN_DASH));
+        backBtn.addActionListener(e -> mainFrame.refreshAdminDashboard());
     }
 
     // ---------- Button Styling ----------
