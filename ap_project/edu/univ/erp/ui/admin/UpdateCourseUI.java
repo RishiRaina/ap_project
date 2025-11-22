@@ -7,6 +7,8 @@ import edu.univ.erp.ui.common.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -69,19 +71,34 @@ public class UpdateCourseUI extends JPanel {
 
         List<Course> courses = courseService.getAllCourses(); // Fetch all courses
 
-        JComboBox<String> courseBox = new JComboBox<>();
+        JComboBox<Course> courseBox = new JComboBox<>();
         courseBox.setFont(inputFont);
-        courseBox.addItem("Select Course"); // placeholder
+        courseBox.addItem(null); // placeholder
         for (Course c : courses) {
-            courseBox.addItem(c.getCode().toUpperCase());
+            courseBox.addItem(c);
         }
-        courseBox.setSelectedIndex(0);
 
-        // --- Title field ---
+        // Show both code and title
+        courseBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof Course) {
+                    Course c = (Course) value;
+                    setText(c.getCode().toUpperCase() + " - " + c.getTitle());
+                } else if (value == null) {
+                    setText("SELECT COURSE...");
+                }
+                return this;
+            }
+        });
+
+        // --- Title field with placeholder ---
         JLabel titleLabel = new JLabel("Updated Title:");
         titleLabel.setFont(labelFont);
         JTextField titleField = new JTextField();
         titleField.setFont(inputFont);
+        setPlaceholder(titleField, "Enter new course title");
 
         // --- Credits dropdown with placeholder ---
         JLabel creditsLabel = new JLabel("Updated Credits:");
@@ -98,10 +115,8 @@ public class UpdateCourseUI extends JPanel {
         // --- Add components to form ---
         form.add(courseLabel);
         form.add(courseBox);
-
         form.add(titleLabel);
         form.add(titleField);
-
         form.add(creditsLabel);
         form.add(creditsBox);
 
@@ -124,12 +139,12 @@ public class UpdateCourseUI extends JPanel {
         // ---------- ACTION LISTENERS ----------
         submit.addActionListener(e -> {
             try {
-                String selectedCode = (String) courseBox.getSelectedItem();
+                Course selectedCourse = (Course) courseBox.getSelectedItem();
                 String newTitle = titleField.getText().trim();
                 String creditsStr = (String) creditsBox.getSelectedItem();
 
                 // Validate placeholders
-                if (selectedCode.equals("Select Course")) {
+                if (selectedCourse == null) {
                     JOptionPane.showMessageDialog(this, "Please select a course.");
                     return;
                 }
@@ -140,12 +155,11 @@ public class UpdateCourseUI extends JPanel {
 
                 int credits = Integer.parseInt(creditsStr);
 
-                Course c = new Course();
-                c.setCode(selectedCode);
-                c.setTitle(newTitle);
-                c.setCredits(credits);
+                // Update course object
+                selectedCourse.setTitle(newTitle);
+                selectedCourse.setCredits(credits);
 
-                if (adminService.updateCourse(c)) {
+                if (adminService.updateCourse(selectedCourse)) {
                     JOptionPane.showMessageDialog(this, "Course Updated!");
                 } else {
                     JOptionPane.showMessageDialog(this, "Update Failed!");
@@ -175,6 +189,29 @@ public class UpdateCourseUI extends JPanel {
 
             public void mouseExited(MouseEvent evt) {
                 btn.setBackground(normal);
+            }
+        });
+    }
+
+    // ---------- HELPER METHOD FOR PLACEHOLDER ----------
+    private void setPlaceholder(JTextField field, String placeholder) {
+        field.setForeground(Color.GRAY);
+        field.setText(placeholder);
+        field.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (field.getText().equals(placeholder)) {
+                    field.setText("");
+                    field.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (field.getText().isEmpty()) {
+                    field.setForeground(Color.GRAY);
+                    field.setText(placeholder);
+                }
             }
         });
     }

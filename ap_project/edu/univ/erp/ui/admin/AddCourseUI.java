@@ -6,6 +6,8 @@ import edu.univ.erp.ui.common.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -72,9 +74,11 @@ public class AddCourseUI extends JPanel {
 
         JTextField codeField = new JTextField();
         codeField.setFont(inputFont);
+        setPlaceholder(codeField, "Enter course code");
 
         JTextField titleField = new JTextField();
         titleField.setFont(inputFont);
+        setPlaceholder(titleField, "Enter course title");
 
         // ---------- Credits dropdown with placeholder ----------
         JComboBox<String> creditsBox = new JComboBox<>();
@@ -106,7 +110,6 @@ public class AddCourseUI extends JPanel {
         form.add(back);
 
         wrapper.add(form);
-
         add(wrapper, BorderLayout.CENTER);
 
         // ---------- ACTION LISTENERS ----------
@@ -157,6 +160,29 @@ public class AddCourseUI extends JPanel {
 
             public void mouseExited(MouseEvent evt) {
                 btn.setBackground(normal);
+            }
+        });
+    }
+
+    // ---------- HELPER METHOD FOR PLACEHOLDER ----------
+    private void setPlaceholder(JTextField field, String placeholder) {
+        field.setForeground(Color.GRAY);
+        field.setText(placeholder);
+        field.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent e) {
+                if (field.getText().equals(placeholder)) {
+                    field.setText("");
+                    field.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(java.awt.event.FocusEvent e) {
+                if (field.getText().isEmpty()) {
+                    field.setForeground(Color.GRAY);
+                    field.setText(placeholder);
+                }
             }
         });
     }

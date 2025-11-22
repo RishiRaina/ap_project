@@ -56,4 +56,9 @@ public class UserAuthService {
     public List<UserAuth> getAllUsers() {
         return userAuthDAO.getAllUsers();
     }
+
+    public String getUsernameById(int userId) {
+        String username = userAuthDAO.getUsernameById(userId);
+        return username != null ? username.toUpperCase() : null;
+    }
 }

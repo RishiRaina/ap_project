@@ -120,7 +120,7 @@ public class AdminDashboard extends JPanel {
                 openContent(new AddInstructorUI(mainFrame));
                 break;
             case "Unenroll Student":
-                openContent(new DropStudentForcefullyUI(mainFrame)); // You can rename the class if needed
+                openContent(new UnenrollStudentUI(mainFrame)); // You can rename the class if needed
                 break;
             case "View All Students":
                 openContent(new ViewAllStudentsUI(mainFrame));

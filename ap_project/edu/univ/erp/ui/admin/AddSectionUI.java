@@ -12,6 +12,8 @@ import edu.univ.erp.ui.common.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Date;
@@ -65,17 +67,33 @@ public class AddSectionUI extends JPanel {
         Font inputFont = new Font("Segoe UI", Font.PLAIN, 15);
 
         // ---------- COURSE DROPDOWN ----------
-        JLabel courseLabel = new JLabel("Course Code:");
+        JLabel courseLabel = new JLabel("Course:");
         courseLabel.setFont(labelFont);
 
-        List<Course> courses = courseService.getAllCourses();
-        String[] courseCodes = courses.stream().map(c -> c.getCode().toUpperCase()).toArray(String[]::new);
-
-        JComboBox<String> courseBox = new JComboBox<>();
-        courseBox.addItem("Select Course"); // placeholder
-        for (String c : courseCodes) courseBox.addItem(c);
+        JComboBox<Course> courseBox = new JComboBox<>();
         courseBox.setFont(inputFont);
-        courseBox.setSelectedIndex(0);
+        courseBox.addItem(null); // placeholder
+
+        List<Course> courses = courseService.getAllCourses();
+        for (Course c : courses) {
+            courseBox.addItem(c);
+        }
+
+        // Renderer to show "CODE - TITLE"
+        courseBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                          boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof Course) {
+                    Course c = (Course) value;
+                    setText(c.getCode().toUpperCase() + " - " + c.getTitle());
+                } else if (value == null) {
+                    setText("Select Course...");
+                }
+                return this;
+            }
+        });
 
         // ---------- INSTRUCTOR DROPDOWN ----------
         JLabel instrLabel = new JLabel("Instructor Username :");
@@ -86,28 +104,30 @@ public class AddSectionUI extends JPanel {
                 .map(i -> instructorDAO.getUsernameById(i.getUserId()).toUpperCase())
                 .toArray(String[]::new);
 
-
         JComboBox<String> instrBox = new JComboBox<>();
         instrBox.addItem("Select Instructor"); // placeholder
         for (String u : instrUsernames) instrBox.addItem(u);
         instrBox.setFont(inputFont);
         instrBox.setSelectedIndex(0);
 
-        // ---------- OTHER FIELDS ----------
+        // ---------- OTHER FIELDS WITH PLACEHOLDERS ----------
         JLabel timeLabel = new JLabel("Day & Time:");
         timeLabel.setFont(labelFont);
         JTextField timeField = new JTextField();
         timeField.setFont(inputFont);
+        setPlaceholder(timeField, "e.g., Mon 10:00-12:00");
 
         JLabel roomLabel = new JLabel("Room:");
         roomLabel.setFont(labelFont);
         JTextField roomField = new JTextField();
         roomField.setFont(inputFont);
+        setPlaceholder(roomField, "e.g., R101");
 
         JLabel capacityLabel = new JLabel("Capacity:");
         capacityLabel.setFont(labelFont);
         JTextField capacityField = new JTextField();
         capacityField.setFont(inputFont);
+        setPlaceholder(capacityField, "e.g., 50");
 
         // ---------- SEMESTER DROPDOWN ----------
         JLabel semesterLabel = new JLabel("Semester:");
@@ -132,6 +152,7 @@ public class AddSectionUI extends JPanel {
         deadlineLabel.setFont(labelFont);
         JTextField deadlineField = new JTextField();
         deadlineField.setFont(inputFont);
+        setPlaceholder(deadlineField, "YYYY-MM-DD");
 
         // ---------- ADD COMPONENTS TO FORM ----------
         form.add(courseLabel); form.add(courseBox);
@@ -162,14 +183,14 @@ public class AddSectionUI extends JPanel {
         // ---------- ACTION LISTENERS ----------
         addBtn.addActionListener(e -> {
             try {
-                String courseCode = (String) courseBox.getSelectedItem();
+                Course selectedCourse = (Course) courseBox.getSelectedItem();
                 String instrUsername = (String) instrBox.getSelectedItem();
                 String dayTime = timeField.getText().trim();
                 String room = roomField.getText().trim();
                 int capacity = Integer.parseInt(capacityField.getText().trim());
 
                 // Validate dropdowns
-                if(courseCode.equals("Select Course")) {
+                if(selectedCourse == null) {
                     JOptionPane.showMessageDialog(this, "Please select a course.");
                     return;
                 }
@@ -197,7 +218,7 @@ public class AddSectionUI extends JPanel {
 
                 Section s = new Section(0, 0, instructorId, dayTime, room, capacity,
                         String.valueOf(semester), year, deadline);
-                boolean success = sectionService.addSection(s, courseCode);
+                boolean success = sectionService.addSection(s, selectedCourse.getCode());
 
                 if(success) {
                     JOptionPane.showMessageDialog(this, "Section Added Successfully!");
@@ -223,6 +244,29 @@ public class AddSectionUI extends JPanel {
         btn.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent evt) { btn.setBackground(hover); }
             public void mouseExited(MouseEvent evt) { btn.setBackground(normal); }
+        });
+    }
+
+    // ---------- Helper method for placeholder ----------
+    private void setPlaceholder(JTextField field, String placeholder) {
+        field.setForeground(Color.GRAY);
+        field.setText(placeholder);
+        field.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (field.getText().equals(placeholder)) {
+                    field.setText("");
+                    field.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (field.getText().isEmpty()) {
+                    field.setForeground(Color.GRAY);
+                    field.setText(placeholder);
+                }
+            }
         });
     }
 }

@@ -13,6 +13,10 @@ public class SectionService {
         this.sectionDAO = new SectionDAO();
     }
 
+    public List<Section> getSectionsByCourse(int Courseid){
+        return sectionDAO.getSectionsByCourse(Courseid);
+    }
+
     public boolean addSection(Section section, String courseCode) {
         return sectionDAO.addSection(section, courseCode);
     }

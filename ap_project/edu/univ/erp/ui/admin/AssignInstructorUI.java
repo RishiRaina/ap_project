@@ -62,10 +62,12 @@ public class AssignInstructorUI extends JPanel {
         courseDropdown.setPreferredSize(new Dimension(150, 30));
 
         courseDropdown.addItem(null); // Placeholder
-        for (Course c : courseDAO.getAllCourses()) {
+        List<Course> courses = courseDAO.getAllCourses();
+        for (Course c : courses) {
             courseDropdown.addItem(c);
         }
 
+        // Renderer to show "CODE - TITLE"
         courseDropdown.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(
@@ -73,7 +75,8 @@ public class AssignInstructorUI extends JPanel {
                     boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof Course) {
-                    setText(((Course) value).getCode().toUpperCase());
+                    Course c = (Course) value;
+                    setText(c.getCode().toUpperCase() + " - " + c.getTitle());
                 } else if (value == null) {
                     setText("Select Course...");
                 }
@@ -152,10 +155,8 @@ public class AssignInstructorUI extends JPanel {
         // Add components
         form.add(courseLabel);
         form.add(courseDropdown);
-
         form.add(sectionLabel);
         form.add(sectionDropdown);
-
         form.add(instructorLabel);
         form.add(instructorDropdown);
 

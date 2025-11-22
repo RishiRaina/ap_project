@@ -126,4 +126,8 @@ public class AdminService {
         boolean current = MaintenanceChecker.isMaintenanceOn();
         MaintenanceChecker.setMaintenance(!current);
     }
+
+    public boolean unenrollStudent(int sectionId, int studentId) {
+        return enrollmentDAO.removeStudentFromSection(sectionId, studentId);
+    }
 }

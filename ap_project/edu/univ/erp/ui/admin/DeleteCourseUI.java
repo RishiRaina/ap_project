@@ -1,6 +1,5 @@
 package edu.univ.erp.ui.admin;
 
-import edu.univ.erp.access.MaintenanceChecker;
 import edu.univ.erp.service.AdminService;
 import edu.univ.erp.service.CourseService;
 import edu.univ.erp.domain.Course;
@@ -67,22 +66,37 @@ public class DeleteCourseUI extends JPanel {
         JLabel courseLabel = new JLabel("Select Course:");
         courseLabel.setFont(labelFont);
 
-        JComboBox<String> courseBox = new JComboBox<>();
+        JComboBox<Course> courseBox = new JComboBox<>();
         courseBox.setFont(inputFont);
 
         // Method to populate dropdown
         Runnable refreshCourseDropdown = () -> {
             courseBox.removeAllItems();
-            courseBox.addItem("Select Course"); // placeholder
+            courseBox.addItem(null); // placeholder
             List<Course> courses = courseService.getAllCourses();
             for (Course c : courses) {
-                courseBox.addItem(c.getCode().toUpperCase());
+                courseBox.addItem(c);
             }
-            courseBox.setSelectedIndex(0);
         };
 
         // Populate initially
         refreshCourseDropdown.run();
+
+        // Renderer to show "CODE - Title"
+        courseBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                          boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof Course) {
+                    Course c = (Course) value;
+                    setText(c.getCode().toUpperCase() + " - " + c.getTitle());
+                } else if (value == null) {
+                    setText("SELECT COURSE...");
+                }
+                return this;
+            }
+        });
 
         form.add(courseLabel);
         form.add(courseBox);
@@ -106,15 +120,15 @@ public class DeleteCourseUI extends JPanel {
         // ---------- ACTION LISTENERS ----------
         deleteBtn.addActionListener(e -> {
             try {
-                String selectedCode = (String) courseBox.getSelectedItem();
+                Course selectedCourse = (Course) courseBox.getSelectedItem();
 
                 // Validate placeholder selection
-                if (selectedCode == null || selectedCode.equals("Select Course")) {
+                if (selectedCourse == null) {
                     JOptionPane.showMessageDialog(this, "Please select a course to delete!");
                     return;
                 }
 
-                if (adminService.deleteCourse(selectedCode)) {
+                if (adminService.deleteCourse(selectedCourse.getCode())) {
                     JOptionPane.showMessageDialog(this, "Course Deleted Successfully!");
                     refreshCourseDropdown.run(); // Refresh dropdown after deletion
                 } else {
