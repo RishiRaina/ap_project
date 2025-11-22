@@ -77,7 +77,7 @@ public class ViewAllInstructorsUI extends JPanel {
         bottom.add(back);
         add(bottom, BorderLayout.SOUTH);
 
-        back.addActionListener(e -> mainFrame.showScreen(MainFrame.ADMIN_DASH));
+        back.addActionListener(e -> mainFrame.refreshAdminDashboard());
 
         // ---------- Load Data ----------
         List<Instructor> instructors = adminService.getAllInstructors();

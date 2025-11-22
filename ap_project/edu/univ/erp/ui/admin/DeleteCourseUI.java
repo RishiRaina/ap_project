@@ -1,5 +1,6 @@
 package edu.univ.erp.ui.admin;
 
+import edu.univ.erp.access.MaintenanceChecker;
 import edu.univ.erp.service.AdminService;
 import edu.univ.erp.service.CourseService;
 import edu.univ.erp.domain.Course;
@@ -48,7 +49,6 @@ public class DeleteCourseUI extends JPanel {
         title.setForeground(Color.WHITE);
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
         header.add(title);
-
         add(header, BorderLayout.NORTH);
 
         // ---------- MAIN WRAPPER ----------
@@ -126,7 +126,7 @@ public class DeleteCourseUI extends JPanel {
             }
         });
 
-        back.addActionListener(e -> mainFrame.showScreen(MainFrame.ADMIN_DASH));
+        back.addActionListener(e -> mainFrame.refreshAdminDashboard());
     }
 
     // ---------- BUTTON STYLING ----------

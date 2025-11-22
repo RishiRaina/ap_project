@@ -210,7 +210,7 @@ public class AddSectionUI extends JPanel {
             }
         });
 
-        back.addActionListener(e -> mainFrame.showScreen(MainFrame.ADMIN_DASH));
+        back.addActionListener(e -> mainFrame.refreshAdminDashboard());
     }
 
     private void styleButton(JButton btn, Color normal, Color hover) {

@@ -156,7 +156,7 @@ public class UpdateCourseUI extends JPanel {
             }
         });
 
-        back.addActionListener(e -> mainFrame.showScreen(MainFrame.ADMIN_DASH));
+        back.addActionListener(e -> mainFrame.refreshAdminDashboard());
     }
 
     // ---------- BUTTON STYLING ----------

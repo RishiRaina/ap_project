@@ -1,5 +1,6 @@
 package edu.univ.erp.ui.admin;
 
+import edu.univ.erp.access.MaintenanceChecker;
 import edu.univ.erp.domain.Student;
 import edu.univ.erp.service.AdminService;
 import edu.univ.erp.ui.common.MainFrame;
@@ -34,12 +35,29 @@ public class AddStudentUI extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245)); // Soft gray background
 
+        JLabel banner = null;
+        if (MaintenanceChecker.isMaintenanceOn()) {
+            banner = new JLabel("System Under Maintenance", SwingConstants.CENTER);
+            banner.setOpaque(true);
+            banner.setBackground(Color.ORANGE);
+            banner.setForeground(Color.BLACK);
+            banner.setFont(new Font("Arial", Font.BOLD, 16));
+            add(banner, BorderLayout.NORTH);
+        }
+
+
         // ---------- Header ----------
         JLabel title = new JLabel("Add Student", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 26));
         title.setForeground(new Color(52, 152, 219));
         title.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-        add(title, BorderLayout.NORTH);
+        if(banner==null) {
+            add(title, BorderLayout.NORTH);
+        }
+        else{
+            add(title,BorderLayout.CENTER);
+        }
+
 
         // ---------- Form Panel ----------
         RoundedPanel form = new RoundedPanel();
@@ -121,7 +139,7 @@ public class AddStudentUI extends JPanel {
             }
         });
 
-        back.addActionListener(e -> mainFrame.showScreen(MainFrame.ADMIN_DASH));
+        back.addActionListener(e -> mainFrame.refreshAdminDashboard());
     }
 
     // ---------- Button Styling ----------
