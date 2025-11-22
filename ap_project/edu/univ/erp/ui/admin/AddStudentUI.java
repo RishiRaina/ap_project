@@ -6,6 +6,8 @@ import edu.univ.erp.ui.common.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -13,14 +15,10 @@ public class AddStudentUI extends JPanel {
 
     private AdminService adminService = new AdminService();
 
-    // ---------- Rounded Panel Class ----------
+    // ---------- Rounded Panel ----------
     class RoundedPanel extends JPanel {
         private int cornerRadius = 20;
-
-        public RoundedPanel() {
-            setOpaque(false);
-        }
-
+        public RoundedPanel() { setOpaque(false); }
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -34,7 +32,7 @@ public class AddStudentUI extends JPanel {
     public AddStudentUI(MainFrame mainFrame) {
 
         setLayout(new BorderLayout());
-        setBackground(new Color(245, 245, 245)); // Soft background
+        setBackground(new Color(245, 245, 245)); // Soft gray background
 
         // ---------- Header ----------
         JLabel title = new JLabel("Add Student", SwingConstants.CENTER);
@@ -49,27 +47,37 @@ public class AddStudentUI extends JPanel {
         form.setBorder(BorderFactory.createEmptyBorder(40, 150, 40, 150));
 
         Font labelFont = new Font("Segoe UI", Font.BOLD, 16);
-        Font inputFont = new Font("Segoe UI", Font.PLAIN, 15);
 
+        // ---------- Text Fields ----------
         JTextField usernameField = new JTextField();
+        usernameField.setPreferredSize(new Dimension(180, 30));
+        addPlaceholder(usernameField, "Enter username...");
+
         JPasswordField passwordField = new JPasswordField();
+        passwordField.setPreferredSize(new Dimension(180, 30));
+        addPlaceholder(passwordField, "Enter password...");
+
         JTextField rollField = new JTextField();
+        rollField.setPreferredSize(new Dimension(180, 30));
+        addPlaceholder(rollField, "Enter roll number...");
+
         JTextField programField = new JTextField();
+        programField.setPreferredSize(new Dimension(180, 30));
+        addPlaceholder(programField, "Enter program...");
+
         JTextField yearField = new JTextField();
+        yearField.setPreferredSize(new Dimension(180, 30));
+        addPlaceholder(yearField, "Enter year...");
 
         // Add labels and fields
         form.add(new JLabel("Username:")).setFont(labelFont);
         form.add(usernameField);
-
         form.add(new JLabel("Password:")).setFont(labelFont);
         form.add(passwordField);
-
         form.add(new JLabel("Roll No:")).setFont(labelFont);
         form.add(rollField);
-
         form.add(new JLabel("Program:")).setFont(labelFont);
         form.add(programField);
-
         form.add(new JLabel("Year:")).setFont(labelFont);
         form.add(yearField);
 
@@ -79,14 +87,13 @@ public class AddStudentUI extends JPanel {
         JButton addBtn = new JButton("Add");
         JButton back = new JButton("Back");
 
-        styleButton(addBtn, new Color(46, 204, 113), new Color(39, 174, 96)); // Green
-        styleButton(back, new Color(52, 152, 219), new Color(41, 128, 185)); // Blue
+        styleButton(addBtn, new Color(46, 204, 113), new Color(39, 174, 96));
+        styleButton(back, new Color(52, 152, 219), new Color(41, 128, 185));
 
         JPanel btnPanel = new JPanel();
         btnPanel.setBackground(new Color(245, 245, 245));
         btnPanel.add(addBtn);
         btnPanel.add(back);
-
         add(btnPanel, BorderLayout.SOUTH);
 
         // ---------- Actions ----------
@@ -127,12 +134,29 @@ public class AddStudentUI extends JPanel {
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         btn.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent evt) {
-                btn.setBackground(hover);
-            }
+            public void mouseEntered(MouseEvent evt) { btn.setBackground(hover); }
+            public void mouseExited(MouseEvent evt) { btn.setBackground(normal); }
+        });
+    }
 
-            public void mouseExited(MouseEvent evt) {
-                btn.setBackground(normal);
+    // ---------- Placeholder Helper ----------
+    private void addPlaceholder(JTextField field, String placeholder) {
+        field.setForeground(Color.GRAY);
+        field.setText(placeholder);
+        field.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (field.getText().equals(placeholder)) {
+                    field.setText("");
+                    field.setForeground(Color.BLACK);
+                }
+            }
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (field.getText().isEmpty()) {
+                    field.setForeground(Color.GRAY);
+                    field.setText(placeholder);
+                }
             }
         });
     }
