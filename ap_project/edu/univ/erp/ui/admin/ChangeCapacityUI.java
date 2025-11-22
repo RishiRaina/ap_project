@@ -1,5 +1,6 @@
 package edu.univ.erp.ui.admin;
 
+import edu.univ.erp.access.MaintenanceChecker;
 import edu.univ.erp.service.AdminService;
 import edu.univ.erp.ui.common.MainFrame;
 
@@ -13,9 +14,24 @@ public class ChangeCapacityUI extends JPanel {
     public ChangeCapacityUI(MainFrame mainFrame) {
 
         setLayout(new BorderLayout());
+        JLabel banner = null;
+        if (MaintenanceChecker.isMaintenanceOn()) {
+            banner = new JLabel("System Under Maintenance", SwingConstants.CENTER);
+            banner.setOpaque(true);
+            banner.setBackground(Color.ORANGE);
+            banner.setForeground(Color.BLACK);
+            banner.setFont(new Font("Arial", Font.BOLD, 16));
+            add(banner, BorderLayout.NORTH);
+        }
+
         JLabel title = new JLabel("Change Section Capacity", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 26));
-        add(title, BorderLayout.NORTH);
+        if(banner==null) {
+            add(title, BorderLayout.NORTH);
+        }
+        else{
+            add(title,BorderLayout.CENTER);
+        }
 
         JPanel form = new JPanel(new GridLayout(2, 2, 10, 10));
         form.setBorder(BorderFactory.createEmptyBorder(40, 200, 40, 200));

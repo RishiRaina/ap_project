@@ -25,7 +25,7 @@ public class AdminDashboard extends JPanel {
             banner.setBackground(Color.ORANGE);
             banner.setForeground(Color.BLACK);
             banner.setFont(new Font("Arial", Font.BOLD, 16));
-            add(banner, BorderLayout.NORTH);
+            add(banner, BorderLayout.SOUTH);
         }
 
         // title
