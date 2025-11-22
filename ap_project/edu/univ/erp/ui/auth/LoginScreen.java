@@ -31,7 +31,7 @@ public class LoginScreen extends JPanel {
         JLabel errorLabel = new JLabel("");
         errorLabel.setForeground(Color.RED);
 
-        //positioning
+        // Layout
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
         add(title, gbc);
 
@@ -55,8 +55,9 @@ public class LoginScreen extends JPanel {
         gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
         add(errorLabel, gbc);
 
-        //when login button clicked, this is done
+        // LOGIN LOGIC
         loginBtn.addActionListener(e -> {
+
             String username = userField.getText();
             String password = new String(passField.getPassword());
 
@@ -67,18 +68,25 @@ public class LoginScreen extends JPanel {
                 return;
             }
 
-            // if login is successful , show dashboard based on role
-            if (result.role.equalsIgnoreCase("STUDENT")) {
-                mainFrame.refreshStudentDashboard();
-            }
-            else if (result.role.equalsIgnoreCase("INSTRUCTOR")) {
-                mainFrame.refreshInstructorDashboard();
-            }
-            else if (result.role.equalsIgnoreCase("ADMIN")) {
-                mainFrame.refreshAdminDashboard();
-            }
-
             errorLabel.setText(""); // clear errors
+
+            // ✔ Get role from result
+            String role = result.role;
+
+            // ✔ Switch dashboard based on role
+            switch (role) {
+                case "INSTRUCTOR":
+                    mainFrame.refreshInstructorDashboard();
+                    break;
+                case "STUDENT":
+                    mainFrame.refreshStudentDashboard();
+                    break;
+                case "ADMIN":
+                    mainFrame.refreshAdminDashboard();
+                    break;
+                default:
+                    JOptionPane.showMessageDialog(this, "Unknown role: " + role);
+            }
         });
     }
 }

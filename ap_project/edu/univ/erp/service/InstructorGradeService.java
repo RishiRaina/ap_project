@@ -18,19 +18,24 @@ public class InstructorGradeService {
     public boolean addOrUpdateComponentGrade(int enrollmentId, String component, double score) throws AccessException {
 
         int instructorId = SessionManager.getCurrentUserId();
-        //role n maintenance check
+        // role + maintenance check
         AccessControl.assertAllowedWithMaintenance(AccessControl.Role.INSTRUCTOR, AccessControl.Actions.ENTER_SCORES);
+
+        // basic validation
+        if (score < 0 || score > 100) {
+            throw new AccessException("Score must be between 0 and 100.");
+        }
 
         // ownership check
         Enrollment e = enrollmentDAO.getEnrollmentById(enrollmentId);
         if (e == null) throw new AccessException("Invalid enrollment.");
-        //section chek
+
         Section sec = sectionDAO.getSectionById(e.getSectionId());
         if (sec == null) throw new AccessException("Section not found.");
 
         AccessControl.assertInstructorOwnsSection(instructorId, sec.getInstructorId(), AccessControl.Actions.ENTER_SCORES);
 
-        //main add or update componet grade work
+        // add or update component grade
         List<Grade> existing = gradeDAO.getGradesByEnrollment(enrollmentId);
         for (Grade g : existing) {
             if (g.getComponent().equalsIgnoreCase(component)) {
@@ -41,6 +46,7 @@ public class InstructorGradeService {
         Grade g = new Grade(enrollmentId, component, score, null);
         return gradeDAO.addGrade(g);
     }
+
 
     public boolean saveFinalGrade(int enrollmentId, String finalGrade) throws AccessException {
 
@@ -113,12 +119,12 @@ public class InstructorGradeService {
         double finalScore = A*0.15 + Q*0.15 + P*0.10 + M*0.25 + Efinal*0.35;
         // Convert to letter
         String letter;
-        if (finalScore >= 90) {
+        if (finalScore >= 85) {
             letter = "A";
         }
-        else if (finalScore >= 80) {letter = "B";}
-        else if (finalScore >= 70) letter = "C";
-        else if (finalScore >= 60) letter = "D";
+        else if (finalScore >= 70) {letter = "B";}
+        else if (finalScore >= 55) letter = "C";
+        else if (finalScore >= 30) letter = "D";
         else letter = "F";
 
         // Save

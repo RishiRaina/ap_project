@@ -53,4 +53,11 @@ public class MainFrame extends JFrame {
         showScreen(ADMIN_DASH);
     }
 
+    public void openContent(JPanel panel) {
+        setContentPane(panel);
+        revalidate();
+        repaint();
+    }
+
+
 }

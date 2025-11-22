@@ -22,13 +22,11 @@ public class ExportGrades extends JPanel {
     private InstructorQueryService queryService = new InstructorQueryService();
     private CourseService courseService = new CourseService();
 
-    // Rounded panel
+    // =========== Modern Rounded Panel ===========
     class RoundedPanel extends JPanel {
         private int cornerRadius = 20;
 
-        public RoundedPanel() {
-            setOpaque(false);
-        }
+        public RoundedPanel() { setOpaque(false); }
 
         @Override
         protected void paintComponent(Graphics g) {
@@ -41,35 +39,40 @@ public class ExportGrades extends JPanel {
     }
 
     public ExportGrades(MainFrame mainFrame) {
+
         this.mainFrame = mainFrame;
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
 
-        // Role check
-        if (!SessionManager.isLoggedIn() || !"INSTRUCTOR".equals(SessionManager.getCurrentUserRole())) {
+        // ============= Role Check =============
+        if (!SessionManager.isLoggedIn() ||
+                !"INSTRUCTOR".equals(SessionManager.getCurrentUserRole())) {
             JOptionPane.showMessageDialog(this, "Access Denied: Instructors only.");
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
             return;
         }
 
-        // Maintenance banner
+        // ============= Maintenance Banner (TOP) =============
         if (MaintenanceChecker.isMaintenanceOn()) {
+            JPanel bannerPanel = new JPanel(new BorderLayout());
+            bannerPanel.setBackground(new Color(255, 179, 71));
+            bannerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
             JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
-            banner.setOpaque(true);
-            banner.setBackground(Color.ORANGE);
-            banner.setForeground(Color.BLACK);
             banner.setFont(new Font("Segoe UI", Font.BOLD, 16));
-            add(banner, BorderLayout.SOUTH);
+
+            bannerPanel.add(banner, BorderLayout.CENTER);
+            add(bannerPanel, BorderLayout.NORTH);
         }
 
-        // Header
+        // ============= Header ============
         JLabel title = new JLabel("Export Grades (CSV)", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
         title.setForeground(new Color(52, 152, 219));
         title.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-        add(title, BorderLayout.NORTH);
+        add(title, BorderLayout.PAGE_START);
 
-        // Form panel
+        // ============= Main Form Panel =============
         RoundedPanel form = new RoundedPanel();
         form.setLayout(new GridLayout(3, 1, 20, 20));
         form.setBorder(BorderFactory.createEmptyBorder(50, 150, 50, 150));
@@ -84,8 +87,9 @@ public class ExportGrades extends JPanel {
 
         sectionDropdown.setRenderer(new DefaultListCellRenderer() {
             @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value,
-                                                          int index, boolean isSelected, boolean cellHasFocus) {
+            public Component getListCellRendererComponent(
+                    JList<?> list, Object value, int index,
+                    boolean isSelected, boolean cellHasFocus) {
 
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 
@@ -96,7 +100,6 @@ public class ExportGrades extends JPanel {
                 } else if (value == null) {
                     setText("Select Section...");
                 }
-
                 return this;
             }
         });
@@ -104,8 +107,8 @@ public class ExportGrades extends JPanel {
         // Buttons
         JButton exportBtn = new JButton("Download CSV");
         JButton backBtn = new JButton("Back");
-        styleButton(exportBtn, new Color(46, 204, 113), new Color(39, 174, 96));  // green
-        styleButton(backBtn, new Color(52, 152, 219), new Color(41, 128, 185)); // blue
+        styleButton(exportBtn, new Color(46, 204, 113), new Color(39, 174, 96));
+        styleButton(backBtn, new Color(52, 152, 219), new Color(41, 128, 185));
 
         JPanel btnPanel = new JPanel();
         btnPanel.add(exportBtn);
@@ -117,10 +120,9 @@ public class ExportGrades extends JPanel {
 
         add(form, BorderLayout.CENTER);
 
-        // Back action
+        // ============= Button Actions =============
         backBtn.addActionListener(e -> mainFrame.refreshInstructorDashboard());
 
-        // Export action
         exportBtn.addActionListener(e -> {
             Section sec = (Section) sectionDropdown.getSelectedItem();
             if (sec == null) {
@@ -139,33 +141,19 @@ public class ExportGrades extends JPanel {
         try {
             int instructorId = SessionManager.getCurrentUserId();
             List<Section> list = queryService.getMySections(instructorId);
-            for (Section s : list) {
-                box.addItem(s);}
+            for (Section s : list) box.addItem(s);
 
         } catch (AccessException ex) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    ex.getMessage(),
-                    "Access Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Unexpected error loading sections.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Access Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
 
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btn.setForeground(Color.WHITE);
         btn.setBackground(normal);
-        btn.setFocusPainted(false);
         btn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        btn.setFocusPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -176,37 +164,47 @@ public class ExportGrades extends JPanel {
 
     private void exportGrades(int sectionId) throws AccessException {
 
+        // ownership check
         Section sec = queryService.getSection(sectionId);
-        AccessControl.assertInstructorOwnsSection(SessionManager.getCurrentUserId(),
+        AccessControl.assertInstructorOwnsSection(
+                SessionManager.getCurrentUserId(),
                 sec.getInstructorId(),
-                AccessControl.Actions.EXPORT_GRADES_CSV);
+                AccessControl.Actions.EXPORT_GRADES_CSV
+        );
 
+        // get data
         List<Enrollment> enrollments = queryService.getSectionEnrollments(sectionId);
         List<String[]> rows = new ArrayList<>();
-        String[] header = {"EnrollmentID", "RollNo", "Component", "Score", "FinalGrade"};
 
+
+        String[] header = {"RollNo", "Assignments", "Quizzes", "Project", "Mid", "End", "FinalScore", "FinalLetter"};
         for (Enrollment e : enrollments) {
-
             Student st = queryService.getStudentForEnrollment(e.getEnrollmentId());
-            List<Grade> grades = queryService.getGradesForEnrollment(e.getEnrollmentId());
+            String roll = (st != null ? st.getRollNo() : "N/A");
 
-            if (grades.isEmpty()) {
-                rows.add(new String[]{
-                        "" + e.getEnrollmentId(),
-                        st != null ? st.getRollNo() : "N/A",
-                        "-", "-", "-"
-                });
-            } else {
-                for (Grade g : grades) {
-                    rows.add(new String[]{
-                            "" + e.getEnrollmentId(),
-                            st != null ? st.getRollNo() : "N/A",
-                            g.getComponent(),
-                            "" + g.getScore(),
-                            g.getFinalGrade() != null ? g.getFinalGrade() : ""
-                    });
+            Double A = null, Q = null, P = null, M = null, Efinal = null;
+            Double finalScore = null;
+            String finalLetter = null;
+
+            List<Grade> grades = queryService.getGradesForEnrollment(e.getEnrollmentId());
+            for (Grade g : grades) {
+                if (g.getComponent() == null) continue;
+                String comp = g.getComponent().toUpperCase();
+
+                switch (comp) {
+                    case "ASSIGNMENTS": A = g.getScore(); break;
+                    case "QUIZZES":     Q = g.getScore(); break;
+                    case "PROJECT":     P = g.getScore(); break;
+                    case "MID":         M = g.getScore(); break;
+                    case "END":         Efinal = g.getScore(); break;
+                    case "FINAL":
+                        finalScore = g.getScore();
+                        finalLetter = g.getFinalGrade();
+                        break;
                 }
             }
+
+            rows.add(new String[]{roll, fmt(A), fmt(Q), fmt(P), fmt(M), fmt(Efinal), fmt(finalScore), (finalLetter != null ? finalLetter : "")});
         }
 
         JFileChooser chooser = new JFileChooser();
@@ -217,4 +215,10 @@ public class ExportGrades extends JPanel {
             JOptionPane.showMessageDialog(this, ok ? "CSV Exported!" : "Failed to Export.");
         }
     }
+
+    // helper formatter
+    private String fmt(Double x) {
+        return (x == null ? "" : String.valueOf(x));
+    }
+
 }

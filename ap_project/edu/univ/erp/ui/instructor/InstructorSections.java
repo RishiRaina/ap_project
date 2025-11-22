@@ -1,134 +1,192 @@
 package edu.univ.erp.ui.instructor;
 
-import edu.univ.erp.access.AccessControl;
 import edu.univ.erp.access.AccessException;
 import edu.univ.erp.access.MaintenanceChecker;
 import edu.univ.erp.auth.SessionManager;
 import edu.univ.erp.domain.Course;
 import edu.univ.erp.domain.Section;
-import edu.univ.erp.service.InstructorQueryService;
 import edu.univ.erp.service.CourseService;
-import edu.univ.erp.ui.common.*;
+import edu.univ.erp.service.InstructorQueryService;
+import edu.univ.erp.ui.common.MainFrame;
+import edu.univ.erp.ui.common.ActionButtonEditor;
+import edu.univ.erp.ui.common.ActionButtonRenderer;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
 public class InstructorSections extends JPanel {
 
-    private MainFrame mainFrame;
-    private InstructorQueryService queryService;
-    private CourseService courseService;
+    private final MainFrame mainFrame;
+    private final InstructorQueryService queryService;
+    private final CourseService courseService;
+
+    // Store the table so we can use it in viewStudents()
+    private JTable sectionTable;
+
+    // Rounded card panel like admin screens
+    class RoundedPanel extends JPanel {
+        private final int cornerRadius = 20;
+
+        public RoundedPanel() { setOpaque(false); }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(Color.WHITE);
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
+        }
+    }
 
     public InstructorSections(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         this.queryService = new InstructorQueryService();
         this.courseService = new CourseService();
 
-        // ===== ROLE CHECK =====
+        // =============== ROLE CHECK ===============
         if (!SessionManager.isLoggedIn() ||
                 !"INSTRUCTOR".equals(SessionManager.getCurrentUserRole())) {
 
-            JOptionPane.showMessageDialog(this, "Access Denied: Instructors only.", "Access Error", JOptionPane.ERROR_MESSAGE);
-
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Access Denied: Instructors only.",
+                    "Access Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
             return;
         }
 
         setLayout(new BorderLayout());
+        setBackground(new Color(245, 245, 245));
 
-        //maintenance banner
-        JLabel banner=null;
+        // =============== MAINTENANCE BANNER ===============
         if (MaintenanceChecker.isMaintenanceOn()) {
-            banner = new JLabel("System Under Maintenance - VIEW ONLY", SwingConstants.CENTER);
-            banner.setOpaque(true);
-            banner.setBackground(Color.ORANGE);
-            banner.setForeground(Color.BLACK);
-            banner.setFont(new Font("Arial", Font.BOLD, 16));
-            add(banner, BorderLayout.NORTH);
+            JPanel bannerPanel = new JPanel(new BorderLayout());
+            bannerPanel.setBackground(new Color(255, 179, 71));
+            bannerPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+            JLabel banner = new JLabel(
+                    "System Under Maintenance — VIEW ONLY",
+                    SwingConstants.CENTER
+            );
+            banner.setFont(new Font("Segoe UI", Font.BOLD, 16));
+            bannerPanel.add(banner, BorderLayout.CENTER);
+            add(bannerPanel, BorderLayout.NORTH);
         }
 
-
-        // title
+        // =============== HEADER ===============
         JLabel title = new JLabel("My Sections", SwingConstants.CENTER);
-        title.setFont(new Font("Arial", Font.BOLD, 28));
-        if(banner!=null){
-            add(title,BorderLayout.CENTER);
-        }
-        else{
-            add(title,BorderLayout.NORTH);
-        }
+        title.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        title.setForeground(new Color(52, 152, 219));
+        title.setBorder(new EmptyBorder(20, 0, 20, 0));
+        add(title, BorderLayout.PAGE_START);
 
-        String[] cols = {"Section ID", "Course Code", "Course Title", "Day/Time", "Room", "Action"};
+        // =============== TABLE CARD ===============
+        RoundedPanel card = new RoundedPanel();
+        card.setLayout(new BorderLayout());
+        card.setBorder(new EmptyBorder(20, 40, 20, 40));
+
+        String[] cols = {"Section ID", "Course", "Title", "Day/Time", "Room", "Action"};
 
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int row, int col) {
-                return col == 5; // Only Action button column
+                return col == 5; // Only Action column
             }
         };
 
-        JTable table = new JTable(model);
-        table.setRowHeight(30);
+        sectionTable = new JTable(model);
+        sectionTable.setRowHeight(30);
+        sectionTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 16));
+        sectionTable.setFont(new Font("Segoe UI", Font.PLAIN, 15));
 
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        sectionTable.getColumn("Action").setCellRenderer(new ActionButtonRenderer());
+        sectionTable.getColumn("Action").setCellEditor(new ActionButtonEditor(new JCheckBox(), this));
 
-        // button render and edit to form button and table
-        table.getColumn("Action").setCellRenderer(new ActionButtonRenderer());
-        table.getColumn("Action").setCellEditor(new ActionButtonEditor(new JCheckBox(), this));
         loadMySections(model);
 
-        // ===== BACK BUTTON =====
+        JScrollPane scroll = new JScrollPane(sectionTable);
+        card.add(scroll, BorderLayout.CENTER);
+        add(card, BorderLayout.CENTER);
+
+        // =============== BACK BUTTON ===============
         JButton backBtn = new JButton("Back");
-        backBtn.setFont(new Font("Arial", Font.PLAIN, 16));
+        styleButton(backBtn, new Color(52, 152, 219), new Color(41, 128, 185));
         backBtn.addActionListener(e -> mainFrame.refreshInstructorDashboard());
 
         JPanel bottom = new JPanel();
+        bottom.setBackground(new Color(245, 245, 245));
         bottom.add(backBtn);
         add(bottom, BorderLayout.SOUTH);
     }
 
     public void loadMySections(DefaultTableModel model) {
-
         model.setRowCount(0);
         try {
             int instructorId = SessionManager.getCurrentUserId();
-            AccessControl.assertAllowed(AccessControl.Role.INSTRUCTOR, AccessControl.Actions.VIEW_SECTIONS);
             List<Section> list = queryService.getMySections(instructorId);
+
             for (Section s : list) {
                 Course c = courseService.getCourseById(s.getCourseId());
-                model.addRow(new Object[]{s.getSectionId(), c != null ? c.getCode() : "N/A", c != null ? c.getTitle() : "N/A", s.getDayTime(), s.getRoom(), "View Students"});
+                model.addRow(new Object[]{
+                        s.getSectionId(),
+                        c != null ? c.getCode() : "N/A",
+                        c != null ? c.getTitle() : "N/A",
+                        s.getDayTime(),
+                        s.getRoom(),
+                        "View Students"
+                });
             }
-
         } catch (AccessException ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Access Error",JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    this,
+                    ex.getMessage(),
+                    "Access Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
-    // view students button handler
+    // called by ActionButtonEditor when "View Students" clicked
     public void viewStudents(int row) {
-
         try {
-            JTable table = (JTable) ((JScrollPane) getComponent(1)).getViewport().getView();
-            int sectionId = (Integer) table.getValueAt(row, 0);
+            int secId = (Integer) sectionTable.getValueAt(row, 0);
 
-            int instructorId = SessionManager.getCurrentUserId();
-            Section sec = queryService.getSection(sectionId);
+            InstructorSectionStudents panel = new InstructorSectionStudents(mainFrame, secId);
 
-            // ownership check
-            AccessControl.assertInstructorOwnsSection(
-                    instructorId,
-                    sec.getInstructorId(),
-                    AccessControl.Actions.VIEW_SECTIONS
-            );
+            // Find the current InstructorDashboard container
+            InstructorDashboard dash = (InstructorDashboard)
+                    SwingUtilities.getAncestorOfClass(InstructorDashboard.class, this);
 
-            // Open student list screen
-            mainFrame.addScreen("instructor_section_students", new InstructorSectionStudents(mainFrame, sectionId));
-            mainFrame.showScreen("instructor_section_students");
+            if (dash != null) {
+                dash.setCenter(panel);   // show inside dashboard center
+            } else {
+                // fallback – card layout navigation
+                mainFrame.addScreen("instructor_section_students", panel);
+                mainFrame.showScreen("instructor_section_students");
+            }
 
-        } catch (AccessException ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Access Error", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void styleButton(JButton btn, Color normal, Color hover) {
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        btn.setForeground(Color.WHITE);
+        btn.setBackground(normal);
+        btn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        btn.setFocusPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) { btn.setBackground(hover); }
+            public void mouseExited(java.awt.event.MouseEvent evt) { btn.setBackground(normal); }
+        });
     }
 }
