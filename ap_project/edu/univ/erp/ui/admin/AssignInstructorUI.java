@@ -59,6 +59,7 @@ public class AssignInstructorUI extends JPanel {
         courseLabel.setFont(labelFont);
         JComboBox<Course> courseDropdown = new JComboBox<>();
         courseDropdown.setFont(inputFont);
+        courseDropdown.setPreferredSize(new Dimension(150, 30));
 
         courseDropdown.addItem(null); // Placeholder
         for (Course c : courseDAO.getAllCourses()) {
@@ -85,6 +86,7 @@ public class AssignInstructorUI extends JPanel {
         sectionLabel.setFont(labelFont);
         JComboBox<Section> sectionDropdown = new JComboBox<>();
         sectionDropdown.setFont(inputFont);
+        sectionDropdown.setPreferredSize(new Dimension(150, 30));
         sectionDropdown.addItem(null); // Placeholder
 
         // When course selected → load sections
@@ -121,6 +123,7 @@ public class AssignInstructorUI extends JPanel {
         instructorLabel.setFont(labelFont);
         JComboBox<Integer> instructorDropdown = new JComboBox<>();
         instructorDropdown.setFont(inputFont);
+        instructorDropdown.setPreferredSize(new Dimension(150, 30));
         instructorDropdown.addItem(null); // Placeholder
 
         for (Integer instId : instructorDAO.getAllInstructorIds()) {

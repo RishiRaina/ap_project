@@ -152,4 +152,24 @@ public class UserAuthDAO {
         }
     }
 
+    public String getUsernameById(int userId) {
+        String sql = "SELECT username FROM users_auth WHERE user_id = ?";
+
+        try (Connection conn = AuthDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getString("username");
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching username for userId " + userId + ": " + e.getMessage());
+        }
+
+        return null; // null if user not found
+    }
+
 }

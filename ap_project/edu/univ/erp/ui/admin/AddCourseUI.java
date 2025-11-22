@@ -26,7 +26,6 @@ public class AddCourseUI extends JPanel {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g;
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
             g2.setColor(Color.WHITE);
             g2.fillRoundRect(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
         }
@@ -55,8 +54,9 @@ public class AddCourseUI extends JPanel {
 
         // ---------- FORM CARD ----------
         RoundedPanel form = new RoundedPanel();
-        form.setLayout(new GridLayout(4, 2, 15, 15));
-        form.setBorder(BorderFactory.createEmptyBorder(40, 50, 40, 50));
+        form.setLayout(new GridLayout(4, 2, 20, 20)); // increased spacing
+        form.setBorder(BorderFactory.createEmptyBorder(60, 100, 60, 100)); // bigger padding
+        form.setPreferredSize(new Dimension(550, 350)); // increased overall size
 
         Font labelFont = new Font("Segoe UI", Font.BOLD, 16);
         Font inputFont = new Font("Segoe UI", Font.PLAIN, 15);
@@ -115,7 +115,6 @@ public class AddCourseUI extends JPanel {
                 String code = codeField.getText().trim();
                 String ctitle = titleField.getText().trim();
 
-                // Check placeholder
                 String creditsStr = (String) creditsBox.getSelectedItem();
                 if (creditsStr.equals("Select Credits")) {
                     JOptionPane.showMessageDialog(this, "Please select credits.");

@@ -100,11 +100,19 @@ public class AdminService {
         return studentDAO.getAllStudents();
     }
 
+    public String getUsernameById(int userId) {
+        return UserAuthDAO.getUsernameById(userId);
+    }
+
 
     // Instructor operation
 
     public boolean addInstructor(String username, String rawPassword, String department) {
         return instructorService.addInstructor(username, rawPassword, department);
+    }
+
+    public String getAllInstructors(int userId) {
+        return UserAuthDAO.getUsernameById(userId);
     }
 
     public List<Instructor> getAllInstructors() {

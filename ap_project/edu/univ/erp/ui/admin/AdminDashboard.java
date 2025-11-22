@@ -1,114 +1,146 @@
 package edu.univ.erp.ui.admin;
 
-import edu.univ.erp.access.MaintenanceChecker;
 import edu.univ.erp.auth.SessionManager;
-import edu.univ.erp.access.AccessControl;
 import edu.univ.erp.ui.common.MainFrame;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class AdminDashboard extends JPanel {
 
     private MainFrame mainFrame;
+    private JPanel mainContent;
 
     public AdminDashboard(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-
         setLayout(new BorderLayout());
-        setBackground(Color.WHITE);
+        setBackground(new Color(245, 245, 245));
 
-        // maintenance banner
-        if (MaintenanceChecker.isMaintenanceOn()) {
-            JLabel banner = new JLabel("System Under Maintenance", SwingConstants.CENTER);
-            banner.setOpaque(true);
-            banner.setBackground(Color.ORANGE);
-            banner.setForeground(Color.BLACK);
-            banner.setFont(new Font("Arial", Font.BOLD, 16));
-            add(banner, BorderLayout.SOUTH);
-        }
+        // ---------- HEADER ----------
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(new Color(52, 152, 219));
+        header.setBorder(new EmptyBorder(10, 20, 10, 20));
 
-        // title
-        JLabel title = new JLabel("Admin Dashboard", SwingConstants.CENTER);
-        title.setFont(new Font("Arial", Font.BOLD, 32));
-        add(title, BorderLayout.NORTH);
+        JLabel title = new JLabel("Admin Dashboard");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        title.setForeground(Color.WHITE);
 
-        // buttons panel
-        JPanel panel = new JPanel(new GridLayout(14, 1, 10, 10));
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 250, 20, 250));
+        header.add(title, BorderLayout.WEST);
 
-        JButton addCourse = btn("Add Course");
-        JButton updateCourse = btn("Update Course");
-        JButton deleteCourse = btn("Delete Course");
-
-        JButton addSection = btn("Add Section");
-        JButton assignInstructor = btn("Assign Instructor");
-        JButton changeCapacity = btn("Change Capacity");
-
-        JButton addStudent = btn("Add Student");
-        JButton addInstructor = btn("Add Instructor");
-        JButton dropStudent = btn("Drop Student Forcefully");
-
-        JButton viewStudents = btn("View All Students");
-        JButton viewInstructors = btn("View All Instructors");
-
-        JButton toggleMaintenance = btn("Toggle Maintenance Mode");
-        JButton logout = btn("Logout");
-
-        panel.add(addCourse);
-        panel.add(updateCourse);
-        panel.add(deleteCourse);
-
-        panel.add(addSection);
-        panel.add(assignInstructor);
-        panel.add(changeCapacity);
-
-        panel.add(addStudent);
-        panel.add(addInstructor);
-        panel.add(dropStudent);
-
-        panel.add(viewStudents);
-        panel.add(viewInstructors);
-
-        panel.add(toggleMaintenance);
-        panel.add(logout);
-
-        add(panel, BorderLayout.CENTER);
-
-        // ACTIONS
-        addCourse.addActionListener(e -> open("add_course", new AddCourseUI(mainFrame)));
-        updateCourse.addActionListener(e -> open("update_course", new UpdateCourseUI(mainFrame)));
-        deleteCourse.addActionListener(e -> open("delete_course", new DeleteCourseUI(mainFrame)));
-
-        addSection.addActionListener(e -> open("add_section", new AddSectionUI(mainFrame)));
-        assignInstructor.addActionListener(e -> open("assign_instructor", new AssignInstructorUI(mainFrame)));
-        changeCapacity.addActionListener(e -> open("change_capacity", new ChangeCapacityUI(mainFrame)));
-
-        addStudent.addActionListener(e -> open("add_student", new AddStudentUI(mainFrame)));
-        addInstructor.addActionListener(e -> open("add_instructor", new AddInstructorUI(mainFrame)));
-        dropStudent.addActionListener(e -> open("drop_student", new DropStudentForcefullyUI(mainFrame)));
-
-        viewStudents.addActionListener(e -> open("view_students", new ViewAllStudentsUI(mainFrame)));
-        viewInstructors.addActionListener(e -> open("view_instructors", new ViewAllInstructorsUI(mainFrame)));
-
-        toggleMaintenance.addActionListener(e -> open("toggle_maintenance", new ToggleMaintenanceUI(mainFrame)));
-
-        logout.addActionListener(e -> {
+        // Optional: Add a "Logout" button in header for quick access
+        JButton logoutBtn = new JButton("Logout");
+        logoutBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        logoutBtn.setForeground(Color.WHITE);
+        logoutBtn.setBackground(new Color(231, 76, 60));
+        logoutBtn.setFocusPainted(false);
+        logoutBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        logoutBtn.addActionListener(e -> {
             SessionManager.clear();
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
         });
+        header.add(logoutBtn, BorderLayout.EAST);
+
+        add(header, BorderLayout.NORTH);
+
+        // ---------- SIDEBAR ----------
+        JPanel sidebar = new JPanel();
+        sidebar.setLayout(new GridLayout(0, 1, 0, 10));
+        sidebar.setBackground(new Color(44, 62, 80));
+        sidebar.setBorder(new EmptyBorder(20, 10, 20, 10));
+
+        String[] buttonNames = {
+                "Add Course", "Update Course", "Delete Course",
+                "Add Section", "Assign Instructor", "Change Capacity",
+                "Add Student", "Add Instructor", "Drop Student Forcefully",
+                "View All Students", "View All Instructors", "Toggle Maintenance Mode"
+        };
+
+        for (String name : buttonNames) {
+            JButton btn = createSidebarButton(name);
+            sidebar.add(btn);
+
+            // ACTIONS
+            btn.addActionListener(e -> handleAction(name));
+        }
+
+        add(sidebar, BorderLayout.WEST);
+
+        // ---------- MAIN CONTENT ----------
+        mainContent = new JPanel();
+        mainContent.setLayout(new BorderLayout());
+        mainContent.setBackground(new Color(245, 245, 245));
+        add(mainContent, BorderLayout.CENTER);
     }
 
-    private JButton btn(String text) {
+    private JButton createSidebarButton(String text) {
         JButton b = new JButton(text);
-        b.setFont(new Font("Arial", Font.PLAIN, 16));
+        b.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         b.setFocusPainted(false);
+        b.setBackground(new Color(52, 73, 94));
+        b.setForeground(Color.WHITE);
+        b.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        b.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Hover effect
+        b.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                b.setBackground(new Color(41, 128, 185));
+            }
+            public void mouseExited(MouseEvent e) {
+                b.setBackground(new Color(52, 73, 94));
+            }
+        });
         return b;
     }
 
-    private void open(String name, JPanel panel) {
-        mainFrame.addScreen(name, panel);
-        mainFrame.showScreen(name);
+    private void handleAction(String action) {
+        switch (action) {
+            case "Add Course":
+                openContent(new AddCourseUI(mainFrame));
+                break;
+            case "Update Course":
+                openContent(new UpdateCourseUI(mainFrame));
+                break;
+            case "Delete Course":
+                openContent(new DeleteCourseUI(mainFrame));
+                break;
+            case "Add Section":
+                openContent(new AddSectionUI(mainFrame));
+                break;
+            case "Assign Instructor":
+                openContent(new AssignInstructorUI(mainFrame));
+                break;
+            case "Change Capacity":
+                openContent(new ChangeCapacityUI(mainFrame));
+                break;
+            case "Add Student":
+                openContent(new AddStudentUI(mainFrame));
+                break;
+            case "Add Instructor":
+                openContent(new AddInstructorUI(mainFrame));
+                break;
+            case "Drop Student Forcefully":
+                openContent(new DropStudentForcefullyUI(mainFrame));
+                break;
+            case "View All Students":
+                openContent(new ViewAllStudentsUI(mainFrame));
+                break;
+            case "View All Instructors":
+                openContent(new ViewAllInstructorsUI(mainFrame));
+                break;
+            case "Toggle Maintenance Mode":
+                openContent(new ToggleMaintenanceUI(mainFrame));
+                break;
+        }
+    }
+
+    private void openContent(JPanel panel) {
+        mainContent.removeAll();
+        mainContent.add(panel, BorderLayout.CENTER);
+        mainContent.revalidate();
+        mainContent.repaint();
     }
 }

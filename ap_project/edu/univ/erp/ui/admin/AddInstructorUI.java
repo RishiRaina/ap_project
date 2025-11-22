@@ -14,14 +14,10 @@ public class AddInstructorUI extends JPanel {
 
     private AdminService adminService = new AdminService();
 
-    // ---------- Rounded Panel Class ----------
+    // ---------- Rounded Panel ----------
     class RoundedPanel extends JPanel {
         private int cornerRadius = 20;
-
-        public RoundedPanel() {
-            setOpaque(false);
-        }
-
+        public RoundedPanel() { setOpaque(false); }
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -33,7 +29,6 @@ public class AddInstructorUI extends JPanel {
     }
 
     public AddInstructorUI(MainFrame mainFrame) {
-
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
 
@@ -50,23 +45,24 @@ public class AddInstructorUI extends JPanel {
         form.setBorder(BorderFactory.createEmptyBorder(40, 150, 40, 150));
 
         Font labelFont = new Font("Segoe UI", Font.BOLD, 16);
-        Font inputFont = new Font("Segoe UI", Font.PLAIN, 15);
 
+        // ---------- Text Fields ----------
         JTextField usernameField = new JTextField();
-        JPasswordField passwordField = new JPasswordField();
-        JTextField deptField = new JTextField();
-
-        // Add placeholders
+        usernameField.setPreferredSize(new Dimension(120, 30)); // reduced width
         addPlaceholder(usernameField, "Enter username...");
+
+        JPasswordField passwordField = new JPasswordField();
+        passwordField.setPreferredSize(new Dimension(120, 30)); // reduced width
         addPlaceholder(passwordField, "Enter password...");
+
+        JTextField deptField = new JTextField();
+        deptField.setPreferredSize(new Dimension(120, 30)); // reduced width
         addPlaceholder(deptField, "Enter department...");
 
         form.add(new JLabel("Username:")).setFont(labelFont);
         form.add(usernameField);
-
         form.add(new JLabel("Password:")).setFont(labelFont);
         form.add(passwordField);
-
         form.add(new JLabel("Department:")).setFont(labelFont);
         form.add(deptField);
 
@@ -75,7 +71,6 @@ public class AddInstructorUI extends JPanel {
         // ---------- Buttons ----------
         JButton addBtn = new JButton("Add");
         JButton back = new JButton("Back");
-
         styleButton(addBtn, new Color(46, 204, 113), new Color(39, 174, 96));
         styleButton(back, new Color(52, 152, 219), new Color(41, 128, 185));
 
@@ -83,10 +78,9 @@ public class AddInstructorUI extends JPanel {
         btnPanel.setBackground(new Color(245, 245, 245));
         btnPanel.add(addBtn);
         btnPanel.add(back);
-
         add(btnPanel, BorderLayout.SOUTH);
 
-        // ---------- Action Listeners ----------
+        // ---------- Actions ----------
         addBtn.addActionListener(e -> {
             try {
                 String username = usernameField.getText().trim();
@@ -122,13 +116,8 @@ public class AddInstructorUI extends JPanel {
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         btn.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent evt) {
-                btn.setBackground(hover);
-            }
-
-            public void mouseExited(MouseEvent evt) {
-                btn.setBackground(normal);
-            }
+            public void mouseEntered(MouseEvent evt) { btn.setBackground(hover); }
+            public void mouseExited(MouseEvent evt) { btn.setBackground(normal); }
         });
     }
 
@@ -137,20 +126,11 @@ public class AddInstructorUI extends JPanel {
         field.setForeground(Color.GRAY);
         field.setText(placeholder);
         field.addFocusListener(new FocusAdapter() {
-            @Override
             public void focusGained(FocusEvent e) {
-                if (field.getText().equals(placeholder)) {
-                    field.setText("");
-                    field.setForeground(Color.BLACK);
-                }
+                if (field.getText().equals(placeholder)) { field.setText(""); field.setForeground(Color.BLACK); }
             }
-
-            @Override
             public void focusLost(FocusEvent e) {
-                if (field.getText().isEmpty()) {
-                    field.setForeground(Color.GRAY);
-                    field.setText(placeholder);
-                }
+                if (field.getText().isEmpty()) { field.setForeground(Color.GRAY); field.setText(placeholder); }
             }
         });
     }
