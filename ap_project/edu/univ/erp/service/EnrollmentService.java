@@ -26,4 +26,22 @@ public class EnrollmentService {
     public List<Enrollment> getEnrollmentsBySection(int sectionId) {
         return enrollmentDAO.getEnrollmentsBySection(sectionId);
     }
+
+    public boolean enrollStudentInSection(int studentId, int sectionId) {
+
+        // Basic validation
+        if (studentId <= 0 || sectionId <= 0) {
+            System.err.println("Invalid student or section ID.");
+            return false;
+        }
+
+        // Call DAO method
+        boolean result = enrollmentDAO.enrollStudentInSection(studentId, sectionId);
+
+        if (!result) {
+            System.out.println("Enrollment failed. Student may already be enrolled or DB error occurred.");
+        }
+
+        return result;
+    }
 }

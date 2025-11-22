@@ -1,7 +1,6 @@
 package edu.univ.erp.ui.auth;
 
 import edu.univ.erp.auth.AuthHelper;
-import edu.univ.erp.auth.SessionManager;
 import edu.univ.erp.ui.common.MainFrame;
 
 import javax.swing.*;
@@ -15,47 +14,93 @@ public class LoginScreen extends JPanel {
         this.mainFrame = mainFrame;
 
         setLayout(new GridBagLayout());
+        setBackground(new Color(245, 247, 250)); // light clean background
+
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.insets = new Insets(15, 15, 15, 15);
 
-        JLabel title = new JLabel("ERP Login");
-        title.setFont(new Font("Arial", Font.BOLD, 26));
+        // ===================== MAIN CARD PANEL =====================
+        JPanel card = new JPanel(new GridBagLayout());
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(220, 220, 220), 1),
+                BorderFactory.createEmptyBorder(40, 60, 40, 60)
+        ));
 
-        JLabel userLabel = new JLabel("Username:");
-        JTextField userField = new JTextField(15);
+        card.setPreferredSize(new Dimension(450, 380));
 
-        JLabel passLabel = new JLabel("Password:");
-        JPasswordField passField = new JPasswordField(15);
+        GridBagConstraints c = new GridBagConstraints();
+        c.insets = new Insets(12, 12, 12, 12);
 
+        // ===================== TITLE =====================
+        JLabel title = new JLabel("ERP LOGIN", SwingConstants.CENTER);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 30));
+        title.setForeground(new Color(44, 62, 80));
+
+        c.gridx = 0;
+        c.gridy = 0;
+        c.gridwidth = 2;
+        card.add(title, c);
+
+        c.gridwidth = 1;
+
+        // ===================== USERNAME =====================
+        JLabel userLabel = new JLabel("Username");
+        userLabel.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        userLabel.setForeground(new Color(52, 73, 94));
+
+        JTextField userField = createInputField();
+
+        c.gridx = 0;
+        c.gridy = 1;
+        card.add(userLabel, c);
+
+        c.gridx = 1;
+        card.add(userField, c);
+
+        // ===================== PASSWORD =====================
+        JLabel passLabel = new JLabel("Password");
+        passLabel.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        passLabel.setForeground(new Color(52, 73, 94));
+
+        JPasswordField passField = createPasswordField();
+
+        c.gridx = 0;
+        c.gridy = 2;
+        card.add(passLabel, c);
+
+        c.gridx = 1;
+        card.add(passField, c);
+
+        // ===================== ERROR LABEL =====================
+        JLabel errorLabel = new JLabel("", SwingConstants.CENTER);
+        errorLabel.setForeground(new Color(192, 57, 43));
+        errorLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
+
+        c.gridx = 0;
+        c.gridy = 3;
+        c.gridwidth = 2;
+        card.add(errorLabel, c);
+
+        c.gridwidth = 1;
+
+        // ===================== LOGIN BUTTON =====================
         JButton loginBtn = new JButton("Login");
-        JLabel errorLabel = new JLabel("");
-        errorLabel.setForeground(Color.RED);
+        stylePrimaryButton(loginBtn);
 
-        // Layout
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
-        add(title, gbc);
+        c.gridx = 0;
+        c.gridy = 4;
+        c.gridwidth = 2;
+        c.fill = GridBagConstraints.HORIZONTAL;
 
-        gbc.gridwidth = 1;
+        card.add(loginBtn, c);
 
-        gbc.gridx = 0; gbc.gridy = 1;
-        add(userLabel, gbc);
+        // Add card to center
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        add(card, gbc);
 
-        gbc.gridx = 1; gbc.gridy = 1;
-        add(userField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 2;
-        add(passLabel, gbc);
-
-        gbc.gridx = 1; gbc.gridy = 2;
-        add(passField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2;
-        add(loginBtn, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
-        add(errorLabel, gbc);
-
-        // LOGIN LOGIC
+        // ===================== LOGIN ACTION =====================
         loginBtn.addActionListener(e -> {
 
             String username = userField.getText();
@@ -68,12 +113,10 @@ public class LoginScreen extends JPanel {
                 return;
             }
 
-            errorLabel.setText(""); // clear errors
+            errorLabel.setText("");
 
-            // ✔ Get role from result
             String role = result.role;
 
-            // ✔ Switch dashboard based on role
             switch (role) {
                 case "INSTRUCTOR":
                     mainFrame.refreshInstructorDashboard();
@@ -86,6 +129,49 @@ public class LoginScreen extends JPanel {
                     break;
                 default:
                     JOptionPane.showMessageDialog(this, "Unknown role: " + role);
+            }
+        });
+    }
+
+    // ======================================================
+    // COMPONENT STYLING HELPERS
+    // ======================================================
+
+    private JTextField createInputField() {
+        JTextField field = new JTextField(12);
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        field.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(180, 180, 180), 1),
+                BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
+        return field;
+    }
+
+    private JPasswordField createPasswordField() {
+        JPasswordField field = new JPasswordField(12);
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        field.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(180, 180, 180), 1),
+                BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
+        return field;
+    }
+
+    private void stylePrimaryButton(JButton btn) {
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 17));
+        btn.setForeground(Color.WHITE);
+        btn.setBackground(new Color(41, 128, 185)); // blue
+        btn.setFocusPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.setBorder(BorderFactory.createEmptyBorder(12, 25, 12, 25));
+
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btn.setBackground(new Color(31, 97, 141));
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btn.setBackground(new Color(41, 128, 185));
             }
         });
     }

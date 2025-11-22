@@ -134,6 +134,53 @@ public class EnrollmentDAO {
         }
     }
 
+    public boolean isStudentAlreadyEnrolledInSection(int studentId, int sectionId) {
+        String sql = "SELECT COUNT(*) FROM enrollments WHERE student_id = ? AND section_id = ?";
+
+        try (Connection conn = ERPDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, studentId);
+            ps.setInt(2, sectionId);
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;  // If count > 0, already enrolled
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error checking enrollment: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean enrollStudentInSection(int studentId, int sectionId) {
+
+        // First check if already enrolled to avoid duplicates
+        if (isStudentAlreadyEnrolledInSection(studentId, sectionId)) {
+            System.out.println("Student is already enrolled in this section.");
+            return false;
+        }
+
+        String sql = "INSERT INTO enrollments(student_id, section_id, status) VALUES (?, ?, ?)";
+
+        try (Connection conn = ERPDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, studentId);
+            ps.setInt(2, sectionId);
+            ps.setString(3, "ENROLLED");  // default status
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error enrolling student in section: " + e.getMessage());
+            return false;
+        }
+    }
+
+
+
 
 
 

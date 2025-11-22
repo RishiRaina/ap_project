@@ -30,7 +30,7 @@ public class AdminDashboard extends JPanel {
 
         header.add(title, BorderLayout.WEST);
 
-        // Optional: Add a "Logout" button in header for quick access
+        // Logout button
         JButton logoutBtn = new JButton("Logout");
         logoutBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         logoutBtn.setForeground(Color.WHITE);
@@ -54,7 +54,8 @@ public class AdminDashboard extends JPanel {
         String[] buttonNames = {
                 "Add Course", "Update Course", "Delete Course",
                 "Add Section", "Assign Instructor",
-                "Add Student", "Add Instructor", "Unenroll Student",
+                "Add Student", "Add Instructor",
+                "Enroll Student", "Unenroll Student", // added Enroll Student
                 "View All Students", "View All Instructors", "Toggle Maintenance Mode"
         };
 
@@ -119,8 +120,11 @@ public class AdminDashboard extends JPanel {
             case "Add Instructor":
                 openContent(new AddInstructorUI(mainFrame));
                 break;
+            case "Enroll Student":
+                openContent(new EnrollStudentUI(mainFrame)); // NEW
+                break;
             case "Unenroll Student":
-                openContent(new UnenrollStudentUI(mainFrame)); // You can rename the class if needed
+                openContent(new UnenrollStudentUI(mainFrame));
                 break;
             case "View All Students":
                 openContent(new ViewAllStudentsUI(mainFrame));

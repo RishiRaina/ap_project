@@ -48,16 +48,20 @@ public class UnenrollStudentUI extends JPanel {
         JComboBox<Course> courseDropdown = new JComboBox<>();
         courseDropdown.setFont(inputFont);
         courseDropdown.addItem(null); // placeholder
+
         for (Course c : courseService.getAllCourses()) {
             courseDropdown.addItem(c);
         }
+
+        // NEW: Show CODE – TITLE
         courseDropdown.setRenderer(new DefaultListCellRenderer() {
             @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                          boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof Course) {
                     Course c = (Course) value;
-                    setText(c.getCode().toUpperCase() + " - " + c.getTitle());
+                    setText(c.getCode().toUpperCase() + " – " + c.getTitle());
                 } else if (value == null) {
                     setText("SELECT COURSE...");
                 }
@@ -75,7 +79,7 @@ public class UnenrollStudentUI extends JPanel {
         courseDropdown.addActionListener(e -> {
             sectionDropdown.removeAllItems();
             sectionDropdown.addItem(null);
-            Map<Integer, String> enrollmentUsernameMap = new HashMap<>();
+
             Course selectedCourse = (Course) courseDropdown.getSelectedItem();
             if (selectedCourse != null) {
                 List<Section> sections = sectionService.getSectionsByCourse(selectedCourse.getCourseId());
@@ -85,12 +89,15 @@ public class UnenrollStudentUI extends JPanel {
             }
         });
 
+        // NEW: Display section.toString() instead of SECTION ID
         sectionDropdown.setRenderer(new DefaultListCellRenderer() {
             @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                          boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof Section) {
-                    setText("SECTION " + ((Section) value).getSectionId());
+                    Section s = (Section) value;
+                    setText(s.toString());  // ✔ use toString()
                 } else if (value == null) {
                     setText("SELECT SECTION...");
                 }
@@ -105,7 +112,7 @@ public class UnenrollStudentUI extends JPanel {
         studentDropdown.setFont(inputFont);
         studentDropdown.addItem(null);
 
-        Map<Integer, String> enrollmentUsernameMap = new HashMap<>(); // enrollmentId -> username
+        Map<Integer, String> enrollmentUsernameMap = new HashMap<>();
 
         sectionDropdown.addActionListener(e -> {
             studentDropdown.removeAllItems();
@@ -125,11 +132,12 @@ public class UnenrollStudentUI extends JPanel {
 
         studentDropdown.setRenderer(new DefaultListCellRenderer() {
             @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                          boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof Enrollment) {
                     Enrollment e = (Enrollment) value;
-                    setText(enrollmentUsernameMap.get(e.getEnrollmentId()));
+                    setText(enrollmentUsernameMap.get(e.getEnrollmentId())); // username
                 } else if (value == null) {
                     setText("SELECT STUDENT...");
                 }
@@ -184,7 +192,8 @@ public class UnenrollStudentUI extends JPanel {
             }
         });
 
-        backBtn.addActionListener(e -> mainFrame.showScreen(MainFrame.ADMIN_DASH));
+        backBtn.addActionListener(e -> mainFrame.refreshAdminDashboard());
+
     }
 
     private void styleButton(JButton btn, Color normal, Color hover) {
