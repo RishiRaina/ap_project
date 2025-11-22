@@ -97,7 +97,7 @@ public class UnenrollStudentUI extends JPanel {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof Section) {
                     Section s = (Section) value;
-                    setText(s.toString());  // ✔ use toString()
+                    setText(s.toString().toUpperCase());  // ✔ use toString()
                 } else if (value == null) {
                     setText("SELECT SECTION...");
                 }

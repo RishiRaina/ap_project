@@ -72,9 +72,9 @@ public class EnrollStudentUI extends JPanel {
 
         // Load data
         loadCourses();
-        loadStudents();   // load once → usernames display from user_auth
+        loadStudents();
 
-        // ---- When course is selected load only linked sections ----
+        // When course is selected → load sections
         courseCombo.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 CourseItem selected = (CourseItem) courseCombo.getSelectedItem();
@@ -84,60 +84,88 @@ public class EnrollStudentUI extends JPanel {
             }
         });
 
-        // ---- Enroll Button ----
         enrollBtn.addActionListener(e -> enrollStudentAction());
     }
-
 
     // ----------------------------- DATA LOADING -----------------------------
 
     private void loadCourses() {
         courseCombo.removeAllItems();
 
+        // placeholder (NORMAL FONT)
+        courseCombo.addItem(new CourseItem(-1, "Select Course..."));
+
         List<Course> courses = courseService.getAllCourses();
         for (Course c : courses) {
             courseCombo.addItem(new CourseItem(c.getCourseId(), c.getTitle()));
         }
+
+        // renderer (normal font always)
+        courseCombo.setRenderer(getNormalRenderer());
     }
 
     private void loadSections(int courseId) {
         sectionCombo.removeAllItems();
 
+        // placeholder
+        sectionCombo.addItem(new SectionItem(-1, "Select Section..."));
+
         List<Section> sections = sectionService.getSectionsByCourse(courseId);
 
         for (Section sec : sections) {
-            sectionCombo.addItem(new SectionItem(
-                    sec.getSectionId(),
-                    sec.toString()
-            ));
+            String display = sec.toString().toUpperCase(); // UPPERCASE DISPLAY
+            sectionCombo.addItem(new SectionItem(sec.getSectionId(), display));
         }
+
+        sectionCombo.setRenderer(getNormalRenderer());
     }
 
     private void loadStudents() {
         studentCombo.removeAllItems();
 
+        studentCombo.addItem(new StudentItem(-1, "Select Student..."));
+
         List<edu.univ.erp.domain.Student> students = adminService.getAllStudents();
 
         for (edu.univ.erp.domain.Student s : students) {
-
             String username = adminService.getUsernameById(s.getUserId());
             if (username == null) username = "UNKNOWN";
 
-            // Show username but keep ID stored
             studentCombo.addItem(new StudentItem(s.getUserId(), username));
         }
+
+        studentCombo.setRenderer(getNormalRenderer());
     }
 
+    // ----------------------------- RENDERER FIX -----------------------------
+
+    /**
+     * Renderer that forces ALL items including placeholders to normal/plain font.
+     */
+    private DefaultListCellRenderer getNormalRenderer() {
+        return new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(
+                    JList<?> list, Object value, int index,
+                    boolean isSelected, boolean cellHasFocus) {
+
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                setFont(new Font("Segoe UI", Font.PLAIN, 15)); // NOT BOLD
+                return this;
+            }
+        };
+    }
 
     // ----------------------------- SUBMIT ACTION -----------------------------
-
     private void enrollStudentAction() {
 
         CourseItem course = (CourseItem) courseCombo.getSelectedItem();
         SectionItem section = (SectionItem) sectionCombo.getSelectedItem();
         StudentItem student = (StudentItem) studentCombo.getSelectedItem();
 
-        if (course == null || section == null || student == null) {
+        if (course == null || section == null || student == null ||
+                course.courseId == -1 || section.sectionId == -1 || student.userId == -1) {
             JOptionPane.showMessageDialog(this, "Please select all fields.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -154,36 +182,35 @@ public class EnrollStudentUI extends JPanel {
         }
     }
 
-
-    // ----------------------------- HELPER CLASSES -----------------------------
+    // ----------------------------- DROPDOWN ITEM CLASSES -----------------------------
 
     class CourseItem {
         int courseId;
-        String courseName;
+        String name;
 
         CourseItem(int id, String name) {
             this.courseId = id;
-            this.courseName = name;
+            this.name = name;
         }
 
         @Override
         public String toString() {
-            return courseName;
+            return name;
         }
     }
 
     class SectionItem {
         int sectionId;
-        String sectionName;
+        String name;
 
         SectionItem(int id, String name) {
             this.sectionId = id;
-            this.sectionName = name;
+            this.name = name;
         }
 
         @Override
         public String toString() {
-            return sectionName;
+            return name;
         }
     }
 
@@ -198,10 +225,9 @@ public class EnrollStudentUI extends JPanel {
 
         @Override
         public String toString() {
-            return username; // shown in dropdown
+            return username;
         }
     }
-
 
     // ----------------------------- UI HELPERS -----------------------------
 
