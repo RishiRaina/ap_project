@@ -62,7 +62,8 @@ public class Section {
 
     @Override
     public String toString() {
-        return "Section " + sectionId + " - " + dayTime + " @ " + room;
+        return sectionId + " | " + courseId + " - " + dayTime + " @ " + room;
     }
+
 
 }

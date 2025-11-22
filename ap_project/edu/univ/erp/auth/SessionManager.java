@@ -1,5 +1,7 @@
 package edu.univ.erp.auth;
 
+import edu.univ.erp.data.UserAuthDAO;
+
 public class SessionManager {
 
     private static int currentUserId = -1;
@@ -8,6 +10,11 @@ public class SessionManager {
     public static void setCurrentUser(int userId, String role) {
         currentUserId = userId;
         currentUserRole = role;
+    }
+    private static UserAuthDAO userAuthDAO = new UserAuthDAO();
+
+    public static String getUsernameByUserId(int userId) {
+        return userAuthDAO.getUsernameById(userId);
     }
 
     public static int getCurrentUserId() {

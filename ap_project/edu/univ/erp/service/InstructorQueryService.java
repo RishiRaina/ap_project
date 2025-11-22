@@ -57,4 +57,8 @@ public class InstructorQueryService {
         AccessControl.assertAllowed(AccessControl.Role.INSTRUCTOR, AccessControl.Actions.VIEW_SECTIONS);
         return sectionDAO.getSectionById(sectionId);
     }
+    public Enrollment getEnrollmentForUserInSection(int userId, int sectionId) {
+        return enrollmentDAO.getEnrollmentByUserAndSection(userId, sectionId);
+    }
+
 }

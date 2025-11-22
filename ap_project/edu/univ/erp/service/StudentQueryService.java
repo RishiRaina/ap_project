@@ -37,6 +37,16 @@ public class StudentQueryService {
         AccessControl.assertAllowed(AccessControl.Role.STUDENT, AccessControl.Actions.VIEW_TIMETABLE);
         return courseDAO.getCourseById(courseId);
     }
+    public String getFinalLetter(int enrollmentId) throws AccessException {
+        List<Grade> grades = gradeDAO.getGradesByEnrollment(enrollmentId);
+        for (Grade g : grades) {
+            if ("FINAL".equalsIgnoreCase(g.getComponent())) {
+                return (g.getFinalGrade() != null) ? g.getFinalGrade() : "N/A";
+            }
+        }
+        return "N/A";
+    }
+
 
     public List<Enrollment> getEnrollmentsBySection(int sectionId) throws AccessException{
         AccessControl.assertAllowed(AccessControl.Role.STUDENT, AccessControl.Actions.VIEW_TIMETABLE);

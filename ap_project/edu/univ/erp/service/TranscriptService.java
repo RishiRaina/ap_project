@@ -34,7 +34,8 @@ public class TranscriptService {
 
             //calculates the grade for the enrollment
             List<Grade> grades = gradeDAO.getGradesByEnrollment(e.getEnrollmentId());
-            String finalGrade = grades.isEmpty() ? "N/A" : grades.get(0).getFinalGrade();
+            String finalGrade = extractFinalLetter(grades);
+
 
             //find the course via section id
             Section sec = sectionDAO.getSectionById(e.getSectionId());
@@ -78,4 +79,14 @@ public class TranscriptService {
                 rows
         );
     }
+
+    private String extractFinalLetter(List<Grade> grades) {
+        for (Grade g : grades) {
+            if ("FINAL".equalsIgnoreCase(g.getComponent())) {
+                return (g.getFinalGrade() != null) ? g.getFinalGrade() : "N/A";
+            }
+        }
+        return "N/A";
+    }
+
 }

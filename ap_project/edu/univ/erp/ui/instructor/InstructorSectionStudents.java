@@ -4,7 +4,11 @@ import edu.univ.erp.access.AccessControl;
 import edu.univ.erp.access.AccessException;
 import edu.univ.erp.access.MaintenanceChecker;
 import edu.univ.erp.auth.SessionManager;
-import edu.univ.erp.domain.*;
+import edu.univ.erp.data.UserAuthDAO;
+import edu.univ.erp.domain.Enrollment;
+import edu.univ.erp.domain.Grade;
+import edu.univ.erp.domain.Section;
+import edu.univ.erp.domain.Student;
 import edu.univ.erp.service.InstructorQueryService;
 import edu.univ.erp.ui.common.ActionButtonEditor;
 import edu.univ.erp.ui.common.ActionButtonRenderer;
@@ -21,6 +25,7 @@ public class InstructorSectionStudents extends JPanel {
     private final MainFrame mainFrame;
     private final int sectionId;
     private final InstructorQueryService queryService;
+    private final UserAuthDAO userAuthDAO;
     private JTable studentTable;
 
     public InstructorSectionStudents(MainFrame mainFrame, int sectionId) {
@@ -28,6 +33,7 @@ public class InstructorSectionStudents extends JPanel {
         this.mainFrame = mainFrame;
         this.sectionId = sectionId;
         this.queryService = new InstructorQueryService();
+        this.userAuthDAO = new UserAuthDAO();
 
         // -------- ROLE CHECK --------
         if (!SessionManager.isLoggedIn() ||
@@ -62,20 +68,37 @@ public class InstructorSectionStudents extends JPanel {
             add(bannerPanel, BorderLayout.NORTH);
         }
 
-        // -------- TITLE --------
-        JLabel title = new JLabel("Students in Section " + sectionId, SwingConstants.CENTER);
+        // -------- TITLE (USE SECTION.TOSTRING IN UPPERCASE) --------
+        Section sec;
+        try {
+            sec = queryService.getSection(sectionId);
+        } catch (AccessException ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    ex.getMessage(),
+                    "Access Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        String sectionLabel = (sec != null)
+                ? sec.toString().toUpperCase()
+                : ("SECTION " + sectionId);
+
+        JLabel title = new JLabel("STUDENTS IN " + sectionLabel, SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
         title.setForeground(new Color(52, 152, 219));
         title.setBorder(new EmptyBorder(20, 0, 20, 0));
         add(title, BorderLayout.PAGE_START);
 
         // -------- TABLE --------
-        String[] cols = {"Enrollment ID", "Roll No", "Program", "Year", "Final Grade", "Action"};
+        String[] cols = {"Username", "Roll No", "Program", "Year", "Final Grade", "Action"};
 
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int row, int col) {
-                return col == 5; // action only
+                return col == 5; // Only "Action" column editable
             }
         };
 
@@ -96,15 +119,16 @@ public class InstructorSectionStudents extends JPanel {
         styleButton(backBtn, new Color(52, 152, 219), new Color(41, 128, 185));
 
         backBtn.addActionListener(e -> {
-            // Go back to "My Sections" inside the same dashboard
             InstructorSections sections = new InstructorSections(mainFrame);
+
             InstructorDashboard dash = (InstructorDashboard)
                     SwingUtilities.getAncestorOfClass(InstructorDashboard.class, this);
 
             if (dash != null) {
+                // Go back inside dashboard center
                 dash.setCenter(sections);
             } else {
-                // fallback: full-screen card navigation
+                // Fallback: card-based navigation
                 mainFrame.addScreen("instructor_my_sections", sections);
                 mainFrame.showScreen("instructor_my_sections");
             }
@@ -120,6 +144,7 @@ public class InstructorSectionStudents extends JPanel {
         return sectionId;
     }
 
+    // ---------- LOAD STUDENTS INTO TABLE ----------
     public void loadStudents(DefaultTableModel model) {
         model.setRowCount(0);
 
@@ -128,10 +153,13 @@ public class InstructorSectionStudents extends JPanel {
 
             AccessControl.assertAllowed(
                     AccessControl.Role.INSTRUCTOR,
-                    AccessControl.Actions.VIEW_SECTIONS);
+                    AccessControl.Actions.VIEW_SECTIONS
+            );
 
             Section sec = queryService.getSection(sectionId);
-            if (sec == null) throw new AccessException("Section does not exist.");
+            if (sec == null) {
+                throw new AccessException("Section does not exist.");
+            }
 
             AccessControl.assertInstructorOwnsSection(
                     instructorId,
@@ -145,6 +173,12 @@ public class InstructorSectionStudents extends JPanel {
                 Student s = queryService.getStudentForEnrollment(e.getEnrollmentId());
                 if (s == null) continue;
 
+                // Get username from auth DB
+                String username = SessionManager.getUsernameByUserId(s.getUserId());
+                if (username == null || username.isBlank()) {
+                    username = "UNKNOWN";
+                }
+
                 String finalGrade = "-";
                 for (Grade g : queryService.getGradesForEnrollment(e.getEnrollmentId())) {
                     if (g.getFinalGrade() != null && !g.getFinalGrade().isBlank()) {
@@ -154,9 +188,9 @@ public class InstructorSectionStudents extends JPanel {
                 }
 
                 model.addRow(new Object[]{
-                        e.getEnrollmentId(),
-                        s.getRollNo(),
-                        s.getProgram(),
+                        username,                              // keep original case; easier for lookup
+                        s.getRollNo() != null ? s.getRollNo().toUpperCase() : "",
+                        s.getProgram() != null ? s.getProgram().toUpperCase() : "",
                         s.getYear(),
                         finalGrade,
                         "Enter Grades"
@@ -173,6 +207,7 @@ public class InstructorSectionStudents extends JPanel {
         }
     }
 
+    // ---------- ACTION: ENTER GRADES ----------
     public void enterGrades(int row) {
         if (MaintenanceChecker.isMaintenanceOn() &&
                 !"ADMIN".equals(SessionManager.getCurrentUserRole())) {
@@ -187,7 +222,42 @@ public class InstructorSectionStudents extends JPanel {
         }
 
         try {
-            int enrollmentId = (Integer) studentTable.getValueAt(row, 0);
+            String username = (String) studentTable.getValueAt(row, 0);
+            if (username == null || username.isBlank()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Invalid username for selected row.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+
+            // Lookup userId from auth DB
+            int userId = userAuthDAO.getUserIdByUsername(username);
+            if (userId <= 0) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Could not find user for username: " + username,
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+
+            // Find enrollment for that user in this section
+            Enrollment enr = queryService.getEnrollmentForUserInSection(userId, sectionId);
+            if (enr == null) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Enrollment not found for " + username + " in this section.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+
+            int enrollmentId = enr.getEnrollmentId();
 
             Section sec = queryService.getSection(sectionId);
 
@@ -208,6 +278,13 @@ public class InstructorSectionStudents extends JPanel {
                     this,
                     ex.getMessage(),
                     "Access Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Unexpected error: " + ex.getMessage(),
+                    "Error",
                     JOptionPane.ERROR_MESSAGE
             );
         }

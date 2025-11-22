@@ -46,17 +46,8 @@ public class InstructorSections extends JPanel {
         this.mainFrame = mainFrame;
         this.queryService = new InstructorQueryService();
         this.courseService = new CourseService();
-
-        // =============== ROLE CHECK ===============
-        if (!SessionManager.isLoggedIn() ||
-                !"INSTRUCTOR".equals(SessionManager.getCurrentUserRole())) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Access Denied: Instructors only.",
-                    "Access Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+        if (!SessionManager.isLoggedIn() || !"INSTRUCTOR".equals(SessionManager.getCurrentUserRole())) {
+            JOptionPane.showMessageDialog(this, "Access Denied: Instructors only.", "Access Error", JOptionPane.ERROR_MESSAGE);
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
             return;
         }
@@ -91,7 +82,7 @@ public class InstructorSections extends JPanel {
         card.setLayout(new BorderLayout());
         card.setBorder(new EmptyBorder(20, 40, 20, 40));
 
-        String[] cols = {"Section ID", "Course", "Title", "Day/Time", "Room", "Action"};
+        String[] cols = {"Section ", "Course", "Title", "Day/Time", "Room", "Action"};
 
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             @Override
@@ -134,11 +125,11 @@ public class InstructorSections extends JPanel {
             for (Section s : list) {
                 Course c = courseService.getCourseById(s.getCourseId());
                 model.addRow(new Object[]{
-                        s.getSectionId(),
-                        c != null ? c.getCode() : "N/A",
-                        c != null ? c.getTitle() : "N/A",
-                        s.getDayTime(),
-                        s.getRoom(),
+                        s.toString().toUpperCase(),
+                        c != null ? c.getCode().toUpperCase() : "N/A",
+                        c != null ? c.getTitle().toUpperCase() : "N/A",
+                        s.getDayTime().toUpperCase(),
+                        s.getRoom().toUpperCase(),
                         "View Students"
                 });
             }
@@ -155,7 +146,9 @@ public class InstructorSections extends JPanel {
     // called by ActionButtonEditor when "View Students" clicked
     public void viewStudents(int row) {
         try {
-            int secId = (Integer) sectionTable.getValueAt(row, 0);
+            String secText = (String) sectionTable.getValueAt(row, 0);
+            int secId = extractSectionId(secText);
+
 
             InstructorSectionStudents panel = new InstructorSectionStudents(mainFrame, secId);
 
@@ -175,6 +168,16 @@ public class InstructorSections extends JPanel {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+    private int extractSectionId(String txt) {
+        // text format could be like this , to extract id  "SECTION 4 - MON 9 @ C103"
+        try {
+            String[] parts = txt.split(" ");
+            return Integer.parseInt(parts[1]);   // 4
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
 
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));

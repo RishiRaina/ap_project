@@ -40,6 +40,45 @@ public class UserAuthDAO {
             return false;
         }
     }
+    public int getUserIdByUsername(String username) {
+        String sql = "SELECT user_id FROM users_auth WHERE username = ?";
+
+        try (Connection conn = AuthDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, username);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("user_id");
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching userId for username " + username + ": " + e.getMessage());
+        }
+
+        return -1; // not found
+    }
+
+    public String getUsernameByUserId(int userId) {
+        String sql = "SELECT username FROM users_auth WHERE user_id = ?";
+
+        try (Connection conn = AuthDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getString("username");
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching username for userId " + userId + ": " + e.getMessage());
+        }
+
+        return null;
+    }
 
 
     public UserAuth getUserByUsername(String username) {

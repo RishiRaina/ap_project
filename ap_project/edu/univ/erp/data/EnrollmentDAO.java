@@ -178,6 +178,33 @@ public class EnrollmentDAO {
             return false;
         }
     }
+    public Enrollment getEnrollmentByUserAndSection(int userId, int sectionId) {
+        String sql = "SELECT * FROM enrollments WHERE student_id = ? AND section_id = ?";
+
+        try (Connection conn = ERPDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ps.setInt(2, sectionId);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return new Enrollment(
+                        rs.getInt("enrollment_id"),
+                        rs.getInt("student_id"),
+                        rs.getInt("section_id"),
+                        rs.getString("status")
+                );
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching enrollment: " + e.getMessage());
+        }
+
+        return null;
+    }
+
 
 
 

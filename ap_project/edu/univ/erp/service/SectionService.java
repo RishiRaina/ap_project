@@ -28,4 +28,19 @@ public class SectionService {
     public Section getSectionById(int sectionId) {
         return sectionDAO.getSectionById(sectionId);
     }
+
+    public Section getSectionByString(String text) {
+        if (text == null || text.trim().isEmpty()) return null;
+
+        try {
+            // Expect format: "12 | CSE101 - DSA (Mon 10:00)"
+            String idPart = text.split("\\|")[0].trim();
+            int sectionId = Integer.parseInt(idPart);
+            return getSectionById(sectionId);
+        } catch (Exception e) {
+            System.err.println("Error parsing section string: " + text + " -> " + e.getMessage());
+            return null;
+        }
+    }
+
 }
