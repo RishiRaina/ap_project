@@ -53,8 +53,8 @@ public class AdminDashboard extends JPanel {
 
         String[] buttonNames = {
                 "Add Course", "Update Course", "Delete Course",
-                "Add Section", "Assign Instructor", "Change Capacity",
-                "Add Student", "Add Instructor", "Drop Student Forcefully",
+                "Add Section", "Assign Instructor",
+                "Add Student", "Add Instructor", "Unenroll Student",
                 "View All Students", "View All Instructors", "Toggle Maintenance Mode"
         };
 
@@ -113,17 +113,14 @@ public class AdminDashboard extends JPanel {
             case "Assign Instructor":
                 openContent(new AssignInstructorUI(mainFrame));
                 break;
-            case "Change Capacity":
-                openContent(new ChangeCapacityUI(mainFrame));
-                break;
             case "Add Student":
                 openContent(new AddStudentUI(mainFrame));
                 break;
             case "Add Instructor":
                 openContent(new AddInstructorUI(mainFrame));
                 break;
-            case "Drop Student Forcefully":
-                openContent(new DropStudentForcefullyUI(mainFrame));
+            case "Unenroll Student":
+                openContent(new DropStudentForcefullyUI(mainFrame)); // You can rename the class if needed
                 break;
             case "View All Students":
                 openContent(new ViewAllStudentsUI(mainFrame));
