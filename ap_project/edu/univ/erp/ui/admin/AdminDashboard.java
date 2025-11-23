@@ -51,12 +51,15 @@ public class AdminDashboard extends JPanel {
         sidebar.setBackground(new Color(44, 62, 80));
         sidebar.setBorder(new EmptyBorder(20, 10, 20, 10));
 
+        // ⬇⬇⬇ UPDATED BUTTON LIST — Added "Change Password"
         String[] buttonNames = {
                 "Add Course", "Update Course", "Delete Course",
                 "Add Section", "Assign Instructor",
                 "Add Student", "Add Instructor",
-                "Enroll Student", "Unenroll Student", // added Enroll Student
-                "View All Students", "View All Instructors", "Toggle Maintenance Mode"
+                "Enroll Student", "Unenroll Student",
+                "View All Students", "View All Instructors",
+                "Toggle Maintenance Mode",
+                "Change Password"    // NEW
         };
 
         for (String name : buttonNames) {
@@ -121,7 +124,7 @@ public class AdminDashboard extends JPanel {
                 openContent(new AddInstructorUI(mainFrame));
                 break;
             case "Enroll Student":
-                openContent(new EnrollStudentUI(mainFrame)); // NEW
+                openContent(new EnrollStudentUI(mainFrame));
                 break;
             case "Unenroll Student":
                 openContent(new UnenrollStudentUI(mainFrame));
@@ -134,6 +137,9 @@ public class AdminDashboard extends JPanel {
                 break;
             case "Toggle Maintenance Mode":
                 openContent(new ToggleMaintenanceUI(mainFrame));
+                break;
+            case "Change Password":            // ⬅⬅⬅ NEW OPTION
+                openContent(new ChangePasswordUI());
                 break;
         }
     }

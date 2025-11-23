@@ -31,7 +31,24 @@ public class InstructorDashboard extends JPanel {
         title.setForeground(Color.WHITE);
         header.add(title, BorderLayout.WEST);
 
-        // Logout button (same as admin)
+        // Top buttons panel
+        JPanel topButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        topButtons.setOpaque(false);
+
+        // Change Password button
+        JButton changePassBtn = new JButton("Change Password");
+        changePassBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        changePassBtn.setForeground(Color.WHITE);
+        changePassBtn.setBackground(new Color(46, 204, 113));
+        changePassBtn.setFocusPainted(false);
+        changePassBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        changePassBtn.addActionListener(e -> {
+            // Switch to Change Password UI
+            mainFrame.addScreen("instructorChangePassword", new InstructorChangePasswordUI(mainFrame));
+            mainFrame.showScreen("instructorChangePassword");
+        });
+
+        // Logout button
         JButton logoutBtn = new JButton("Logout");
         logoutBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         logoutBtn.setForeground(Color.WHITE);
@@ -42,8 +59,11 @@ public class InstructorDashboard extends JPanel {
             SessionManager.clear();
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
         });
-        header.add(logoutBtn, BorderLayout.EAST);
 
+        topButtons.add(changePassBtn);
+        topButtons.add(logoutBtn);
+
+        header.add(topButtons, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
 
         // ===================== SIDEBAR =====================

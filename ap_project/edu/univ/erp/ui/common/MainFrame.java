@@ -18,6 +18,7 @@ public class MainFrame extends JFrame {
     public static final String INSTRUCTOR_DASH = "instructor_dashboard";
     public static final String ADMIN_DASH = "admin_dashboard";
 
+
     public MainFrame() {
         setTitle("University ERP System");
         setSize(900, 600);

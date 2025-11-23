@@ -29,7 +29,18 @@ public class StudentDashboard extends JPanel {
         title.setForeground(Color.WHITE);
         header.add(title, BorderLayout.WEST);
 
-        // Logout button
+        // Buttons panel on top-right
+        JPanel topButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        topButtons.setOpaque(false);
+
+        JButton changePassBtn = new JButton("Change Password");
+        changePassBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        changePassBtn.setForeground(Color.WHITE);
+        changePassBtn.setBackground(new Color(46, 204, 113));
+        changePassBtn.setFocusPainted(false);
+        changePassBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        changePassBtn.addActionListener(e -> setCenter(new StudentChangePasswordUI(mainFrame)));
+
         JButton logoutBtn = new JButton("Logout");
         logoutBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         logoutBtn.setForeground(Color.WHITE);
@@ -41,7 +52,10 @@ public class StudentDashboard extends JPanel {
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
         });
 
-        header.add(logoutBtn, BorderLayout.EAST);
+        topButtons.add(changePassBtn);
+        topButtons.add(logoutBtn);
+
+        header.add(topButtons, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
 
         // ===================== SIDEBAR =====================
