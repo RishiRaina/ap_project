@@ -19,7 +19,7 @@ public class AdminDashboard extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
 
-        // ---------- HEADER ----------
+        // ===================== HEADER =====================
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(new Color(52, 152, 219));
         header.setBorder(new EmptyBorder(10, 20, 10, 20));
@@ -27,8 +27,23 @@ public class AdminDashboard extends JPanel {
         JLabel title = new JLabel("Admin Dashboard");
         title.setFont(new Font("Segoe UI", Font.BOLD, 26));
         title.setForeground(Color.WHITE);
-
         header.add(title, BorderLayout.WEST);
+
+        // Top buttons panel
+        JPanel topButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        topButtons.setOpaque(false);
+
+        // Change Password button
+        JButton changePassBtn = new JButton("Change Password");
+        changePassBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        changePassBtn.setForeground(Color.WHITE);
+        changePassBtn.setBackground(new Color(46, 204, 113));
+        changePassBtn.setFocusPainted(false);
+        changePassBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        changePassBtn.addActionListener(e -> {
+            mainFrame.addScreen("adminChangePassword", new ChangePasswordUI(mainFrame));
+            mainFrame.showScreen("adminChangePassword");
+        });
 
         // Logout button
         JButton logoutBtn = new JButton("Logout");
@@ -41,40 +56,38 @@ public class AdminDashboard extends JPanel {
             SessionManager.clear();
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
         });
-        header.add(logoutBtn, BorderLayout.EAST);
+
+        topButtons.add(changePassBtn);
+        topButtons.add(logoutBtn);
+        header.add(topButtons, BorderLayout.EAST);
 
         add(header, BorderLayout.NORTH);
 
-        // ---------- SIDEBAR ----------
+        // ===================== SIDEBAR =====================
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new GridLayout(0, 1, 0, 10));
         sidebar.setBackground(new Color(44, 62, 80));
         sidebar.setBorder(new EmptyBorder(20, 10, 20, 10));
 
-        // ⬇⬇⬇ UPDATED BUTTON LIST — Added "Change Password"
-        String[] buttonNames = {
+        String[] menuItems = {
                 "Add Course", "Update Course", "Delete Course",
                 "Add Section", "Assign Instructor",
                 "Add Student", "Add Instructor",
                 "Enroll Student", "Unenroll Student",
                 "View All Students", "View All Instructors",
-                "Toggle Maintenance Mode",
-                "Change Password"    // NEW
+                "Toggle Maintenance Mode"
         };
 
-        for (String name : buttonNames) {
+        for (String name : menuItems) {
             JButton btn = createSidebarButton(name);
             sidebar.add(btn);
-
-            // ACTIONS
             btn.addActionListener(e -> handleAction(name));
         }
 
         add(sidebar, BorderLayout.WEST);
 
-        // ---------- MAIN CONTENT ----------
-        mainContent = new JPanel();
-        mainContent.setLayout(new BorderLayout());
+        // ===================== CENTER CONTENT =====================
+        mainContent = new JPanel(new BorderLayout());
         mainContent.setBackground(new Color(245, 245, 245));
         add(mainContent, BorderLayout.CENTER);
     }
@@ -85,7 +98,7 @@ public class AdminDashboard extends JPanel {
         b.setFocusPainted(false);
         b.setBackground(new Color(52, 73, 94));
         b.setForeground(Color.WHITE);
-        b.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        b.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
         b.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         // Hover effect
@@ -138,13 +151,10 @@ public class AdminDashboard extends JPanel {
             case "Toggle Maintenance Mode":
                 openContent(new ToggleMaintenanceUI(mainFrame));
                 break;
-            case "Change Password":            // ⬅⬅⬅ NEW OPTION
-                openContent(new ChangePasswordUI());
-                break;
         }
     }
 
-    private void openContent(JPanel panel) {
+    public void openContent(JPanel panel) {
         mainContent.removeAll();
         mainContent.add(panel, BorderLayout.CENTER);
         mainContent.revalidate();
