@@ -1,11 +1,19 @@
 package edu.univ.erp.ui.admin;
 
-import edu.univ.erp.service.*;
-import edu.univ.erp.domain.*;
+import edu.univ.erp.domain.Course;
+import edu.univ.erp.domain.Enrollment;
+import edu.univ.erp.domain.Section;
+import edu.univ.erp.service.AdminService;
+import edu.univ.erp.service.CourseService;
+import edu.univ.erp.service.EnrollmentService;
+import edu.univ.erp.service.SectionService;
+import edu.univ.erp.service.UserAuthService;
 import edu.univ.erp.ui.common.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +24,22 @@ public class UnenrollStudentUI extends JPanel {
     private CourseService courseService = new CourseService();
     private SectionService sectionService = new SectionService();
     private EnrollmentService enrollmentService = new EnrollmentService();
-    private UserAuthService userAuthService = new UserAuthService(); // fetch usernames
+    private UserAuthService userAuthService = new UserAuthService();
+
+    // ---------- ROUNDED PANEL ----------
+    class RoundedPanel extends JPanel {
+        private int cornerRadius = 20;
+
+        public RoundedPanel() { setOpaque(false); }
+
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(Color.WHITE);
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
+        }
+    }
 
     public UnenrollStudentUI(MainFrame mainFrame) {
 
@@ -24,141 +47,121 @@ public class UnenrollStudentUI extends JPanel {
         setBackground(new Color(245, 245, 245));
 
         // ---------- HEADER ----------
-        JLabel title = new JLabel("Unenroll Student From Section", SwingConstants.CENTER);
+        JPanel header = new JPanel();
+        header.setBackground(new Color(52, 152, 219));
+        header.setBorder(BorderFactory.createEmptyBorder(25, 0, 25, 0));
+
+        JLabel title = new JLabel("Unenroll Student From Section");
+        title.setForeground(Color.WHITE);
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        title.setBorder(BorderFactory.createEmptyBorder(30, 0, 30, 0));
-        add(title, BorderLayout.NORTH);
+        header.add(title);
+        add(header, BorderLayout.NORTH);
 
-        // ---------- CARD PANEL ----------
-        JPanel card = new JPanel(new BorderLayout());
-        card.setBackground(Color.WHITE);
-        card.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
-        add(card, BorderLayout.CENTER);
+        // ---------- WRAPPER PANEL ----------
+        JPanel wrapper = new JPanel(new GridBagLayout());
+        wrapper.setBackground(new Color(245, 245, 245));
 
-        // ---------- FORM PANEL ----------
-        JPanel form = new JPanel(new GridLayout(3, 2, 20, 20));
-        form.setBackground(Color.WHITE);
+        RoundedPanel form = new RoundedPanel();
+        form.setLayout(new GridLayout(3, 2, 25, 25)); // ONLY real fields
+        form.setBorder(BorderFactory.createEmptyBorder(40, 50, 40, 50));
 
         Font labelFont = new Font("Segoe UI", Font.BOLD, 16);
         Font inputFont = new Font("Segoe UI", Font.PLAIN, 15);
 
-        // --- Course Dropdown ---
+        // ---------- COURSE ----------
         JLabel courseLabel = new JLabel("Select Course:");
         courseLabel.setFont(labelFont);
-        JComboBox<Course> courseDropdown = new JComboBox<>();
-        courseDropdown.setFont(inputFont);
-        courseDropdown.addItem(null); // placeholder
 
-        for (Course c : courseService.getAllCourses()) {
-            courseDropdown.addItem(c);
-        }
+        JComboBox<Course> courseBox = new JComboBox<>();
+        courseBox.setFont(inputFont);
+        courseBox.addItem(null);
+        for (Course c : courseService.getAllCourses()) courseBox.addItem(c);
 
-        // NEW: Show CODE – TITLE
-        courseDropdown.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
-                                                          boolean isSelected, boolean cellHasFocus) {
+        courseBox.setRenderer(new DefaultListCellRenderer() {
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                if (value instanceof Course) {
-                    Course c = (Course) value;
-                    setText(c.getCode().toUpperCase() + " – " + c.getTitle());
-                } else if (value == null) {
-                    setText("SELECT COURSE...");
-                }
+                if (value instanceof Course) setText(((Course) value).getCode().toUpperCase() + " - " + ((Course) value).getTitle());
+                else if (value == null) setText("Select Course...");
+                setFont(inputFont);
                 return this;
             }
         });
 
-        // --- Section Dropdown ---
+        // ---------- SECTION ----------
         JLabel sectionLabel = new JLabel("Select Section:");
         sectionLabel.setFont(labelFont);
-        JComboBox<Section> sectionDropdown = new JComboBox<>();
-        sectionDropdown.setFont(inputFont);
-        sectionDropdown.addItem(null);
 
-        courseDropdown.addActionListener(e -> {
-            sectionDropdown.removeAllItems();
-            sectionDropdown.addItem(null);
+        JComboBox<Section> sectionBox = new JComboBox<>();
+        sectionBox.setFont(inputFont);
+        sectionBox.addItem(null);
 
-            Course selectedCourse = (Course) courseDropdown.getSelectedItem();
-            if (selectedCourse != null) {
-                List<Section> sections = sectionService.getSectionsByCourse(selectedCourse.getCourseId());
-                for (Section s : sections) {
-                    sectionDropdown.addItem(s);
-                }
+        courseBox.addActionListener(e -> {
+            sectionBox.removeAllItems();
+            sectionBox.addItem(null);
+            Course selected = (Course) courseBox.getSelectedItem();
+            if (selected != null) {
+                List<Section> sections = sectionService.getSectionsByCourse(selected.getCourseId());
+                for (Section s : sections) sectionBox.addItem(s);
             }
         });
 
-        // NEW: Display section.toString() instead of SECTION ID
-        sectionDropdown.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
-                                                          boolean isSelected, boolean cellHasFocus) {
+        sectionBox.setRenderer(new DefaultListCellRenderer() {
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                if (value instanceof Section) {
-                    Section s = (Section) value;
-                    setText(s.toString().toUpperCase());  // ✔ use toString()
-                } else if (value == null) {
-                    setText("SELECT SECTION...");
-                }
+                if (value instanceof Section) setText(value.toString().toUpperCase());
+                else if (value == null) setText("Select Section...");
+                setFont(inputFont);
                 return this;
             }
         });
 
-        // --- Enrollment Dropdown (Students) ---
+        // ---------- STUDENT ----------
         JLabel studentLabel = new JLabel("Select Student:");
         studentLabel.setFont(labelFont);
-        JComboBox<Enrollment> studentDropdown = new JComboBox<>();
-        studentDropdown.setFont(inputFont);
-        studentDropdown.addItem(null);
 
-        Map<Integer, String> enrollmentUsernameMap = new HashMap<>();
+        JComboBox<Enrollment> studentBox = new JComboBox<>();
+        studentBox.setFont(inputFont);
+        studentBox.addItem(null);
 
-        sectionDropdown.addActionListener(e -> {
-            studentDropdown.removeAllItems();
-            studentDropdown.addItem(null);
-            enrollmentUsernameMap.clear();
+        Map<Integer, String> studentMap = new HashMap<>();
 
-            Section selectedSection = (Section) sectionDropdown.getSelectedItem();
-            if (selectedSection != null) {
-                List<Enrollment> enrollments = enrollmentService.getEnrollmentsBySection(selectedSection.getSectionId());
+        sectionBox.addActionListener(e -> {
+            studentBox.removeAllItems();
+            studentBox.addItem(null);
+            studentMap.clear();
+            Section sec = (Section) sectionBox.getSelectedItem();
+            if (sec != null) {
+                List<Enrollment> enrollments = enrollmentService.getEnrollmentsBySection(sec.getSectionId());
                 for (Enrollment en : enrollments) {
                     String username = userAuthService.getUsernameById(en.getStudentId());
-                    enrollmentUsernameMap.put(en.getEnrollmentId(), username.toUpperCase());
-                    studentDropdown.addItem(en);
+                    studentMap.put(en.getEnrollmentId(), username.toUpperCase());
+                    studentBox.addItem(en);
                 }
             }
         });
 
-        studentDropdown.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
-                                                          boolean isSelected, boolean cellHasFocus) {
+        studentBox.setRenderer(new DefaultListCellRenderer() {
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                if (value instanceof Enrollment) {
-                    Enrollment e = (Enrollment) value;
-                    setText(enrollmentUsernameMap.get(e.getEnrollmentId())); // username
-                } else if (value == null) {
-                    setText("SELECT STUDENT...");
-                }
+                if (value instanceof Enrollment) setText(studentMap.get(((Enrollment) value).getEnrollmentId()));
+                else if (value == null) setText("Select Student...");
+                setFont(inputFont);
                 return this;
             }
         });
 
-        // Add form components
-        form.add(courseLabel);
-        form.add(courseDropdown);
-        form.add(sectionLabel);
-        form.add(sectionDropdown);
-        form.add(studentLabel);
-        form.add(studentDropdown);
+        // ---------- ADD FIELDS TO FORM ----------
+        form.add(courseLabel); form.add(courseBox);
+        form.add(sectionLabel); form.add(sectionBox);
+        form.add(studentLabel); form.add(studentBox);
 
-        card.add(form, BorderLayout.CENTER);
+        wrapper.add(form);
+        add(wrapper, BorderLayout.CENTER);
 
-        // ---------- BUTTON PANEL ----------
+        // ---------- BUTTONS ----------
         JPanel btnPanel = new JPanel();
-        btnPanel.setBackground(Color.WHITE);
-        btnPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
+        btnPanel.setBackground(new Color(245, 245, 245));
+        btnPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 30, 0));
 
         JButton unenrollBtn = new JButton("Unenroll");
         JButton backBtn = new JButton("Back");
@@ -169,31 +172,25 @@ public class UnenrollStudentUI extends JPanel {
         btnPanel.add(unenrollBtn);
         btnPanel.add(backBtn);
 
-        card.add(btnPanel, BorderLayout.SOUTH);
+        add(btnPanel, BorderLayout.SOUTH);
 
-        // ---------- BUTTON ACTIONS ----------
+        // ---------- ACTIONS ----------
         unenrollBtn.addActionListener(e -> {
-            Enrollment selectedEnrollment = (Enrollment) studentDropdown.getSelectedItem();
-            if (selectedEnrollment == null) {
-                JOptionPane.showMessageDialog(this, "No student selected.", "Warning", JOptionPane.WARNING_MESSAGE);
+            Enrollment en = (Enrollment) studentBox.getSelectedItem();
+            if (en == null) {
+                JOptionPane.showMessageDialog(this, "Select a student.", "Warning", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-
-            boolean success = adminService.unenrollStudent(
-                    selectedEnrollment.getSectionId(),
-                    selectedEnrollment.getStudentId()
-            );
-
-            if (success) {
-                JOptionPane.showMessageDialog(this, "Student unenrolled successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                studentDropdown.removeItem(selectedEnrollment);
+            boolean ok = adminService.unenrollStudent(en.getSectionId(), en.getStudentId());
+            if (ok) {
+                JOptionPane.showMessageDialog(this, "Student unenrolled successfully.");
+                studentBox.removeItem(en);
             } else {
-                JOptionPane.showMessageDialog(this, "Failed to unenroll student.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Error while unenrolling.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
         backBtn.addActionListener(e -> mainFrame.refreshAdminDashboard());
-
     }
 
     private void styleButton(JButton btn, Color normal, Color hover) {
@@ -201,17 +198,11 @@ public class UnenrollStudentUI extends JPanel {
         btn.setForeground(Color.WHITE);
         btn.setBackground(normal);
         btn.setFocusPainted(false);
-        btn.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 25));
+        btn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        btn.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btn.setBackground(hover);
-            }
-
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                btn.setBackground(normal);
-            }
+        btn.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent evt) { btn.setBackground(hover); }
+            public void mouseExited(MouseEvent evt) { btn.setBackground(normal); }
         });
     }
 }

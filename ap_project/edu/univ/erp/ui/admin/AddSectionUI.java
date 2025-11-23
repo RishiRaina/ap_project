@@ -12,8 +12,6 @@ import edu.univ.erp.ui.common.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Date;
@@ -30,7 +28,6 @@ public class AddSectionUI extends JPanel {
     class RoundedPanel extends JPanel {
         private int cornerRadius = 20;
         public RoundedPanel() { setOpaque(false); }
-        @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g;
@@ -45,7 +42,6 @@ public class AddSectionUI extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
 
-        // ---------- HEADER ----------
         JPanel header = new JPanel();
         header.setBackground(new Color(52, 152, 219));
         header.setBorder(BorderFactory.createEmptyBorder(25, 0, 25, 0));
@@ -55,7 +51,6 @@ public class AddSectionUI extends JPanel {
         header.add(title);
         add(header, BorderLayout.NORTH);
 
-        // ---------- MAIN WRAPPER ----------
         JPanel wrapper = new JPanel(new GridBagLayout());
         wrapper.setBackground(new Color(245, 245, 245));
 
@@ -66,37 +61,26 @@ public class AddSectionUI extends JPanel {
         Font labelFont = new Font("Segoe UI", Font.BOLD, 16);
         Font inputFont = new Font("Segoe UI", Font.PLAIN, 15);
 
-        // ---------- COURSE DROPDOWN ----------
         JLabel courseLabel = new JLabel("Course:");
         courseLabel.setFont(labelFont);
 
         JComboBox<Course> courseBox = new JComboBox<>();
         courseBox.setFont(inputFont);
-        courseBox.addItem(null); // placeholder
+        courseBox.addItem(null);
 
         List<Course> courses = courseService.getAllCourses();
-        for (Course c : courses) {
-            courseBox.addItem(c);
-        }
+        for (Course c : courses) courseBox.addItem(c);
 
-        // Renderer to show "CODE - TITLE"
         courseBox.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
-                                                          boolean isSelected, boolean cellHasFocus) {
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                if (value instanceof Course) {
-                    Course c = (Course) value;
-                    setText(c.getCode().toUpperCase() + " - " + c.getTitle());
-                } else if (value == null) {
-                    setText("Select Course...");
-                }
+                if (value instanceof Course) setText(((Course) value).getCode().toUpperCase() + " - " + ((Course) value).getTitle());
+                else if (value == null) setText("Select Course...");
                 return this;
             }
         });
 
-        // ---------- INSTRUCTOR DROPDOWN ----------
-        JLabel instrLabel = new JLabel("Instructor Username :");
+        JLabel instrLabel = new JLabel("Instructor Username:");
         instrLabel.setFont(labelFont);
 
         List<Instructor> instructors = instructorService.getAllInstructors();
@@ -105,56 +89,44 @@ public class AddSectionUI extends JPanel {
                 .toArray(String[]::new);
 
         JComboBox<String> instrBox = new JComboBox<>();
-        instrBox.addItem("Select Instructor"); // placeholder
+        instrBox.addItem("Select Instructor");
         for (String u : instrUsernames) instrBox.addItem(u);
         instrBox.setFont(inputFont);
-        instrBox.setSelectedIndex(0);
 
-        // ---------- OTHER FIELDS WITH PLACEHOLDERS ----------
         JLabel timeLabel = new JLabel("Day & Time:");
         timeLabel.setFont(labelFont);
         JTextField timeField = new JTextField();
         timeField.setFont(inputFont);
-        setPlaceholder(timeField, "e.g., Mon 10:00-12:00");
 
         JLabel roomLabel = new JLabel("Room:");
         roomLabel.setFont(labelFont);
         JTextField roomField = new JTextField();
         roomField.setFont(inputFont);
-        setPlaceholder(roomField, "e.g., R101");
 
         JLabel capacityLabel = new JLabel("Capacity:");
         capacityLabel.setFont(labelFont);
         JTextField capacityField = new JTextField();
         capacityField.setFont(inputFont);
-        setPlaceholder(capacityField, "e.g., 50");
 
-        // ---------- SEMESTER DROPDOWN ----------
         JLabel semesterLabel = new JLabel("Semester:");
         semesterLabel.setFont(labelFont);
         JComboBox<String> semesterBox = new JComboBox<>();
-        semesterBox.addItem("Select Semester"); // placeholder
+        semesterBox.addItem("Select Semester");
         for (int i = 1; i <= 8; i++) semesterBox.addItem(String.valueOf(i));
         semesterBox.setFont(inputFont);
-        semesterBox.setSelectedIndex(0);
 
-        // ---------- YEAR DROPDOWN ----------
         JLabel yearLabel = new JLabel("Year:");
         yearLabel.setFont(labelFont);
         JComboBox<String> yearBox = new JComboBox<>();
-        yearBox.addItem("Select Year"); // placeholder
+        yearBox.addItem("Select Year");
         for (int y = 2020; y <= 2030; y++) yearBox.addItem(String.valueOf(y));
         yearBox.setFont(inputFont);
-        yearBox.setSelectedIndex(0);
 
-        // ---------- REGISTRATION DEADLINE ----------
         JLabel deadlineLabel = new JLabel("Registration Deadline (YYYY-MM-DD):");
         deadlineLabel.setFont(labelFont);
         JTextField deadlineField = new JTextField();
         deadlineField.setFont(inputFont);
-        setPlaceholder(deadlineField, "YYYY-MM-DD");
 
-        // ---------- ADD COMPONENTS TO FORM ----------
         form.add(courseLabel); form.add(courseBox);
         form.add(instrLabel); form.add(instrBox);
         form.add(timeLabel); form.add(timeField);
@@ -164,7 +136,6 @@ public class AddSectionUI extends JPanel {
         form.add(yearLabel); form.add(yearBox);
         form.add(deadlineLabel); form.add(deadlineField);
 
-        // ---------- BUTTONS ----------
         JButton addBtn = new JButton("Add Section");
         JButton back = new JButton("Back");
 
@@ -180,53 +151,79 @@ public class AddSectionUI extends JPanel {
         add(wrapper, BorderLayout.CENTER);
         add(buttons, BorderLayout.SOUTH);
 
-        // ---------- ACTION LISTENERS ----------
         addBtn.addActionListener(e -> {
             try {
                 Course selectedCourse = (Course) courseBox.getSelectedItem();
                 String instrUsername = (String) instrBox.getSelectedItem();
                 String dayTime = timeField.getText().trim();
                 String room = roomField.getText().trim();
-                int capacity = Integer.parseInt(capacityField.getText().trim());
+                String capStr = capacityField.getText().trim();
+                String deadlineStr = deadlineField.getText().trim();
 
-                // Validate dropdowns
-                if(selectedCourse == null) {
-                    JOptionPane.showMessageDialog(this, "Please select a course.");
+                if (selectedCourse == null) {
+                    JOptionPane.showMessageDialog(this, "Select a course.");
                     return;
                 }
-                if(semesterBox.getSelectedItem().equals("Select Semester")) {
-                    JOptionPane.showMessageDialog(this, "Please select a semester.");
+                if (instrUsername == null || instrUsername.equals("Select Instructor")) {
+                    JOptionPane.showMessageDialog(this, "Select an instructor.");
                     return;
                 }
-                if(yearBox.getSelectedItem().equals("Select Year")) {
-                    JOptionPane.showMessageDialog(this, "Please select a year.");
+                if (dayTime.isEmpty() || !dayTime.matches("[A-Za-z0-9 :\\-/]+")) {
+                    JOptionPane.showMessageDialog(this, "Invalid day & time. Use letters, numbers, spaces, :, -, /");
                     return;
                 }
+                if (room.isEmpty() || !room.matches("[A-Za-z0-9\\s!@#$%^&*()_+\\-={}\\[\\]:;\"'<>,.?/|`~]+")) {
+                    JOptionPane.showMessageDialog(this, "Invalid room. Only letters, numbers, spaces.");
+                    return;
+                }
+                if (!capStr.matches("\\d+")) {
+                    JOptionPane.showMessageDialog(this, "Capacity must be a positive number.");
+                    return;
+                }
+                int capacity = Integer.parseInt(capStr);
+                if (capacity <= 0 || capacity >= 1000) {
+                    JOptionPane.showMessageDialog(this, "Capacity must be between 1 and 999.");
+                    return;
+                }
+                if (semesterBox.getSelectedItem().equals("Select Semester")) {
+                    JOptionPane.showMessageDialog(this, "Select a semester.");
+                    return;
+                }
+                if (yearBox.getSelectedItem().equals("Select Year")) {
+                    JOptionPane.showMessageDialog(this, "Select a year.");
+                    return;
+                }
+
+                // Remove ALL spaces from the input
+                String cleaned = deadlineStr.replaceAll("\\s+", "");
+
+                if (!cleaned.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                    JOptionPane.showMessageDialog(this, "Invalid date. Use format YYYY-MM-DD.");
+                    return;
+                }
+
+                Date deadline;
+                try {
+                    deadline = Date.valueOf(cleaned);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Invalid date. Please enter a valid YYYY-MM-DD date.");
+                    return;
+                }
+
 
                 int semester = Integer.parseInt((String) semesterBox.getSelectedItem());
                 int year = Integer.parseInt((String) yearBox.getSelectedItem());
-                Date deadline = Date.valueOf(deadlineField.getText().trim());
 
-                Integer instructorId = null;
-                if(instrUsername != null && !instrUsername.equals("Select Instructor")) {
-                    instructorId = userAuthDAO.getUserByUsername(instrUsername).getUserId();
-                    if(instructorId == null) {
-                        JOptionPane.showMessageDialog(this, "Instructor not found!");
-                        return;
-                    }
-                }
+                Integer instructorId = userAuthDAO.getUserByUsername(instrUsername).getUserId();
 
                 Section s = new Section(0, 0, instructorId, dayTime, room, capacity,
                         String.valueOf(semester), year, deadline);
+
                 boolean success = sectionService.addSection(s, selectedCourse.getCode());
 
-                if(success) {
-                    JOptionPane.showMessageDialog(this, "Section Added Successfully!");
-                } else {
-                    JOptionPane.showMessageDialog(this, "Failed to Add Section.");
-                }
+                JOptionPane.showMessageDialog(this, success ? "Section Added Successfully!" : "Failed to Add Section.");
 
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage());
             }
         });
@@ -244,29 +241,6 @@ public class AddSectionUI extends JPanel {
         btn.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent evt) { btn.setBackground(hover); }
             public void mouseExited(MouseEvent evt) { btn.setBackground(normal); }
-        });
-    }
-
-    // ---------- Helper method for placeholder ----------
-    private void setPlaceholder(JTextField field, String placeholder) {
-        field.setForeground(Color.GRAY);
-        field.setText(placeholder);
-        field.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (field.getText().equals(placeholder)) {
-                    field.setText("");
-                    field.setForeground(Color.BLACK);
-                }
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (field.getText().isEmpty()) {
-                    field.setForeground(Color.GRAY);
-                    field.setText(placeholder);
-                }
-            }
         });
     }
 }

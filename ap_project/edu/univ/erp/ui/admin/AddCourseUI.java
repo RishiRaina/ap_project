@@ -6,8 +6,6 @@ import edu.univ.erp.ui.common.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -80,16 +78,15 @@ public class AddCourseUI extends JPanel {
         titleField.setFont(inputFont);
         setPlaceholder(titleField, "Enter course title");
 
-        // ---------- Credits dropdown with placeholder ----------
+        // ---------- Credits dropdown ----------
         JComboBox<String> creditsBox = new JComboBox<>();
         creditsBox.setFont(inputFont);
-        creditsBox.addItem("Select Credits"); // Placeholder
+        creditsBox.addItem("Select Credits");
         creditsBox.addItem("1");
         creditsBox.addItem("2");
         creditsBox.addItem("4");
-        creditsBox.setSelectedIndex(0); // ensure placeholder shows first
+        creditsBox.setSelectedIndex(0);
 
-        // Add components to form
         form.add(codeLabel);
         form.add(codeField);
 
@@ -117,8 +114,33 @@ public class AddCourseUI extends JPanel {
             try {
                 String code = codeField.getText().trim();
                 String ctitle = titleField.getText().trim();
-
                 String creditsStr = (String) creditsBox.getSelectedItem();
+
+                // --- VALIDATE EMPTY OR PLACEHOLDER ---
+                if (code.equals("") || code.equals("Enter course code")) {
+                    JOptionPane.showMessageDialog(this, "Please enter a valid course code.");
+                    return;
+                }
+
+                if (ctitle.equals("") || ctitle.equals("Enter course title")) {
+                    JOptionPane.showMessageDialog(this, "Please enter a valid course title.");
+                    return;
+                }
+
+                // --- ALPHANUMERIC ONLY ---
+                if (!isValidAlphaNumeric(code)) {
+                    JOptionPane.showMessageDialog(this,
+                            "Course code must be alphanumeric only .");
+                    return;
+                }
+
+                if (!isValidAlphaNumeric(ctitle)) {
+                    JOptionPane.showMessageDialog(this,
+                            "Course title must be alphanumeric only .");
+                    return;
+                }
+
+                // --- CREDITS CHECK ---
                 if (creditsStr.equals("Select Credits")) {
                     JOptionPane.showMessageDialog(this, "Please select credits.");
                     return;
@@ -134,8 +156,9 @@ public class AddCourseUI extends JPanel {
                 if (adminService.addCourse(c)) {
                     JOptionPane.showMessageDialog(this, "Course Added Successfully!");
                 } else {
-                    JOptionPane.showMessageDialog(this, "Failed to Add Course.");
+                    JOptionPane.showMessageDialog(this, "Failed to Add Course due to Duplicate Code.");
                 }
+
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage());
             }
@@ -164,7 +187,7 @@ public class AddCourseUI extends JPanel {
         });
     }
 
-    // ---------- HELPER METHOD FOR PLACEHOLDER ----------
+    // ---------- HELPER: PLACEHOLDER ----------
     private void setPlaceholder(JTextField field, String placeholder) {
         field.setForeground(Color.GRAY);
         field.setText(placeholder);
@@ -185,5 +208,11 @@ public class AddCourseUI extends JPanel {
                 }
             }
         });
+    }
+
+    // ---------- HELPER: ALPHANUMERIC ONLY ----------
+    private boolean isValidAlphaNumeric(String s) {
+        return s.matches("^[a-zA-Z0-9 ]+$");
+        // alphanumeric only
     }
 }

@@ -17,52 +17,85 @@ public class EnrollStudentUI extends JPanel {
     private SectionService sectionService = new SectionService();
     private EnrollmentService enrollmentService = new EnrollmentService();
 
-
     private JComboBox<CourseItem> courseCombo;
     private JComboBox<SectionItem> sectionCombo;
     private JComboBox<StudentItem> studentCombo;
 
+    class RoundedPanel extends JPanel {
+        private int cornerRadius = 20;
+        public RoundedPanel() { setOpaque(false); }
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(Color.WHITE);
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
+        }
+    }
+
     public EnrollStudentUI(MainFrame mainFrame) {
 
         setLayout(new BorderLayout());
-        setBackground(Color.WHITE);
+        setBackground(new Color(245, 245, 245));
 
-        JLabel title = new JLabel("Enroll Student", SwingConstants.CENTER);
+        JPanel header = new JPanel();
+        header.setBackground(new Color(52, 152, 219));
+        header.setBorder(BorderFactory.createEmptyBorder(25, 0, 25, 0));
+
+        JLabel title = new JLabel("Enroll Student");
+        title.setForeground(Color.WHITE);
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        title.setForeground(new Color(41, 128, 185));
-        title.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-        add(title, BorderLayout.NORTH);
+        header.add(title);
 
-        JPanel formPanel = new JPanel(new GridLayout(4, 2, 20, 20));
-        formPanel.setBorder(BorderFactory.createEmptyBorder(40, 150, 40, 150));
-        formPanel.setBackground(Color.WHITE);
+        add(header, BorderLayout.NORTH);
 
-        // ---- Course Dropdown ----
-        formPanel.add(createLabel("Select Course:"));
+        JPanel wrapper = new JPanel(new GridBagLayout());
+        wrapper.setBackground(new Color(245, 245, 245));
+
+        RoundedPanel form = new RoundedPanel();
+        form.setLayout(new GridLayout(4, 2, 15, 15));
+        form.setBorder(BorderFactory.createEmptyBorder(40, 50, 40, 50));
+
+        Font labelFont = new Font("Segoe UI", Font.BOLD, 16);
+        Font inputFont = new Font("Segoe UI", Font.PLAIN, 15);
+
+        // Course
+        JLabel courseLabel = new JLabel("Select Course:");
+        courseLabel.setFont(labelFont);
+
         courseCombo = new JComboBox<>();
-        formPanel.add(courseCombo);
+        courseCombo.setFont(inputFont);
 
-        // ---- Section Dropdown ----
-        formPanel.add(createLabel("Select Section:"));
+        // Section
+        JLabel sectionLabel = new JLabel("Select Section:");
+        sectionLabel.setFont(labelFont);
+
         sectionCombo = new JComboBox<>();
-        formPanel.add(sectionCombo);
+        sectionCombo.setFont(inputFont);
 
-        // ---- Student Dropdown ----
-        formPanel.add(createLabel("Select Student:"));
+        // Student
+        JLabel studentLabel = new JLabel("Select Student:");
+        studentLabel.setFont(labelFont);
+
         studentCombo = new JComboBox<>();
-        formPanel.add(studentCombo);
+        studentCombo.setFont(inputFont);
 
-        add(formPanel, BorderLayout.CENTER);
+        // Add to form
+        form.add(courseLabel); form.add(courseCombo);
+        form.add(sectionLabel); form.add(sectionCombo);
+        form.add(studentLabel); form.add(studentCombo);
 
-        // ---- Buttons ----
+        wrapper.add(form);
+        add(wrapper, BorderLayout.CENTER);
+
         JButton enrollBtn = new JButton("Enroll");
-        styleButton(enrollBtn, new Color(39, 174, 96), new Color(33, 140, 72));
+        styleButton(enrollBtn, new Color(46, 204, 113), new Color(39, 174, 96));
 
         JButton backBtn = new JButton("Back");
         styleButton(backBtn, new Color(52, 152, 219), new Color(41, 128, 185));
 
         JPanel bottom = new JPanel();
-        bottom.setBackground(Color.WHITE);
+        bottom.setBackground(new Color(245, 245, 245));
         bottom.add(enrollBtn);
         bottom.add(backBtn);
 
@@ -70,51 +103,39 @@ public class EnrollStudentUI extends JPanel {
 
         backBtn.addActionListener(e -> mainFrame.refreshAdminDashboard());
 
-        // Load data
         loadCourses();
         loadStudents();
 
-        // When course is selected → load sections
         courseCombo.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
-                CourseItem selected = (CourseItem) courseCombo.getSelectedItem();
-                if (selected != null) {
-                    loadSections(selected.courseId);
-                }
+                CourseItem item = (CourseItem) courseCombo.getSelectedItem();
+                if (item != null) loadSections(item.courseId);
             }
         });
 
         enrollBtn.addActionListener(e -> enrollStudentAction());
     }
 
-    // ----------------------------- DATA LOADING -----------------------------
-
     private void loadCourses() {
         courseCombo.removeAllItems();
-
-        // placeholder (NORMAL FONT)
         courseCombo.addItem(new CourseItem(-1, "Select Course..."));
 
-        List<Course> courses = courseService.getAllCourses();
-        for (Course c : courses) {
+        List<Course> list = courseService.getAllCourses();
+        for (Course c : list) {
             courseCombo.addItem(new CourseItem(c.getCourseId(), c.getTitle()));
         }
 
-        // renderer (normal font always)
         courseCombo.setRenderer(getNormalRenderer());
     }
 
     private void loadSections(int courseId) {
         sectionCombo.removeAllItems();
-
-        // placeholder
         sectionCombo.addItem(new SectionItem(-1, "Select Section..."));
 
         List<Section> sections = sectionService.getSectionsByCourse(courseId);
 
         for (Section sec : sections) {
-            String display = sec.toString().toUpperCase(); // UPPERCASE DISPLAY
-            sectionCombo.addItem(new SectionItem(sec.getSectionId(), display));
+            sectionCombo.addItem(new SectionItem(sec.getSectionId(), sec.toString().toUpperCase()));
         }
 
         sectionCombo.setRenderer(getNormalRenderer());
@@ -122,7 +143,6 @@ public class EnrollStudentUI extends JPanel {
 
     private void loadStudents() {
         studentCombo.removeAllItems();
-
         studentCombo.addItem(new StudentItem(-1, "Select Student..."));
 
         List<edu.univ.erp.domain.Student> students = adminService.getAllStudents();
@@ -130,129 +150,77 @@ public class EnrollStudentUI extends JPanel {
         for (edu.univ.erp.domain.Student s : students) {
             String username = adminService.getUsernameById(s.getUserId());
             if (username == null) username = "UNKNOWN";
-
             studentCombo.addItem(new StudentItem(s.getUserId(), username));
         }
 
         studentCombo.setRenderer(getNormalRenderer());
     }
 
-    // ----------------------------- RENDERER FIX -----------------------------
-
-    /**
-     * Renderer that forces ALL items including placeholders to normal/plain font.
-     */
     private DefaultListCellRenderer getNormalRenderer() {
         return new DefaultListCellRenderer() {
-            @Override
             public Component getListCellRendererComponent(
                     JList<?> list, Object value, int index,
                     boolean isSelected, boolean cellHasFocus) {
 
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-                setFont(new Font("Segoe UI", Font.PLAIN, 15)); // NOT BOLD
+                setFont(new Font("Segoe UI", Font.PLAIN, 15));
                 return this;
             }
         };
     }
 
-    // ----------------------------- SUBMIT ACTION -----------------------------
     private void enrollStudentAction() {
 
-        CourseItem course = (CourseItem) courseCombo.getSelectedItem();
-        SectionItem section = (SectionItem) sectionCombo.getSelectedItem();
-        StudentItem student = (StudentItem) studentCombo.getSelectedItem();
+        CourseItem c = (CourseItem) courseCombo.getSelectedItem();
+        SectionItem s = (SectionItem) sectionCombo.getSelectedItem();
+        StudentItem st = (StudentItem) studentCombo.getSelectedItem();
 
-        if (course == null || section == null || student == null ||
-                course.courseId == -1 || section.sectionId == -1 || student.userId == -1) {
+        if (c == null || s == null || st == null ||
+                c.courseId == -1 || s.sectionId == -1 || st.userId == -1) {
+
             JOptionPane.showMessageDialog(this, "Please select all fields.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        boolean ok = enrollmentService.enrollStudentInSection(
-                student.userId,
-                section.sectionId
-        );
+        boolean ok = enrollmentService.enrollStudentInSection(st.userId, s.sectionId);
 
-        if (ok) {
-            JOptionPane.showMessageDialog(this, "Student enrolled successfully!");
-        } else {
-            JOptionPane.showMessageDialog(this, "Enrollment failed!", "Error", JOptionPane.ERROR_MESSAGE);
-        }
+        JOptionPane.showMessageDialog(this,
+                ok ? "Student enrolled successfully!" : "Enrollment failed!",
+                ok ? "Success" : "Error",
+                ok ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE);
     }
-
-    // ----------------------------- DROPDOWN ITEM CLASSES -----------------------------
 
     class CourseItem {
         int courseId;
         String name;
-
-        CourseItem(int id, String name) {
-            this.courseId = id;
-            this.name = name;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
+        CourseItem(int id, String name) { this.courseId = id; this.name = name; }
+        public String toString() { return name; }
     }
 
     class SectionItem {
         int sectionId;
         String name;
-
-        SectionItem(int id, String name) {
-            this.sectionId = id;
-            this.name = name;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
+        SectionItem(int id, String name) { this.sectionId = id; this.name = name; }
+        public String toString() { return name; }
     }
 
     class StudentItem {
         int userId;
-        String username;
-
-        StudentItem(int id, String name) {
-            this.userId = id;
-            this.username = name;
-        }
-
-        @Override
-        public String toString() {
-            return username;
-        }
-    }
-
-    // ----------------------------- UI HELPERS -----------------------------
-
-    private JLabel createLabel(String text) {
-        JLabel lbl = new JLabel(text);
-        lbl.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        lbl.setForeground(new Color(44, 62, 80));
-        return lbl;
+        String name;
+        StudentItem(int id, String name) { this.userId = id; this.name = name; }
+        public String toString() { return name; }
     }
 
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btn.setForeground(Color.WHITE);
         btn.setBackground(normal);
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btn.setFocusPainted(false);
-        btn.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 25));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
+        btn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btn.setBackground(hover);
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                btn.setBackground(normal);
-            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) { btn.setBackground(hover); }
+            public void mouseExited(java.awt.event.MouseEvent evt) { btn.setBackground(normal); }
         });
     }
 }

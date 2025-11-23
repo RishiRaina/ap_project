@@ -16,11 +16,9 @@ public class AddStudentUI extends JPanel {
 
     private AdminService adminService = new AdminService();
 
-    // ---------- Rounded Panel ----------
     class RoundedPanel extends JPanel {
         private int cornerRadius = 20;
         public RoundedPanel() { setOpaque(false); }
-        @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g;
@@ -33,106 +31,140 @@ public class AddStudentUI extends JPanel {
     public AddStudentUI(MainFrame mainFrame) {
 
         setLayout(new BorderLayout());
-        setBackground(new Color(245, 245, 245)); // Soft gray background
+        setBackground(new Color(245, 245, 245));
 
-        JLabel banner = null;
-        if (MaintenanceChecker.isMaintenanceOn()) {
-            banner = new JLabel("System Under Maintenance", SwingConstants.CENTER);
-            banner.setOpaque(true);
-            banner.setBackground(Color.ORANGE);
-            banner.setForeground(Color.BLACK);
-            banner.setFont(new Font("Arial", Font.BOLD, 16));
-            add(banner, BorderLayout.NORTH);
-        }
+        JPanel header = new JPanel();
+        header.setBackground(new Color(52, 152, 219));
+        header.setBorder(BorderFactory.createEmptyBorder(25, 0, 25, 0));
+        JLabel title = new JLabel("Add Student");
+        title.setForeground(Color.WHITE);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        header.add(title);
+        add(header, BorderLayout.NORTH);
 
+        JPanel wrapper = new JPanel(new GridBagLayout());
+        wrapper.setBackground(new Color(245, 245, 245));
 
-        // ---------- Header ----------
-        JLabel title = new JLabel("Add Student", SwingConstants.CENTER);
-        title.setFont(new Font("Segoe UI", Font.BOLD, 26));
-        title.setForeground(new Color(52, 152, 219));
-        title.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-        if(banner==null) {
-            add(title, BorderLayout.NORTH);
-        }
-        else{
-            add(title,BorderLayout.CENTER);
-        }
-
-
-        // ---------- Form Panel ----------
         RoundedPanel form = new RoundedPanel();
-        form.setLayout(new GridLayout(5, 2, 15, 15));
-        form.setBorder(BorderFactory.createEmptyBorder(40, 150, 40, 150));
+        form.setLayout(new GridLayout(6, 2, 15, 15));
+        form.setBorder(BorderFactory.createEmptyBorder(40, 50, 40, 50));
+        form.setPreferredSize(new Dimension(600, 380));
 
         Font labelFont = new Font("Segoe UI", Font.BOLD, 16);
+        Font inputFont = new Font("Segoe UI", Font.PLAIN, 15);
 
-        // ---------- Text Fields ----------
+        JLabel userLabel = new JLabel("Username:");
+        userLabel.setFont(labelFont);
         JTextField usernameField = new JTextField();
-        usernameField.setPreferredSize(new Dimension(180, 30));
+        usernameField.setFont(inputFont);
         addPlaceholder(usernameField, "Enter username...");
 
+        JLabel passLabel = new JLabel("Password:");
+        passLabel.setFont(labelFont);
         JPasswordField passwordField = new JPasswordField();
-        passwordField.setPreferredSize(new Dimension(180, 30));
+        passwordField.setFont(inputFont);
         addPlaceholder(passwordField, "Enter password...");
 
+        JLabel rollLabel = new JLabel("Roll Number:");
+        rollLabel.setFont(labelFont);
         JTextField rollField = new JTextField();
-        rollField.setPreferredSize(new Dimension(180, 30));
-        addPlaceholder(rollField, "Enter roll number...");
+        rollField.setFont(inputFont);
+        addPlaceholder(rollField, "Enter 7-digit roll number...");
 
-        JTextField programField = new JTextField();
-        programField.setPreferredSize(new Dimension(180, 30));
-        addPlaceholder(programField, "Enter program...");
+        JLabel progLabel = new JLabel("Program:");
+        progLabel.setFont(labelFont);
+        JComboBox<String> programBox = new JComboBox<>();
+        programBox.addItem("Select Program");
+        programBox.addItem("CSAI");
+        programBox.addItem("CSE");
+        programBox.addItem("CSAM");
+        programBox.addItem("CSD");
+        programBox.addItem("CSB");
+        programBox.addItem("CSS");
+        programBox.addItem("ECE");
+        programBox.addItem("EVE");
+        programBox.addItem("CSEcon");
+        programBox.setFont(inputFont);
 
-        JTextField yearField = new JTextField();
-        yearField.setPreferredSize(new Dimension(180, 30));
-        addPlaceholder(yearField, "Enter year...");
+        JLabel yearLabel = new JLabel("Year:");
+        yearLabel.setFont(labelFont);
+        JComboBox<String> yearBox = new JComboBox<>();
+        yearBox.addItem("Select Year");
+        for (int y = 2020; y <= 2030; y++) yearBox.addItem(String.valueOf(y));
+        yearBox.setFont(inputFont);
 
-        // Add labels and fields
-        form.add(new JLabel("Username:")).setFont(labelFont);
-        form.add(usernameField);
-        form.add(new JLabel("Password:")).setFont(labelFont);
-        form.add(passwordField);
-        form.add(new JLabel("Roll No:")).setFont(labelFont);
-        form.add(rollField);
-        form.add(new JLabel("Program:")).setFont(labelFont);
-        form.add(programField);
-        form.add(new JLabel("Year:")).setFont(labelFont);
-        form.add(yearField);
+        form.add(userLabel); form.add(usernameField);
+        form.add(passLabel); form.add(passwordField);
+        form.add(rollLabel); form.add(rollField);
+        form.add(progLabel); form.add(programBox);
+        form.add(yearLabel); form.add(yearBox);
 
-        add(form, BorderLayout.CENTER);
-
-        // ---------- Buttons ----------
-        JButton addBtn = new JButton("Add");
+        JButton addBtn = new JButton("Add Student");
         JButton back = new JButton("Back");
 
         styleButton(addBtn, new Color(46, 204, 113), new Color(39, 174, 96));
         styleButton(back, new Color(52, 152, 219), new Color(41, 128, 185));
 
-        JPanel btnPanel = new JPanel();
-        btnPanel.setBackground(new Color(245, 245, 245));
-        btnPanel.add(addBtn);
-        btnPanel.add(back);
-        add(btnPanel, BorderLayout.SOUTH);
+        JPanel buttons = new JPanel();
+        buttons.setBackground(new Color(245, 245, 245));
+        buttons.add(addBtn);
+        buttons.add(back);
 
-        // ---------- Actions ----------
+        wrapper.add(form);
+        add(wrapper, BorderLayout.CENTER);
+        add(buttons, BorderLayout.SOUTH);
+
         addBtn.addActionListener(e -> {
             try {
                 String username = usernameField.getText().trim();
                 String password = new String(passwordField.getPassword()).trim();
-                String roll = rollField.getText().trim();
-                String prog = programField.getText().trim();
-                int year = Integer.parseInt(yearField.getText().trim());
+                String roll = rollField.getText().replaceAll("\\s+", "");
+                String program = (String) programBox.getSelectedItem();
+                String yearStr = (String) yearBox.getSelectedItem();
+
+                // ----- VALIDATION (unchanged, placeholder not counted as valid) -----
+
+                if (username.isEmpty() || username.equals("Enter username...")) {
+                    JOptionPane.showMessageDialog(this, "Username must not be empty.");
+                    return;
+                }
+
+                if (!username.matches("[A-Za-z0-9]+")) {
+                    JOptionPane.showMessageDialog(this, "Username must be alphanumeric only.");
+                    return;
+                }
+
+                if (password.isEmpty() || password.equals("Enter password...")) {
+                    JOptionPane.showMessageDialog(this, "Password cannot be empty.");
+                    return;
+                }
+
+                if (roll.isEmpty() || roll.equals("Enter 7-digit roll number...") || !roll.matches("\\d{7}")) {
+                    JOptionPane.showMessageDialog(this, "Roll number must be a 7-digit number.");
+                    return;
+                }
+
+                if (program.equals("Select Program")) {
+                    JOptionPane.showMessageDialog(this, "Select a program.");
+                    return;
+                }
+
+                if (yearStr.equals("Select Year")) {
+                    JOptionPane.showMessageDialog(this, "Select a year.");
+                    return;
+                }
+
+                int year = Integer.parseInt(yearStr);
 
                 Student s = new Student();
                 s.setRollNo(roll);
-                s.setProgram(prog);
+                s.setProgram(program);
                 s.setYear(year);
 
-                if (adminService.addStudent(s, username, password)) {
-                    JOptionPane.showMessageDialog(this, "Student Added Successfully!");
-                } else {
-                    JOptionPane.showMessageDialog(this, "Failed to Add Student.");
-                }
+                boolean success = adminService.addStudent(s, username, password);
+
+                JOptionPane.showMessageDialog(this,
+                        success ? "Student Added Successfully!" : "Failed to Add Student.");
 
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage());
@@ -142,7 +174,6 @@ public class AddStudentUI extends JPanel {
         back.addActionListener(e -> mainFrame.refreshAdminDashboard());
     }
 
-    // ---------- Button Styling ----------
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btn.setForeground(Color.WHITE);
@@ -150,7 +181,6 @@ public class AddStudentUI extends JPanel {
         btn.setFocusPainted(false);
         btn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
         btn.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent evt) { btn.setBackground(hover); }
             public void mouseExited(MouseEvent evt) { btn.setBackground(normal); }
@@ -161,15 +191,14 @@ public class AddStudentUI extends JPanel {
     private void addPlaceholder(JTextField field, String placeholder) {
         field.setForeground(Color.GRAY);
         field.setText(placeholder);
+
         field.addFocusListener(new FocusAdapter() {
-            @Override
             public void focusGained(FocusEvent e) {
                 if (field.getText().equals(placeholder)) {
                     field.setText("");
                     field.setForeground(Color.BLACK);
                 }
             }
-            @Override
             public void focusLost(FocusEvent e) {
                 if (field.getText().isEmpty()) {
                     field.setForeground(Color.GRAY);

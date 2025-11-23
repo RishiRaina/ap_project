@@ -35,30 +35,41 @@ public class AdminDashboard extends JPanel {
 
         // Change Password button
         JButton changePassBtn = new JButton("Change Password");
-        changePassBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        changePassBtn.setForeground(Color.WHITE);
-        changePassBtn.setBackground(new Color(46, 204, 113));
-        changePassBtn.setFocusPainted(false);
-        changePassBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        styleTopBarButton(changePassBtn, new Color(46, 204, 113), new Color(39, 174, 96));
         changePassBtn.addActionListener(e -> {
             mainFrame.addScreen("adminChangePassword", new ChangePasswordUI(mainFrame));
             mainFrame.showScreen("adminChangePassword");
         });
 
+        // Backup button
+        JButton backupBtn = new JButton("Backup");
+        styleTopBarButton(backupBtn, new Color(241, 196, 15), new Color(243, 156, 18));
+        backupBtn.addActionListener(e -> {
+            mainFrame.addScreen("backupUI", new BackupUI(mainFrame));
+            mainFrame.showScreen("backupUI");
+        });
+
+        // Restore button
+        JButton restoreBtn = new JButton("Restore");
+        styleTopBarButton(restoreBtn, new Color(230, 126, 34), new Color(211, 84, 0));
+        restoreBtn.addActionListener(e -> {
+            mainFrame.addScreen("restoreUI", new RestoreUI(mainFrame));
+            mainFrame.showScreen("restoreUI");
+        });
+
         // Logout button
         JButton logoutBtn = new JButton("Logout");
-        logoutBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        logoutBtn.setForeground(Color.WHITE);
-        logoutBtn.setBackground(new Color(231, 76, 60));
-        logoutBtn.setFocusPainted(false);
-        logoutBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        styleTopBarButton(logoutBtn, new Color(231, 76, 60), new Color(192, 57, 43));
         logoutBtn.addActionListener(e -> {
             SessionManager.clear();
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
         });
 
         topButtons.add(changePassBtn);
+        topButtons.add(backupBtn);
+        topButtons.add(restoreBtn);
         topButtons.add(logoutBtn);
+
         header.add(topButtons, BorderLayout.EAST);
 
         add(header, BorderLayout.NORTH);
@@ -159,5 +170,23 @@ public class AdminDashboard extends JPanel {
         mainContent.add(panel, BorderLayout.CENTER);
         mainContent.revalidate();
         mainContent.repaint();
+    }
+
+    private void styleTopBarButton(JButton btn, Color normal, Color hover) {
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btn.setForeground(Color.WHITE);
+        btn.setBackground(normal);
+        btn.setFocusPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                btn.setBackground(hover);
+            }
+            public void mouseExited(MouseEvent e) {
+                btn.setBackground(normal);
+            }
+        });
     }
 }

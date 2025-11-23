@@ -14,10 +14,10 @@ public class AddInstructorUI extends JPanel {
 
     private AdminService adminService = new AdminService();
 
-    // ---------- Rounded Panel ----------
     class RoundedPanel extends JPanel {
         private int cornerRadius = 20;
         public RoundedPanel() { setOpaque(false); }
+
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -29,73 +29,132 @@ public class AddInstructorUI extends JPanel {
     }
 
     public AddInstructorUI(MainFrame mainFrame) {
+
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
 
-        // ---------- Header ----------
-        JLabel title = new JLabel("Add Instructor", SwingConstants.CENTER);
-        title.setFont(new Font("Segoe UI", Font.BOLD, 26));
-        title.setForeground(new Color(52, 152, 219));
-        title.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-        add(title, BorderLayout.NORTH);
+        JPanel headerPanel = new JPanel();
+        headerPanel.setBackground(new Color(52, 152, 219));
+        headerPanel.setPreferredSize(new Dimension(0, 80));
 
-        // ---------- Form Panel ----------
+        JLabel title = new JLabel("Add Instructor");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        title.setForeground(Color.WHITE);
+        headerPanel.add(title);
+
+        add(headerPanel, BorderLayout.NORTH);
+
+        JPanel wrapper = new JPanel(new GridBagLayout());
+        wrapper.setBackground(new Color(245, 245, 245));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+
         RoundedPanel form = new RoundedPanel();
-        form.setLayout(new GridLayout(3, 2, 15, 15));
-        form.setBorder(BorderFactory.createEmptyBorder(40, 150, 40, 150));
+        form.setLayout(new GridBagLayout());
+        form.setPreferredSize(new Dimension(520, 380));
+        form.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
+
+        GridBagConstraints fgbc = new GridBagConstraints();
+        fgbc.insets = new Insets(15, 20, 15, 20);
+        fgbc.anchor = GridBagConstraints.WEST;
 
         Font labelFont = new Font("Segoe UI", Font.BOLD, 16);
+        Font fieldFont = new Font("Segoe UI", Font.PLAIN, 16);
 
-        // ---------- Text Fields ----------
         JTextField usernameField = new JTextField();
-        usernameField.setPreferredSize(new Dimension(120, 30)); // reduced width
+        usernameField.setPreferredSize(new Dimension(200, 34));
+        usernameField.setFont(fieldFont);
         addPlaceholder(usernameField, "Enter username...");
 
         JPasswordField passwordField = new JPasswordField();
-        passwordField.setPreferredSize(new Dimension(120, 30)); // reduced width
+        passwordField.setPreferredSize(new Dimension(200, 34));
+        passwordField.setFont(fieldFont);
         addPlaceholder(passwordField, "Enter password...");
 
-        JTextField deptField = new JTextField();
-        deptField.setPreferredSize(new Dimension(120, 30)); // reduced width
-        addPlaceholder(deptField, "Enter department...");
+        String[] departments = {"CSB", "CSE", "ECE", "CSSS", "CSD", "CSAM"};
+        JComboBox<String> deptDropdown = new JComboBox<>(departments);
+        deptDropdown.setPreferredSize(new Dimension(200, 34));
+        deptDropdown.setFont(fieldFont);
 
-        form.add(new JLabel("Username:")).setFont(labelFont);
-        form.add(usernameField);
-        form.add(new JLabel("Password:")).setFont(labelFont);
-        form.add(passwordField);
-        form.add(new JLabel("Department:")).setFont(labelFont);
-        form.add(deptField);
+        fgbc.gridx = 0;
+        fgbc.gridy = 0;
+        JLabel uLabel = new JLabel("Username:");
+        uLabel.setFont(labelFont);
+        form.add(uLabel, fgbc);
 
-        add(form, BorderLayout.CENTER);
+        fgbc.gridx = 1;
+        form.add(usernameField, fgbc);
 
-        // ---------- Buttons ----------
+        fgbc.gridx = 0;
+        fgbc.gridy = 1;
+        JLabel pLabel = new JLabel("Password:");
+        pLabel.setFont(labelFont);
+        form.add(pLabel, fgbc);
+
+        fgbc.gridx = 1;
+        form.add(passwordField, fgbc);
+
+        fgbc.gridx = 0;
+        fgbc.gridy = 2;
+        JLabel dLabel = new JLabel("Department:");
+        dLabel.setFont(labelFont);
+        form.add(dLabel, fgbc);
+
+        fgbc.gridx = 1;
+        form.add(deptDropdown, fgbc);
+
         JButton addBtn = new JButton("Add");
-        JButton back = new JButton("Back");
+        JButton backBtn = new JButton("Back");
         styleButton(addBtn, new Color(46, 204, 113), new Color(39, 174, 96));
-        styleButton(back, new Color(52, 152, 219), new Color(41, 128, 185));
+        styleButton(backBtn, new Color(52, 152, 219), new Color(41, 128, 185));
 
         JPanel btnPanel = new JPanel();
-        btnPanel.setBackground(new Color(245, 245, 245));
+        btnPanel.setBackground(Color.WHITE);
         btnPanel.add(addBtn);
-        btnPanel.add(back);
-        add(btnPanel, BorderLayout.SOUTH);
+        btnPanel.add(backBtn);
 
-        // ---------- Actions ----------
+        fgbc.gridx = 0;
+        fgbc.gridy = 3;
+        fgbc.gridwidth = 2;
+        fgbc.anchor = GridBagConstraints.CENTER;
+        form.add(btnPanel, fgbc);
+
+        wrapper.add(form, gbc);
+        add(wrapper, BorderLayout.CENTER);
+
         addBtn.addActionListener(e -> {
             try {
                 String username = usernameField.getText().trim();
                 String password = new String(passwordField.getPassword()).trim();
-                String dept = deptField.getText().trim();
+                String department = deptDropdown.getSelectedItem().toString();
 
-                if (username.isEmpty() || password.isEmpty() || dept.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "All fields are required.");
+                if (username.isEmpty() || username.equals("Enter username...")) {
+                    JOptionPane.showMessageDialog(this, "Username cannot be empty.");
                     return;
                 }
 
-                if (adminService.addInstructor(username, password, dept)) {
-                    JOptionPane.showMessageDialog(this, "Instructor Added Successfully!");
+                if (!username.matches("[A-Za-z0-9 ]+")) {
+                    JOptionPane.showMessageDialog(this,
+                            "Username must be alphanumeric (letters, digits, spaces only).");
+                    return;
+                }
+
+                if (password.isEmpty() || password.equals("Enter password...")) {
+                    JOptionPane.showMessageDialog(this, "Password cannot be empty.");
+                    return;
+                }
+
+                if (password.length() < 5) {
+                    JOptionPane.showMessageDialog(this, "Password must be at least 5 characters long.");
+                    return;
+                }
+
+                if (adminService.addInstructor(username, password, department)) {
+                    JOptionPane.showMessageDialog(this, "Instructor added successfully!");
                 } else {
-                    JOptionPane.showMessageDialog(this, "Failed to Add Instructor. Username may already exist.");
+                    JOptionPane.showMessageDialog(this,
+                            "Failed to add instructor. Username may already exist.");
                 }
 
             } catch (Exception ex) {
@@ -103,10 +162,9 @@ public class AddInstructorUI extends JPanel {
             }
         });
 
-        back.addActionListener(e -> mainFrame.refreshAdminDashboard());
+        backBtn.addActionListener(e -> mainFrame.refreshAdminDashboard());
     }
 
-    // ---------- Button Styling ----------
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btn.setForeground(Color.WHITE);
@@ -121,16 +179,22 @@ public class AddInstructorUI extends JPanel {
         });
     }
 
-    // ---------- Placeholder Helper ----------
     private void addPlaceholder(JTextField field, String placeholder) {
         field.setForeground(Color.GRAY);
         field.setText(placeholder);
+
         field.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent e) {
-                if (field.getText().equals(placeholder)) { field.setText(""); field.setForeground(Color.BLACK); }
+                if (field.getText().equals(placeholder)) {
+                    field.setText("");
+                    field.setForeground(Color.BLACK);
+                }
             }
             public void focusLost(FocusEvent e) {
-                if (field.getText().isEmpty()) { field.setForeground(Color.GRAY); field.setText(placeholder); }
+                if (field.getText().isEmpty()) {
+                    field.setForeground(Color.GRAY);
+                    field.setText(placeholder);
+                }
             }
         });
     }

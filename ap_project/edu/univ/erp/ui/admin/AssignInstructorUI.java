@@ -17,13 +17,9 @@ public class AssignInstructorUI extends JPanel {
     private SectionDAO sectionDAO = new SectionDAO();
     private InstructorDAO instructorDAO = new InstructorDAO();
 
-    // ---------- Rounded Panel ----------
     class RoundedPanel extends JPanel {
         private int cornerRadius = 20;
-
         public RoundedPanel() { setOpaque(false); }
-
-        @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g;
@@ -38,22 +34,26 @@ public class AssignInstructorUI extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
 
-        // ---------- Header ----------
-        JLabel title = new JLabel("Assign Instructor to Section", SwingConstants.CENTER);
-        title.setFont(new Font("Segoe UI", Font.BOLD, 26));
-        title.setForeground(new Color(52, 152, 219));
-        title.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-        add(title, BorderLayout.NORTH);
+        JPanel header = new JPanel();
+        header.setBackground(new Color(52, 152, 219));
+        header.setBorder(BorderFactory.createEmptyBorder(25, 0, 25, 0));
+        JLabel title = new JLabel("Assign Instructor to Section");
+        title.setForeground(Color.WHITE);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        header.add(title);
+        add(header, BorderLayout.NORTH);
 
-        // ---------- Form Panel ----------
+        JPanel wrapper = new JPanel(new GridBagLayout());
+        wrapper.setBackground(new Color(245, 245, 245));
+
         RoundedPanel form = new RoundedPanel();
-        form.setLayout(new GridLayout(3, 2, 20, 20));
-        form.setBorder(BorderFactory.createEmptyBorder(40, 150, 40, 150));
+        form.setLayout(new GridLayout(3, 2, 15, 15)); // match AddSection spacing
+        form.setBorder(BorderFactory.createEmptyBorder(40, 50, 40, 50)); // match AddSection width
 
         Font labelFont = new Font("Segoe UI", Font.BOLD, 16);
         Font inputFont = new Font("Segoe UI", Font.PLAIN, 15);
 
-        // --- Course Dropdown ---
+        // Course
         JLabel courseLabel = new JLabel("Select Course:");
         courseLabel.setFont(labelFont);
 
@@ -62,31 +62,22 @@ public class AssignInstructorUI extends JPanel {
         courseDropdown.addItem(null);
 
         List<Course> courses = courseDAO.getAllCourses();
-        for (Course c : courses) {
-            courseDropdown.addItem(c);
-        }
+        for (Course c : courses) courseDropdown.addItem(c);
 
-        // Display: CODE - TITLE
         courseDropdown.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(
-                    JList<?> list, Object value, int index,
-                    boolean isSelected, boolean cellHasFocus) {
-
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
                 if (value instanceof Course) {
                     Course c = (Course) value;
                     setText(c.getCode().toUpperCase() + " - " + c.getTitle());
                 } else {
                     setText("Select Course...");
                 }
-
                 return this;
             }
         });
 
-        // --- Section Dropdown ---
+        // Section
         JLabel sectionLabel = new JLabel("Select Section:");
         sectionLabel.setFont(labelFont);
 
@@ -94,7 +85,6 @@ public class AssignInstructorUI extends JPanel {
         sectionDropdown.setFont(inputFont);
         sectionDropdown.addItem(null);
 
-        // Load sections when course changes
         courseDropdown.addActionListener(e -> {
             sectionDropdown.removeAllItems();
             sectionDropdown.addItem(null);
@@ -106,27 +96,19 @@ public class AssignInstructorUI extends JPanel {
             for (Section s : secs) sectionDropdown.addItem(s);
         });
 
-        // ✔ Display section.toString().toUpperCase()
         sectionDropdown.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(
-                    JList<?> list, Object value, int index,
-                    boolean isSelected, boolean cellHasFocus) {
-
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
                 if (value instanceof Section) {
-                    Section s = (Section) value;
-                    setText(s.toString().toUpperCase());
+                    setText(value.toString().toUpperCase());
                 } else {
                     setText("Select Section...");
                 }
-
                 return this;
             }
         });
 
-        // --- Instructor Dropdown ---
+        // Instructor
         JLabel instructorLabel = new JLabel("Select Instructor:");
         instructorLabel.setFont(labelFont);
 
@@ -134,52 +116,42 @@ public class AssignInstructorUI extends JPanel {
         instructorDropdown.setFont(inputFont);
         instructorDropdown.addItem(null);
 
-        for (Integer id : instructorDAO.getAllInstructorIds()) {
-            instructorDropdown.addItem(id);
-        }
+        for (Integer id : instructorDAO.getAllInstructorIds()) instructorDropdown.addItem(id);
 
         instructorDropdown.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(
-                    JList<?> list, Object value, int index,
-                    boolean isSelected, boolean cellHasFocus) {
-
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
                 if (value instanceof Integer) {
                     String username = instructorDAO.getUsernameById((Integer) value);
                     setText(username != null ? username.toUpperCase() : "UNKNOWN");
                 } else {
                     setText("Select Instructor...");
                 }
-
                 return this;
             }
         });
 
-        // Add components to form
-        form.add(courseLabel);
-        form.add(courseDropdown);
-        form.add(sectionLabel);
-        form.add(sectionDropdown);
-        form.add(instructorLabel);
-        form.add(instructorDropdown);
+        // Add components
+        form.add(courseLabel); form.add(courseDropdown);
+        form.add(sectionLabel); form.add(sectionDropdown);
+        form.add(instructorLabel); form.add(instructorDropdown);
 
-        // ---------- Buttons ----------
+        JPanel buttons = new JPanel();
+        buttons.setBackground(new Color(245, 245, 245));
+
         JButton assignBtn = new JButton("Assign");
         JButton backBtn = new JButton("Back");
 
         styleButton(assignBtn, new Color(46, 204, 113), new Color(39, 174, 96));
         styleButton(backBtn, new Color(52, 152, 219), new Color(41, 128, 185));
 
-        JPanel btnPanel = new JPanel();
-        btnPanel.add(assignBtn);
-        btnPanel.add(backBtn);
+        buttons.add(assignBtn);
+        buttons.add(backBtn);
 
-        add(form, BorderLayout.CENTER);
-        add(btnPanel, BorderLayout.SOUTH);
+        wrapper.add(form);
+        add(wrapper, BorderLayout.CENTER);
+        add(buttons, BorderLayout.SOUTH);
 
-        // ---------- Button Actions ----------
         assignBtn.addActionListener(e -> {
             Section selectedSec = (Section) sectionDropdown.getSelectedItem();
             Integer instId = (Integer) instructorDropdown.getSelectedItem();
@@ -188,7 +160,6 @@ public class AssignInstructorUI extends JPanel {
                 JOptionPane.showMessageDialog(this, "No section selected.");
                 return;
             }
-
             if (instId == null) {
                 JOptionPane.showMessageDialog(this, "No instructor selected.");
                 return;
@@ -203,7 +174,6 @@ public class AssignInstructorUI extends JPanel {
         backBtn.addActionListener(e -> mainFrame.refreshAdminDashboard());
     }
 
-    // ---------- Button Styling ----------
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btn.setForeground(Color.WHITE);
@@ -211,15 +181,9 @@ public class AssignInstructorUI extends JPanel {
         btn.setFocusPainted(false);
         btn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btn.setBackground(hover);
-            }
-
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                btn.setBackground(normal);
-            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) { btn.setBackground(hover); }
+            public void mouseExited(java.awt.event.MouseEvent evt) { btn.setBackground(normal); }
         });
     }
 }
