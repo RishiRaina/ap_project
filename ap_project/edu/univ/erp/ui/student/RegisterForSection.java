@@ -5,10 +5,12 @@ import edu.univ.erp.access.MaintenanceChecker;
 import edu.univ.erp.auth.SessionManager;
 import edu.univ.erp.data.UserAuthDAO;
 import edu.univ.erp.domain.Course;
+import edu.univ.erp.domain.Enrollment;
 import edu.univ.erp.domain.Section;
 import edu.univ.erp.service.CourseService;
-import edu.univ.erp.service.StudentRegistrationService;
 import edu.univ.erp.service.SectionService;
+import edu.univ.erp.service.StudentQueryService;
+import edu.univ.erp.service.StudentRegistrationService;
 import edu.univ.erp.ui.common.MainFrame;
 
 import javax.swing.*;
@@ -16,6 +18,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.text.SimpleDateFormat;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class RegisterForSection extends JPanel {
 
@@ -23,16 +28,13 @@ public class RegisterForSection extends JPanel {
     private final SectionService sectionService;
     private final CourseService courseService;
     private final StudentRegistrationService regService;
+    private final StudentQueryService queryService;
     private final UserAuthDAO userAuthDAO = new UserAuthDAO();
 
-    // -----------------------------------------
-    // Rounded card panel
-    // -----------------------------------------
+    // ---------- Rounded card panel ----------
     class RoundedPanel extends JPanel {
         private final int radius = 20;
-
         public RoundedPanel() { setOpaque(false); }
-
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -44,20 +46,22 @@ public class RegisterForSection extends JPanel {
     }
 
     public RegisterForSection(MainFrame mainFrame) {
-
         this.mainFrame = mainFrame;
         this.sectionService = new SectionService();
         this.courseService = new CourseService();
         this.regService = new StudentRegistrationService();
+        this.queryService = new StudentQueryService();
 
         // ---------- ROLE CHECK ----------
         if (!SessionManager.isLoggedIn() ||
                 !"STUDENT".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
 
             JOptionPane.showMessageDialog(
-                    this, "Access Denied: Students Only",
-                    "Access Error", JOptionPane.ERROR_MESSAGE);
-
+                    this,
+                    "Access Denied: Students Only",
+                    "Access Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
             return;
         }
@@ -75,7 +79,7 @@ public class RegisterForSection extends JPanel {
                     SwingConstants.CENTER);
             banner.setFont(new Font("Segoe UI", Font.BOLD, 16));
 
-            bp.add(banner);
+            bp.add(banner, BorderLayout.CENTER);
             add(bp, BorderLayout.NORTH);
         }
 
@@ -86,17 +90,20 @@ public class RegisterForSection extends JPanel {
         title.setBorder(new EmptyBorder(20, 0, 20, 0));
         add(title, BorderLayout.PAGE_START);
 
-        // ---------- ROUNDED CARD ----------
+        // ---------- MAIN CARD ----------
         RoundedPanel card = new RoundedPanel();
         card.setLayout(new BorderLayout());
         card.setBorder(new EmptyBorder(25, 40, 25, 40));
         add(card, BorderLayout.CENTER);
 
-        // ---------- TABLE ----------
-        String[] cols = {"Section", "Course", "Instructor", "Time", "Room", "Capacity", "Deadline"};
+        // ---------- TABLE MODEL ----------
+        String[] cols = {"Section", "Course", "Instructor", "Time", "Room", "Seats Left", "Deadline"};
 
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
-            public boolean isCellEditable(int r, int c) { return false; }
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
 
         JTable table = new JTable(model);
@@ -104,22 +111,21 @@ public class RegisterForSection extends JPanel {
         table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 15));
         table.setRowHeight(28);
 
-        // *** CRITICAL FIX: Stop shrinking + enable horizontal scroll ***
+        // Horizontal scrolling + fixed preferred widths
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-
-        table.getColumnModel().getColumn(0).setPreferredWidth(180); // Section
-        table.getColumnModel().getColumn(1).setPreferredWidth(220); // Course
-        table.getColumnModel().getColumn(2).setPreferredWidth(120); // Instructor
+        table.getColumnModel().getColumn(0).setPreferredWidth(200); // Section
+        table.getColumnModel().getColumn(1).setPreferredWidth(240); // Course
+        table.getColumnModel().getColumn(2).setPreferredWidth(130); // Instructor
         table.getColumnModel().getColumn(3).setPreferredWidth(170); // Time
         table.getColumnModel().getColumn(4).setPreferredWidth(100); // Room
-        table.getColumnModel().getColumn(5).setPreferredWidth(90);  // Capacity
+        table.getColumnModel().getColumn(5).setPreferredWidth(120); // Seats Left
         table.getColumnModel().getColumn(6).setPreferredWidth(170); // Deadline
 
         JScrollPane scroll = new JScrollPane(table);
         scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         card.add(scroll, BorderLayout.CENTER);
 
-        // ---------- BUTTONS ----------
+        // ---------- BOTTOM BUTTONS ----------
         JButton registerBtn = new JButton("Register");
         JButton backBtn = new JButton("Back");
 
@@ -132,7 +138,7 @@ public class RegisterForSection extends JPanel {
         bottom.add(backBtn);
         add(bottom, BorderLayout.SOUTH);
 
-        // Load data
+        // Load initial data
         loadSections(model);
 
         // ---------- REGISTER ACTION ----------
@@ -141,17 +147,23 @@ public class RegisterForSection extends JPanel {
             if (MaintenanceChecker.isMaintenanceOn() &&
                     !"ADMIN".equals(SessionManager.getCurrentUserRole())) {
 
-                JOptionPane.showMessageDialog(this,
+                JOptionPane.showMessageDialog(
+                        this,
                         "Registration disabled — Maintenance Mode ON",
-                        "Maintenance", JOptionPane.WARNING_MESSAGE);
+                        "Maintenance",
+                        JOptionPane.WARNING_MESSAGE
+                );
                 return;
             }
 
             int row = table.getSelectedRow();
             if (row == -1) {
-                JOptionPane.showMessageDialog(this,
+                JOptionPane.showMessageDialog(
+                        this,
                         "Select a section first!",
-                        "Error", JOptionPane.WARNING_MESSAGE);
+                        "Error",
+                        JOptionPane.WARNING_MESSAGE
+                );
                 return;
             }
 
@@ -159,69 +171,106 @@ public class RegisterForSection extends JPanel {
             Section sec = sectionService.getSectionByString(sectionText);
 
             if (sec == null) {
-                JOptionPane.showMessageDialog(this,
-                        "Section lookup failed!", "Error",
-                        JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Section lookup failed!",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
                 return;
             }
 
-            int sectionId = sec.getSectionId();
             int studentId = SessionManager.getCurrentUserId();
+            int sectionId = sec.getSectionId();
 
             try {
                 regService.register(studentId, sectionId);
 
-                JOptionPane.showMessageDialog(this,
+                JOptionPane.showMessageDialog(
+                        this,
                         "Successfully registered!",
-                        "Success", JOptionPane.INFORMATION_MESSAGE);
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
 
-                loadSections(model);
-            }
-            catch (AccessException ex2) {
-                JOptionPane.showMessageDialog(this,
+                loadSections(model);  // refresh available sections
+            } catch (AccessException ex2) {
+                JOptionPane.showMessageDialog(
+                        this,
                         ex2.getMessage(),
                         "Registration Failed",
-                        JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.ERROR_MESSAGE
+                );
             }
         });
 
         backBtn.addActionListener(e -> mainFrame.refreshStudentDashboard());
     }
 
-    // -------------------------------------------------------
-    // LOAD SECTIONS
-    // -------------------------------------------------------
+    // ---------- LOAD SECTIONS (only ones not already enrolled) ----------
     private void loadSections(DefaultTableModel model) {
         model.setRowCount(0);
 
+        int studentId = SessionManager.getCurrentUserId();
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy");
 
-        for (Section s : sectionService.getAllSections()) {
-
-            Course c = courseService.getCourseById(s.getCourseId());
-
-            String instructor = "TBA";
-            if (s.getInstructorId() != null) {
-                instructor = userAuthDAO.getUsernameByUserId(s.getInstructorId()).toUpperCase();
+        try {
+            // Build set of sectionIds the student is already in
+            Set<Integer> mySections = new HashSet<>();
+            List<Enrollment> myEnrollments = queryService.getMyEnrollments(studentId);
+            for (Enrollment e : myEnrollments) {
+                mySections.add(e.getSectionId());
             }
 
-            model.addRow(new Object[]{
-                    s.toString().toUpperCase(),
-                    c != null ? c.getCode().toUpperCase() + " - " + c.getTitle() : "N/A",
-                    instructor,
-                    s.getDayTime(),
-                    s.getRoom().toUpperCase(),
-                    s.getCapacity(),
-                    (s.getRegistrationDeadline() != null)
-                            ? sdf.format(s.getRegistrationDeadline())
-                            : "N/A"
-            });
+            // Loop through all sections
+            List<Section> allSections = sectionService.getAllSections();
+            for (Section s : allSections) {
+
+                // Skip sections the student is already registered in
+                if (mySections.contains(s.getSectionId())) {
+                    continue;
+                }
+
+                Course c = courseService.getCourseById(s.getCourseId());
+
+                // Instructor username
+                String instructor = "TBA";
+                if (s.getInstructorId() != null) {
+                    instructor = userAuthDAO
+                            .getUsernameByUserId(s.getInstructorId())
+                            .toUpperCase();
+                }
+
+                // Seats left
+                int totalCap = s.getCapacity();
+                int enrolledCount = queryService.getEnrollmentsBySection(s.getSectionId()).size();
+                int remaining = Math.max(0, totalCap - enrolledCount);
+                String seatsText = remaining + " / " + totalCap;
+
+                model.addRow(new Object[]{
+                        s.toString().toUpperCase(),                               // Section (rich string)
+                        (c != null) ? (c.getCode().toUpperCase() + " - " + c.getTitle()) : "N/A",
+                        instructor,
+                        s.getDayTime(),
+                        s.getRoom().toUpperCase(),
+                        seatsText,
+                        (s.getRegistrationDeadline() != null)
+                                ? sdf.format(s.getRegistrationDeadline())
+                                : "N/A"
+                });
+            }
+
+        } catch (AccessException ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Failed to load sections: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
-    // -------------------------------------------------------
-    // BUTTON STYLE
-    // -------------------------------------------------------
+    // ---------- BUTTON STYLE ----------
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btn.setForeground(Color.WHITE);
@@ -231,8 +280,12 @@ public class RegisterForSection extends JPanel {
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) { btn.setBackground(hover); }
-            public void mouseExited(java.awt.event.MouseEvent evt) { btn.setBackground(normal); }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btn.setBackground(hover);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btn.setBackground(normal);
+            }
         });
     }
 }
