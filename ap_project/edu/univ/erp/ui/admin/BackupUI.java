@@ -1,5 +1,6 @@
 package edu.univ.erp.ui.admin;
 
+import edu.univ.erp.data.BackupDAO;
 import edu.univ.erp.ui.common.MainFrame;
 
 import javax.swing.*;
@@ -7,62 +8,91 @@ import java.awt.*;
 
 public class BackupUI extends JPanel {
 
+    private BackupDAO backupDAO = new BackupDAO();
+
+    class RoundedPanel extends JPanel {
+        private int cornerRadius = 20;
+        public RoundedPanel() { setOpaque(false); }
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(Color.WHITE);
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius);
+        }
+    }
+
     public BackupUI(MainFrame mainFrame) {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
 
-        // Title
-        JLabel title = new JLabel("Backup Database", SwingConstants.CENTER);
+        // ---------- HEADER ----------
+        JPanel header = new JPanel();
+        header.setBackground(new Color(52, 152, 219));
+        header.setBorder(BorderFactory.createEmptyBorder(25, 0, 25, 0));
+        JLabel title = new JLabel("Backup Database");
+        title.setForeground(Color.WHITE);
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        title.setBorder(BorderFactory.createEmptyBorder(40, 0, 40, 0));
-        add(title, BorderLayout.NORTH);
+        header.add(title);
+        add(header, BorderLayout.NORTH);
 
-        // Center panel
-        JPanel center = new JPanel();
-        center.setBackground(Color.WHITE);
-        center.setBorder(BorderFactory.createEmptyBorder(50, 200, 50, 200));
-        center.setLayout(new GridLayout(3, 1, 20, 20));
+        // ---------- FORM ----------
+        JPanel wrapper = new JPanel(new GridBagLayout());
+        wrapper.setBackground(new Color(245, 245, 245));
 
-        JLabel info = new JLabel("Click the button below to create a backup of the database.", SwingConstants.CENTER);
-        info.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        RoundedPanel form = new RoundedPanel();
+        form.setLayout(new GridLayout(2, 1, 20, 20));
+        form.setBorder(BorderFactory.createEmptyBorder(40, 50, 40, 50));
+
+        Font labelFont = new Font("Segoe UI", Font.BOLD, 16);
+
+        JLabel lastBackupLabel = new JLabel("Last Backup: " + backupDAO.getLastBackupTime());
+        lastBackupLabel.setFont(labelFont);
+        lastBackupLabel.setForeground(new Color(44, 62, 80));
 
         JButton backupBtn = new JButton("Backup Now");
-        styleButton(backupBtn, new Color(46, 204, 113), new Color(39, 174, 96));
+        styleButton(backupBtn, new Color(241, 196, 15), new Color(243, 156, 18));
 
-        JLabel statusLabel = new JLabel("", SwingConstants.CENTER);
-        statusLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        statusLabel.setForeground(new Color(231, 76, 60));
+        form.add(lastBackupLabel);
+        form.add(backupBtn);
 
+        wrapper.add(form);
+        add(wrapper, BorderLayout.CENTER);
+
+        // ---------- BUTTONS ----------
+        JPanel buttons = new JPanel();
+        buttons.setBackground(new Color(245, 245, 245));
+
+        JButton backBtn = new JButton("Back");
+        styleButton(backBtn, new Color(52, 152, 219), new Color(41, 128, 185));
+
+        buttons.add(backBtn);
+        add(buttons, BorderLayout.SOUTH);
+
+        // ---------- ACTIONS ----------
         backupBtn.addActionListener(e -> {
-            // TODO: Implement actual backup logic here
-            boolean success = true; // placeholder
-
-            if (success) {
-                statusLabel.setText("Database backup completed successfully!");
-                statusLabel.setForeground(new Color(46, 204, 113));
+            boolean ok = backupDAO.backupAll();
+            if (ok) {
+                JOptionPane.showMessageDialog(this, "Backup completed successfully!");
+                lastBackupLabel.setText("Last Backup: " + backupDAO.getLastBackupTime());
             } else {
-                statusLabel.setText("Database backup failed.");
-                statusLabel.setForeground(new Color(231, 76, 60));
+                JOptionPane.showMessageDialog(this, "Backup failed!", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        center.add(info);
-        center.add(backupBtn);
-        center.add(statusLabel);
-
-        add(center, BorderLayout.CENTER);
+        backBtn.addActionListener(e -> mainFrame.refreshAdminDashboard());
     }
 
     private void styleButton(JButton btn, Color normal, Color hover) {
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btn.setForeground(Color.WHITE);
         btn.setBackground(normal);
         btn.setFocusPainted(false);
-        btn.setBorder(BorderFactory.createEmptyBorder(12, 30, 12, 30));
+        btn.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent e) { btn.setBackground(hover); }
-            public void mouseExited(java.awt.event.MouseEvent e) { btn.setBackground(normal); }
+            public void mouseEntered(java.awt.event.MouseEvent evt) { btn.setBackground(hover); }
+            public void mouseExited(java.awt.event.MouseEvent evt) { btn.setBackground(normal); }
         });
     }
 }
