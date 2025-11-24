@@ -152,6 +152,11 @@ public class ChangePasswordUI extends JPanel {
             return;
         }
 
+        if (oldPass.equals(newPass)) {
+            statusLabel.setText("New password cannot be same as old password.");
+            return;
+        }
+
         int userId = SessionManager.getCurrentUserId();
 
         boolean ok = AuthHelper.changePassword(userId, oldPass, newPass);
