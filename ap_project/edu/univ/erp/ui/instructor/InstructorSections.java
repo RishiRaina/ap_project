@@ -23,10 +23,9 @@ public class InstructorSections extends JPanel {
     private final InstructorQueryService queryService;
     private final CourseService courseService;
 
-    // Store the table so we can use it in viewStudents()
-    private JTable sectionTable;
+    private JTable sectionTable;  // reference for action buttons
 
-    // Rounded card panel like admin screens
+    // ------------------ Rounded Card Panel ------------------
     class RoundedPanel extends JPanel {
         private final int cornerRadius = 20;
 
@@ -42,12 +41,22 @@ public class InstructorSections extends JPanel {
         }
     }
 
+    // ------------------ Constructor ------------------
     public InstructorSections(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         this.queryService = new InstructorQueryService();
         this.courseService = new CourseService();
-        if (!SessionManager.isLoggedIn() || !"INSTRUCTOR".equals(SessionManager.getCurrentUserRole())) {
-            JOptionPane.showMessageDialog(this, "Access Denied: Instructors only.", "Access Error", JOptionPane.ERROR_MESSAGE);
+
+        // -------- ROLE CHECK --------
+        if (!SessionManager.isLoggedIn() ||
+                !"INSTRUCTOR".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Access Denied: Instructors only.",
+                    "Access Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
             return;
         }
@@ -55,57 +64,61 @@ public class InstructorSections extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
 
-        // =============== MAINTENANCE BANNER ===============
+        // ------------------ MAINTENANCE BANNER ------------------
         if (MaintenanceChecker.isMaintenanceOn()) {
             JPanel bannerPanel = new JPanel(new BorderLayout());
             bannerPanel.setBackground(new Color(255, 179, 71));
             bannerPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-            JLabel banner = new JLabel(
-                    "System Under Maintenance — VIEW ONLY",
-                    SwingConstants.CENTER
-            );
+            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
             banner.setFont(new Font("Segoe UI", Font.BOLD, 16));
             bannerPanel.add(banner, BorderLayout.CENTER);
+
             add(bannerPanel, BorderLayout.NORTH);
         }
 
-        // =============== HEADER ===============
+        // ------------------ HEADER ------------------
         JLabel title = new JLabel("My Sections", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
         title.setForeground(new Color(52, 152, 219));
         title.setBorder(new EmptyBorder(20, 0, 20, 0));
         add(title, BorderLayout.PAGE_START);
 
-        // =============== TABLE CARD ===============
+        // ------------------ TABLE CARD ------------------
         RoundedPanel card = new RoundedPanel();
         card.setLayout(new BorderLayout());
         card.setBorder(new EmptyBorder(20, 40, 20, 40));
 
-        String[] cols = {"Section ", "Course", "Title", "Day/Time", "Room", "Action"};
+        // ------- IMPORTANT: Hidden ID column added at the end -------
+        String[] cols = {"Section", "Course", "Title", "Day/Time", "Room", "Action", "SECTION_ID"};
 
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             @Override
-            public boolean isCellEditable(int row, int col) {
-                return col == 5; // Only Action column
+            public boolean isCellEditable(int row, int column) {
+                return column == 5;  // ONLY action column editable
             }
         };
 
         sectionTable = new JTable(model);
         sectionTable.setRowHeight(30);
-        sectionTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 16));
         sectionTable.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        sectionTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 16));
 
+        // Action button styling
         sectionTable.getColumn("Action").setCellRenderer(new ActionButtonRenderer());
         sectionTable.getColumn("Action").setCellEditor(new ActionButtonEditor(new JCheckBox(), this));
 
+        // Load content
         loadMySections(model);
+
+        // ----- Hide INTERNAL column (SECTION_ID) from view -----
+        sectionTable.removeColumn(sectionTable.getColumnModel().getColumn(6));
 
         JScrollPane scroll = new JScrollPane(sectionTable);
         card.add(scroll, BorderLayout.CENTER);
         add(card, BorderLayout.CENTER);
 
-        // =============== BACK BUTTON ===============
+        // ------------------ BACK BUTTON ------------------
         JButton backBtn = new JButton("Back");
         styleButton(backBtn, new Color(52, 152, 219), new Color(41, 128, 185));
         backBtn.addActionListener(e -> mainFrame.refreshInstructorDashboard());
@@ -116,23 +129,30 @@ public class InstructorSections extends JPanel {
         add(bottom, BorderLayout.SOUTH);
     }
 
+    // ------------------ Load Sections ------------------
     public void loadMySections(DefaultTableModel model) {
         model.setRowCount(0);
+
         try {
             int instructorId = SessionManager.getCurrentUserId();
-            List<Section> list = queryService.getMySections(instructorId);
+            List<Section> sections = queryService.getMySections(instructorId);
 
-            for (Section s : list) {
+            for (Section s : sections) {
                 Course c = courseService.getCourseById(s.getCourseId());
+
                 model.addRow(new Object[]{
                         s.toString().toUpperCase(),
                         c != null ? c.getCode().toUpperCase() : "N/A",
                         c != null ? c.getTitle().toUpperCase() : "N/A",
                         s.getDayTime().toUpperCase(),
                         s.getRoom().toUpperCase(),
-                        "View Students"
+                        "View Students",
+
+                        // REAL SECTION ID stored here (hidden column)
+                        s.getSectionId()
                 });
             }
+
         } catch (AccessException ex) {
             JOptionPane.showMessageDialog(
                     this,
@@ -143,42 +163,31 @@ public class InstructorSections extends JPanel {
         }
     }
 
-    // called by ActionButtonEditor when "View Students" clicked
+    // ------------------ VIEW STUDENTS HANDLER ------------------
     public void viewStudents(int row) {
         try {
-            String secText = (String) sectionTable.getValueAt(row, 0);
-            int secId = extractSectionId(secText);
+            // Retrieve REAL sectionId from hidden column
+            int sectionId = (int) sectionTable.getModel().getValueAt(row, 6);
 
+            InstructorSectionStudents panel = new InstructorSectionStudents(mainFrame, sectionId);
 
-            InstructorSectionStudents panel = new InstructorSectionStudents(mainFrame, secId);
-
-            // Find the current InstructorDashboard container
-            InstructorDashboard dash = (InstructorDashboard)
-                    SwingUtilities.getAncestorOfClass(InstructorDashboard.class, this);
+            // Display inside dashboard frame if possible
+            InstructorDashboard dash =
+                    (InstructorDashboard) SwingUtilities.getAncestorOfClass(InstructorDashboard.class, this);
 
             if (dash != null) {
-                dash.setCenter(panel);   // show inside dashboard center
+                dash.setCenter(panel);
             } else {
-                // fallback – card layout navigation
                 mainFrame.addScreen("instructor_section_students", panel);
                 mainFrame.showScreen("instructor_section_students");
             }
 
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-    private int extractSectionId(String txt) {
-        // text format could be like this , to extract id  "SECTION 4 - MON 9 @ C103"
-        try {
-            String[] parts = txt.split(" ");
-            return Integer.parseInt(parts[1]);   // 4
-        } catch (Exception e) {
-            return -1;
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-
+    // ------------------ Button Styling ------------------
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btn.setForeground(Color.WHITE);

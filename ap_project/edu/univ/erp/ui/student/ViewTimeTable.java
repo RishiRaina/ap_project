@@ -9,6 +9,8 @@ import edu.univ.erp.domain.Enrollment;
 import edu.univ.erp.domain.Section;
 import edu.univ.erp.service.StudentQueryService;
 import edu.univ.erp.ui.common.MainFrame;
+import java.util.Map;
+import java.util.HashMap;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -71,22 +73,87 @@ public class ViewTimeTable extends JPanel {
         loadTimetable(model);
     }
 
-    private void loadTimetable(DefaultTableModel model)  {
+    private void loadTimetable(DefaultTableModel model) {
         model.setRowCount(0);
+
         int studentId = SessionManager.getCurrentUserId();
+
+        // define order for days
+        Map<String, Integer> dayOrder = new HashMap<>();
+        dayOrder.put("Mon", 1);
+        dayOrder.put("Tue", 2);
+        dayOrder.put("Wed", 3);
+        dayOrder.put("Thu", 4);
+        dayOrder.put("Fri", 5);
+        dayOrder.put("Sat", 6);
+        dayOrder.put("Sun", 7);
+
+        class Entry {
+            String day;
+            String time;
+            String room;
+            String code;
+            String title;
+            int dayIndex;
+            int timeInt;
+        }
+
+        List<Entry> list = new java.util.ArrayList<>();
+
         try {
             List<Enrollment> enrollments = queryService.getMyEnrollments(studentId);
+
             for (Enrollment e : enrollments) {
+
                 Section sec = queryService.getSection(e.getSectionId());
                 if (sec == null) continue;
+
                 Course c = queryService.getCourseById(sec.getCourseId());
-                model.addRow(new Object[]{sec.getDayTime(), sec.getRoom(), c != null ? c.getCode() : "N/A", c != null ? c.getTitle() : "N/A"});
+                if (c == null) continue;
+
+                // parse day + time from "Mon 10:00"
+                String[] parts = sec.getDayTime().split(" ");
+                if (parts.length < 2) continue;
+
+                String day = parts[0];
+                String time = parts[1];
+
+                int timeInt = Integer.parseInt(time.replace(":", "")); // 10:00 → 1000
+                int dayIdx = dayOrder.getOrDefault(day, 99);
+
+                Entry entry = new Entry();
+                entry.day = day;
+                entry.time = time;
+                entry.room = sec.getRoom();
+                entry.code = c.getCode();
+                entry.title = c.getTitle();
+                entry.dayIndex = dayIdx;
+                entry.timeInt = timeInt;
+
+                list.add(entry);
+            }
+
+            // sort by day then time
+            list.sort((a, b) -> {
+                if (a.dayIndex != b.dayIndex)
+                    return Integer.compare(a.dayIndex, b.dayIndex);
+                return Integer.compare(a.timeInt, b.timeInt);
+            });
+
+            // add sorted rows
+            for (Entry e : list) {
+                model.addRow(new Object[]{
+                        e.day + " " + e.time,
+                        e.room,
+                        e.code,
+                        e.title
+                });
             }
 
         } catch (AccessException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Access Error", JOptionPane.ERROR_MESSAGE);
-            mainFrame.showScreen(MainFrame.STUDENT_DASH);
         }
     }
+
 
 }
