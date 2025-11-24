@@ -1,9 +1,7 @@
 package edu.univ.erp.ui.student;
 
 import javax.swing.*;
-import javax.swing.table.TableCellEditor;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 
 public class ButtonEditor extends DefaultCellEditor {
 
@@ -17,12 +15,21 @@ public class ButtonEditor extends DefaultCellEditor {
         this.parent = parent;
 
         button = new JButton("Drop");
-        button.addActionListener((ActionEvent e) -> fireEditingStopped());
+
+        button.addActionListener(e -> {
+            clicked = true;
+            // DO NOT call fireEditingStopped directly!
+            SwingUtilities.invokeLater(() -> {
+                parent.dropEnrollment(enrollmentId);
+                cancelCellEditing();   // ← MAGIC FIX
+            });
+        });
     }
 
     @Override
-    public Component getTableCellEditorComponent(JTable table, Object value,
-                                                 boolean isSelected, int row, int column) {
+    public Component getTableCellEditorComponent(
+            JTable table, Object value, boolean isSelected, int row, int column) {
+
         enrollmentId = (int) table.getValueAt(row, 0);
         clicked = true;
         return button;
@@ -30,16 +37,19 @@ public class ButtonEditor extends DefaultCellEditor {
 
     @Override
     public Object getCellEditorValue() {
-        if (clicked) {
-            parent.dropEnrollment(enrollmentId);
-        }
-        clicked = false;
-        return "Drop";
+        return null;   // JTable will not write anything back
     }
 
     @Override
     public boolean stopCellEditing() {
+        // DO NOT let JTable write anything to model
         clicked = false;
         return super.stopCellEditing();
+    }
+
+    @Override
+    public void cancelCellEditing() {
+        // This completely bypasses JTable.setValueAt()
+        super.cancelCellEditing();
     }
 }

@@ -63,26 +63,35 @@ public class StudentRegistrationService {
     //this bit is for dropping a section
 
     public void drop(int studentId, int enrollmentId) throws AccessException {
+
         AccessControl.assertAllowedWithMaintenance(AccessControl.Role.STUDENT, AccessControl.Actions.DROP_SECTION);
-        AccessControl.assertAllowedWithMaintenance(
-                AccessControl.Role.STUDENT,
-                AccessControl.Actions.DROP_SECTION);
-        //fetch the enrollment
+
+        // fetch the enrollment
         Enrollment e = enrollmentDAO.getEnrollmentById(enrollmentId);
         if (e == null)
             throw new AccessException("Invalid enrollment.");
+
         // ownership check
         AccessControl.assertStudentOwnsEnrollment(studentId, e.getStudentId(), AccessControl.Actions.DROP_SECTION);
 
-        // drop before deadline
+        // drop deadline check = 14 days after registration deadline
         Section sec = sectionDAO.getSectionById(e.getSectionId());
-        if (LocalDate.now().isAfter(sec.getRegistrationDeadline().toLocalDate()))
-            throw new AccessException("Cannot drop after deadline.");
 
-        // actual droppinf done here
+        LocalDate regDeadline = sec.getRegistrationDeadline().toLocalDate();
+        LocalDate dropDeadline = regDeadline.plusDays(14);
+
+        if (LocalDate.now().isAfter(dropDeadline)) {
+            throw new AccessException(
+                    "Drop deadline has passed.\nYou can drop only within 14 days after registration deadline."
+            );
+        }
+
+        // actual dropping
         boolean removed = enrollmentDAO.deleteEnrollment(enrollmentId);
+
         if (!removed)
             throw new AccessException("Failed to drop enrollment.");
     }
+
 
 }
