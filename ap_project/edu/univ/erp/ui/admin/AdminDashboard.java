@@ -33,7 +33,6 @@ public class AdminDashboard extends JPanel {
         JPanel topButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         topButtons.setOpaque(false);
 
-        // Change Password button
         JButton changePassBtn = new JButton("Change Password");
         styleTopBarButton(changePassBtn, new Color(46, 204, 113), new Color(39, 174, 96));
         changePassBtn.addActionListener(e -> {
@@ -41,7 +40,6 @@ public class AdminDashboard extends JPanel {
             mainFrame.showScreen("adminChangePassword");
         });
 
-        // Backup button
         JButton backupBtn = new JButton("Backup");
         styleTopBarButton(backupBtn, new Color(241, 196, 15), new Color(243, 156, 18));
         backupBtn.addActionListener(e -> {
@@ -49,7 +47,6 @@ public class AdminDashboard extends JPanel {
             mainFrame.showScreen("backupUI");
         });
 
-        // Restore button
         JButton restoreBtn = new JButton("Restore");
         styleTopBarButton(restoreBtn, new Color(230, 126, 34), new Color(211, 84, 0));
         restoreBtn.addActionListener(e -> {
@@ -57,7 +54,6 @@ public class AdminDashboard extends JPanel {
             mainFrame.showScreen("restoreUI");
         });
 
-        // Logout button
         JButton logoutBtn = new JButton("Logout");
         styleTopBarButton(logoutBtn, new Color(231, 76, 60), new Color(192, 57, 43));
         logoutBtn.addActionListener(e -> {
@@ -80,12 +76,14 @@ public class AdminDashboard extends JPanel {
         sidebar.setBackground(new Color(44, 62, 80));
         sidebar.setBorder(new EmptyBorder(20, 10, 20, 10));
 
+        // NEW ITEM ADDED HERE ▼▼▼
         String[] menuItems = {
                 "Add Course", "Update Course", "Delete Course",
                 "Add Section", "Assign Instructor",
                 "Add Student", "Add Instructor",
                 "Enroll Student", "Unenroll Student",
                 "View All Students", "View All Instructors",
+                "Update Grade",                      // <-- NEW BUTTON
                 "Toggle Maintenance Mode"
         };
 
@@ -112,7 +110,6 @@ public class AdminDashboard extends JPanel {
         b.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
         b.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Hover effect
         b.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
                 b.setBackground(new Color(41, 128, 185));
@@ -158,6 +155,9 @@ public class AdminDashboard extends JPanel {
                 break;
             case "View All Instructors":
                 openContent(new ViewAllInstructorsUI(mainFrame));
+                break;
+            case "Update Grade":     // <-- NEW CASE
+                openContent(new UpdateGradeUI(mainFrame));
                 break;
             case "Toggle Maintenance Mode":
                 openContent(new ToggleMaintenanceUI(mainFrame));

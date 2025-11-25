@@ -10,7 +10,7 @@ public class BackupDAO {
     private final String AUTH_DB_URL = "jdbc:mysql://localhost:3306/auth_db";
     private final String ERP_DB_URL = "jdbc:mysql://localhost:3306/erp_db";
     private final String DB_USER = "root";
-    private final String DB_PASS = "nehal-011";
+    private final String DB_PASS = "qwerty";
 
     private final String BACKUP_FOLDER = "backups/";
 
