@@ -8,14 +8,9 @@ public class AuthDatabaseConnection {
 
     private static final String URL = "jdbc:mysql://localhost:3306/auth_db";
     private static final String USER = "root";
-    private static final String PASSWORD = "qwerty";
+    private static final String PASSWORD = "nehal-011";
 
-    public static Connection getConnection() {
-        try {
-            return DriverManager.getConnection(URL, USER, PASSWORD);
-        } catch (SQLException e) {
-            System.err.println("Auth database connection failed: " + e.getMessage());
-            return null;
-        }
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 }

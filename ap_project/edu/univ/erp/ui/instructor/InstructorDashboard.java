@@ -12,7 +12,7 @@ import java.awt.event.MouseEvent;
 
 public class InstructorDashboard extends JPanel {
 
-    private MainFrame mainFrame;
+    private final MainFrame mainFrame;
     private JPanel mainContent;
 
     public InstructorDashboard(MainFrame mainFrame) {
@@ -31,30 +31,17 @@ public class InstructorDashboard extends JPanel {
         title.setForeground(Color.WHITE);
         header.add(title, BorderLayout.WEST);
 
-        // Top buttons panel
+        // ===================== TOP BUTTONS =====================
         JPanel topButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         topButtons.setOpaque(false);
 
-        // Change Password button
-        JButton changePassBtn = new JButton("Change Password");
-        changePassBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        changePassBtn.setForeground(Color.WHITE);
-        changePassBtn.setBackground(new Color(46, 204, 113));
-        changePassBtn.setFocusPainted(false);
-        changePassBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        JButton changePassBtn = styledTopButton("Change Password", new Color(46, 204, 113));
         changePassBtn.addActionListener(e -> {
-            // Switch to Change Password UI
-            mainFrame.addScreen("instructorChangePassword", new InstructorChangePasswordUI(mainFrame));
-            mainFrame.showScreen("instructorChangePassword");
+            mainFrame.addScreen("instructor_change_password", new InstructorChangePasswordUI(mainFrame));
+            mainFrame.showScreen("instructor_change_password");
         });
 
-        // Logout button
-        JButton logoutBtn = new JButton("Logout");
-        logoutBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        logoutBtn.setForeground(Color.WHITE);
-        logoutBtn.setBackground(new Color(231, 76, 60));
-        logoutBtn.setFocusPainted(false);
-        logoutBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        JButton logoutBtn = styledTopButton("Logout", new Color(231, 76, 60));
         logoutBtn.addActionListener(e -> {
             SessionManager.clear();
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
@@ -62,53 +49,52 @@ public class InstructorDashboard extends JPanel {
 
         topButtons.add(changePassBtn);
         topButtons.add(logoutBtn);
-
         header.add(topButtons, BorderLayout.EAST);
+
         add(header, BorderLayout.NORTH);
 
         // ===================== SIDEBAR =====================
-        JPanel sidebar = new JPanel();
-        sidebar.setLayout(new GridLayout(0, 1, 0, 10));
+        JPanel sidebar = new JPanel(new GridLayout(0, 1, 0, 10));
         sidebar.setBackground(new Color(44, 62, 80));
         sidebar.setBorder(new EmptyBorder(20, 10, 20, 10));
 
-        String[] menuItems = {
+        String[] menu = {
                 "My Sections",
                 "View Class Stats",
-                "Download Grades (CSV)"
+                "Download Grades (CSV)",
+                "Notifications"
         };
 
-        for (String name : menuItems) {
-            JButton btn = createSidebarButton(name);
+        for (String m : menu) {
+            JButton btn = sidebarButton(m);
+            btn.addActionListener(e -> handleAction(m));
             sidebar.add(btn);
-            btn.addActionListener(e -> handleAction(name));
         }
 
         add(sidebar, BorderLayout.WEST);
 
-        // ===================== CENTER CONTENT =====================
+        // ===================== CENTER AREA =====================
         mainContent = new JPanel(new BorderLayout());
         mainContent.setBackground(new Color(245, 245, 245));
         add(mainContent, BorderLayout.CENTER);
 
-        // Default center view = My Sections
         setCenter(new InstructorSections(mainFrame));
 
         // ===================== MAINTENANCE BANNER =====================
         if (MaintenanceChecker.isMaintenanceOn()) {
-            JPanel bannerPanel = new JPanel(new BorderLayout());
-            bannerPanel.setBackground(new Color(255, 179, 71));
-            bannerPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+            JPanel warn = new JPanel(new BorderLayout());
+            warn.setBackground(new Color(255, 179, 71));
+            warn.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
-            banner.setFont(new Font("Segoe UI", Font.BOLD, 16));
+            JLabel msg = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
+            msg.setFont(new Font("Segoe UI", Font.BOLD, 16));
 
-            bannerPanel.add(banner, BorderLayout.CENTER);
-            add(bannerPanel, BorderLayout.SOUTH);
+            warn.add(msg);
+            add(warn, BorderLayout.SOUTH);
         }
     }
 
-    private JButton createSidebarButton(String text) {
+    private JButton sidebarButton(String text) {
         JButton b = new JButton(text);
         b.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         b.setFocusPainted(false);
@@ -117,17 +103,25 @@ public class InstructorDashboard extends JPanel {
         b.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
         b.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Hover effect
         b.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
                 b.setBackground(new Color(41, 128, 185));
             }
-
             public void mouseExited(MouseEvent e) {
                 b.setBackground(new Color(52, 73, 94));
             }
         });
+        return b;
+    }
 
+    private JButton styledTopButton(String text, Color color) {
+        JButton b = new JButton(text);
+        b.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        b.setForeground(Color.WHITE);
+        b.setBackground(color);
+        b.setFocusPainted(false);
+        b.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        b.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
         return b;
     }
 
@@ -142,19 +136,18 @@ public class InstructorDashboard extends JPanel {
             case "Download Grades (CSV)":
                 setCenter(new ExportGrades(mainFrame));
                 break;
+
+            case "Notifications":
+                setCenter(new InstructorNotificationsPanel());
+                break;
+
         }
     }
 
-    // PUBLIC method for children to change the center content
     public void setCenter(JPanel panel) {
         mainContent.removeAll();
         mainContent.add(panel, BorderLayout.CENTER);
         mainContent.revalidate();
         mainContent.repaint();
-    }
-
-    // alias, just in case some old code calls this
-    public void openContent(JPanel panel) {
-        setCenter(panel);
     }
 }

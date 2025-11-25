@@ -11,11 +11,12 @@ import java.awt.event.MouseEvent;
 
 public class AdminDashboard extends JPanel {
 
-    private MainFrame mainFrame;
+    private final MainFrame mainFrame;
     private JPanel mainContent;
 
     public AdminDashboard(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
+
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
 
@@ -29,37 +30,29 @@ public class AdminDashboard extends JPanel {
         title.setForeground(Color.WHITE);
         header.add(title, BorderLayout.WEST);
 
-        // Top buttons panel
+        // ===================== TOP BUTTONS =====================
         JPanel topButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         topButtons.setOpaque(false);
 
-        // Change Password button
-        JButton changePassBtn = new JButton("Change Password");
-        styleTopBarButton(changePassBtn, new Color(46, 204, 113), new Color(39, 174, 96));
+        JButton changePassBtn = styledTopButton("Change Password", new Color(46, 204, 113));
         changePassBtn.addActionListener(e -> {
-            mainFrame.addScreen("adminChangePassword", new ChangePasswordUI(mainFrame));
-            mainFrame.showScreen("adminChangePassword");
+            mainFrame.addScreen("admin_change_password", new ChangePasswordUI(mainFrame));
+            mainFrame.showScreen("admin_change_password");
         });
 
-        // Backup button
-        JButton backupBtn = new JButton("Backup");
-        styleTopBarButton(backupBtn, new Color(241, 196, 15), new Color(243, 156, 18));
+        JButton backupBtn = styledTopButton("Backup", new Color(241, 196, 15));
         backupBtn.addActionListener(e -> {
-            mainFrame.addScreen("backupUI", new BackupUI(mainFrame));
-            mainFrame.showScreen("backupUI");
+            mainFrame.addScreen("backup_ui", new BackupUI(mainFrame));
+            mainFrame.showScreen("backup_ui");
         });
 
-        // Restore button
-        JButton restoreBtn = new JButton("Restore");
-        styleTopBarButton(restoreBtn, new Color(230, 126, 34), new Color(211, 84, 0));
+        JButton restoreBtn = styledTopButton("Restore", new Color(230, 126, 34));
         restoreBtn.addActionListener(e -> {
-            mainFrame.addScreen("restoreUI", new RestoreUI(mainFrame));
-            mainFrame.showScreen("restoreUI");
+            mainFrame.addScreen("restore_ui", new RestoreUI(mainFrame));
+            mainFrame.showScreen("restore_ui");
         });
 
-        // Logout button
-        JButton logoutBtn = new JButton("Logout");
-        styleTopBarButton(logoutBtn, new Color(231, 76, 60), new Color(192, 57, 43));
+        JButton logoutBtn = styledTopButton("Logout", new Color(231, 76, 60));
         logoutBtn.addActionListener(e -> {
             SessionManager.clear();
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
@@ -71,56 +64,62 @@ public class AdminDashboard extends JPanel {
         topButtons.add(logoutBtn);
 
         header.add(topButtons, BorderLayout.EAST);
-
         add(header, BorderLayout.NORTH);
 
         // ===================== SIDEBAR =====================
-        JPanel sidebar = new JPanel();
-        sidebar.setLayout(new GridLayout(0, 1, 0, 10));
+        JPanel sidebar = new JPanel(new GridLayout(0, 1, 0, 10));
         sidebar.setBackground(new Color(44, 62, 80));
         sidebar.setBorder(new EmptyBorder(20, 10, 20, 10));
 
-        String[] menuItems = {
+        String[] menu = {
                 "Add Course", "Update Course", "Delete Course",
                 "Add Section", "Assign Instructor",
                 "Add Student", "Add Instructor",
                 "Enroll Student", "Unenroll Student",
                 "View All Students", "View All Instructors",
-                "Toggle Maintenance Mode"
+                "Toggle Maintenance Mode","Send Notification"
         };
 
-        for (String name : menuItems) {
-            JButton btn = createSidebarButton(name);
+        for (String m : menu) {
+            JButton btn = sidebarButton(m);
+            btn.addActionListener(e -> handleAction(m));
             sidebar.add(btn);
-            btn.addActionListener(e -> handleAction(name));
         }
 
         add(sidebar, BorderLayout.WEST);
 
-        // ===================== CENTER CONTENT =====================
+        // ===================== CENTER AREA =====================
         mainContent = new JPanel(new BorderLayout());
         mainContent.setBackground(new Color(245, 245, 245));
+
         add(mainContent, BorderLayout.CENTER);
     }
 
-    private JButton createSidebarButton(String text) {
+    private JButton sidebarButton(String text) {
         JButton b = new JButton(text);
         b.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        b.setFocusPainted(false);
         b.setBackground(new Color(52, 73, 94));
         b.setForeground(Color.WHITE);
-        b.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
+        b.setFocusPainted(false);
         b.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        b.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
 
-        // Hover effect
         b.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) {
-                b.setBackground(new Color(41, 128, 185));
-            }
-            public void mouseExited(MouseEvent e) {
-                b.setBackground(new Color(52, 73, 94));
-            }
+            public void mouseEntered(MouseEvent e) { b.setBackground(new Color(41, 128, 185)); }
+            public void mouseExited(MouseEvent e) { b.setBackground(new Color(52, 73, 94)); }
         });
+
+        return b;
+    }
+
+    private JButton styledTopButton(String text, Color color) {
+        JButton b = new JButton(text);
+        b.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        b.setForeground(Color.WHITE);
+        b.setBackground(color);
+        b.setFocusPainted(false);
+        b.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        b.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
         return b;
     }
 
@@ -162,6 +161,11 @@ public class AdminDashboard extends JPanel {
             case "Toggle Maintenance Mode":
                 openContent(new ToggleMaintenanceUI(mainFrame));
                 break;
+
+            case "Send Notification":
+                openContent(new AdminNotificationBroadcastUI());
+                break;
+
         }
     }
 
@@ -170,23 +174,5 @@ public class AdminDashboard extends JPanel {
         mainContent.add(panel, BorderLayout.CENTER);
         mainContent.revalidate();
         mainContent.repaint();
-    }
-
-    private void styleTopBarButton(JButton btn, Color normal, Color hover) {
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btn.setForeground(Color.WHITE);
-        btn.setBackground(normal);
-        btn.setFocusPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
-
-        btn.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(MouseEvent e) {
-                btn.setBackground(hover);
-            }
-            public void mouseExited(MouseEvent e) {
-                btn.setBackground(normal);
-            }
-        });
     }
 }

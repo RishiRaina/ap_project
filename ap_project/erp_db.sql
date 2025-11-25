@@ -76,6 +76,16 @@ CREATE TABLE IF NOT EXISTS settings (
   value VARCHAR(255)
 );
 
+CREATE TABLE notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    target_user_id INT NULL,       -- null = broadcast by role / all
+    target_role VARCHAR(20) NULL,  -- 'STUDENT', 'INSTRUCTOR', 'ADMIN', 'ALL'
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+
 INSERT INTO settings (key_name, value)
 SELECT 'maintenance_on', 'false'
 WHERE NOT EXISTS (SELECT 1 FROM settings WHERE key_name = 'maintenance_on');

@@ -112,6 +112,29 @@ public class SectionDAO {
         return list;
     }
 
+    // NEW METHOD — Get instructor's user_id for a given section
+    public int getInstructorUserId(int sectionId) {
+        String sql = "SELECT instructor_id FROM sections WHERE section_id = ?";
+
+        try (Connection conn = ERPDatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, sectionId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                int val = rs.getInt("instructor_id");
+                return rs.wasNull() ? -1 : val;   // return -1 if null
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error getting instructor user ID: " + e.getMessage());
+        }
+
+        return -1;
+    }
+
+
     public boolean assignInstructor(int sectionId, int instructorId) {
         String sql = "UPDATE sections SET instructor_id = ? WHERE section_id = ?";
 

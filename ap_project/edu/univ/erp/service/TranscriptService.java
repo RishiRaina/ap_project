@@ -27,7 +27,18 @@ public class TranscriptService {
             if (sec == null) continue;
             Course c = courseDAO.getCourseById(sec.getCourseId());
             if (c == null) continue;
-            rows.add(new String[]{c.getCode().toUpperCase(), c.getTitle(), String.valueOf(c.getCredits()), e.getStatus(), finalGrade});
+
+            String sectionInfo = (sec != null ? sec.toString() : "N/A");
+
+            rows.add(new String[]{
+                    c.getCode(),
+                    c.getTitle(),
+                    String.valueOf(c.getCredits()),
+                    sectionInfo,
+                    e.getStatus(),
+                    finalGrade
+            });
+
         }
 
         return rows;

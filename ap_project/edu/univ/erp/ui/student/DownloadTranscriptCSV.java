@@ -78,7 +78,8 @@ public class DownloadTranscriptCSV extends JPanel {
         add(card, BorderLayout.CENTER);
 
         // -------- TABLE --------
-        String[] cols = {"Course Code", "Title", "Credits", "Status", "Final Grade"};
+        String[] cols = {"Course Code", "Title", "Credits", "Section", "Status", "Final Grade"};
+
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
