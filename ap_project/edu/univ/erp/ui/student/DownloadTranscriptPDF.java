@@ -37,12 +37,13 @@ public class DownloadTranscriptPDF extends JPanel {
         this.ts = new TranscriptService();
 
         // -------- ROLE CHECK --------
-        if (!SessionManager.isLoggedIn()
-                || !"STUDENT".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
+        if (!SessionManager.isLoggedIn() ||
+                !"STUDENT".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
 
             JOptionPane.showMessageDialog(this,
                     "Access Denied: Students only.",
                     "Access Error", JOptionPane.ERROR_MESSAGE);
+
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
             return;
         }
@@ -78,8 +79,16 @@ public class DownloadTranscriptPDF extends JPanel {
         card.setBorder(new EmptyBorder(25, 40, 25, 40));
         add(card, BorderLayout.CENTER);
 
-        // -------- TABLE --------
-        String[] cols = {"Course Code", "Title", "Credits", "Status", "Final Grade"};
+        // -------- TABLE (with SECTION column added) --------
+        String[] cols = {
+                "Course Code",
+                "Title",
+                "Credits",
+                "Section",
+                "Status",
+                "Final Grade"
+        };
+
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -93,7 +102,7 @@ public class DownloadTranscriptPDF extends JPanel {
         scroll.setBorder(null);
         card.add(scroll, BorderLayout.CENTER);
 
-        // -------- BOTTOM BUTTONS --------
+        // -------- BUTTONS --------
         JButton exportBtn = new JButton("Download PDF");
         JButton backBtn = new JButton("Back");
 
@@ -114,9 +123,11 @@ public class DownloadTranscriptPDF extends JPanel {
     }
 
     private void loadTranscript(DefaultTableModel model) {
-        model.setRowCount(0);
 
+        model.setRowCount(0);
         int studentId = SessionManager.getCurrentUserId();
+
+        // rows already include SECTION field now
         List<String[]> rows = ts.getTranscriptRows(studentId);
 
         for (String[] row : rows) {
@@ -131,6 +142,7 @@ public class DownloadTranscriptPDF extends JPanel {
         chooser.setSelectedFile(new File("transcript.pdf"));
 
         if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+
             boolean ok = ts.exportTranscriptPDF(studentId, chooser.getSelectedFile());
 
             if (ok) {
@@ -154,12 +166,8 @@ public class DownloadTranscriptPDF extends JPanel {
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btn.setBackground(hover);
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                btn.setBackground(normal);
-            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) { btn.setBackground(hover); }
+            public void mouseExited(java.awt.event.MouseEvent evt)  { btn.setBackground(normal); }
         });
     }
 }

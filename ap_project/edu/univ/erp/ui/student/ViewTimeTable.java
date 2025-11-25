@@ -1,6 +1,5 @@
 package edu.univ.erp.ui.student;
 
-import edu.univ.erp.access.AccessControl;
 import edu.univ.erp.access.AccessException;
 import edu.univ.erp.access.MaintenanceChecker;
 import edu.univ.erp.auth.SessionManager;
@@ -9,67 +8,111 @@ import edu.univ.erp.domain.Enrollment;
 import edu.univ.erp.domain.Section;
 import edu.univ.erp.service.StudentQueryService;
 import edu.univ.erp.ui.common.MainFrame;
-import java.util.Map;
-import java.util.HashMap;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 
 public class ViewTimeTable extends JPanel {
 
-    private MainFrame mainFrame;
-    private StudentQueryService queryService;
+    private final MainFrame mainFrame;
+    private final StudentQueryService queryService = new StudentQueryService();
+
+    // Rounded panel for consistency with other student screens
+    class RoundedPanel extends JPanel {
+        private final int radius = 20;
+        public RoundedPanel() { setOpaque(false); }
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(Color.WHITE);
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
+        }
+    }
 
     public ViewTimeTable(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-        this.queryService = new StudentQueryService();
 
-        if (!SessionManager.isLoggedIn() || !"STUDENT".equals(SessionManager.getCurrentUserRole())) {
-            JOptionPane.showMessageDialog(this, "Access Denied: Students only.", "Access Error", JOptionPane.ERROR_MESSAGE);
+        // -------- ROLE CHECK --------
+        if (!SessionManager.isLoggedIn()
+                || !"STUDENT".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
+
+            JOptionPane.showMessageDialog(this,
+                    "Access Denied: Students only.",
+                    "Access Error", JOptionPane.ERROR_MESSAGE);
+
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
-            return;   // stop with this screen after showing back to login screen
+            return;
         }
 
+        // -------- BASE LAYOUT --------
         setLayout(new BorderLayout());
+        setBackground(new Color(245, 245, 245));
 
-        JLabel banner=null;
+        // -------- MAINTENANCE BANNER --------
         if (MaintenanceChecker.isMaintenanceOn()) {
-            banner = new JLabel("System Under Maintenance - VIEW ONLY", SwingConstants.CENTER);
-            banner.setOpaque(true);
-            banner.setBackground(Color.ORANGE);
-            banner.setForeground(Color.BLACK);
-            banner.setFont(new Font("Arial", Font.BOLD, 16));
-            add(banner, BorderLayout.NORTH);
+            JPanel bannerPanel = new JPanel(new BorderLayout());
+            bannerPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+            bannerPanel.setBackground(new Color(255, 179, 71));
+
+            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
+            banner.setFont(new Font("Segoe UI", Font.BOLD, 16));
+
+            bannerPanel.add(banner);
+            add(bannerPanel, BorderLayout.NORTH);
         }
 
+        // -------- TITLE --------
         JLabel title = new JLabel("Timetable", SwingConstants.CENTER);
-        title.setFont(new Font("Arial", Font.BOLD, 28));
-        if(banner!=null){
-            add(title,BorderLayout.CENTER);
-        }
-        else{
-            add(title,BorderLayout.NORTH);
-        }
+        title.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        title.setForeground(new Color(52, 152, 219));
+        title.setBorder(new EmptyBorder(20, 0, 20, 0));
+        add(title, BorderLayout.PAGE_START);
 
+        // -------- TABLE CARD --------
+        RoundedPanel card = new RoundedPanel();
+        card.setLayout(new BorderLayout());
+        card.setBorder(new EmptyBorder(20, 40, 20, 40));
+        add(card, BorderLayout.CENTER);
 
-        // tbale structure
+        // -------- TABLE --------
         String[] cols = {"Day/Time", "Room", "Course Code", "Course Title"};
         DefaultTableModel model = new DefaultTableModel(cols, 0);
-
         JTable table = new JTable(model);
-        table.setRowHeight(25);
 
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        table.setRowHeight(30);
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 16));
 
-        //back button
+        card.add(new JScrollPane(table), BorderLayout.CENTER);
+
+        // -------- BACK BUTTON --------
         JButton backBtn = new JButton("Back");
-        JPanel bottom = new JPanel();
-        bottom.add(backBtn);
-        add(bottom, BorderLayout.SOUTH);
+        styleButton(backBtn, new Color(52, 152, 219), new Color(41, 128, 185));
 
+        JPanel bottom = new JPanel();
+        bottom.setBackground(new Color(245, 245, 245));
+        bottom.add(backBtn);
+
+        add(bottom, BorderLayout.SOUTH);
         backBtn.addActionListener(e -> mainFrame.refreshStudentDashboard());
+
+        // Load Timetable Data
         loadTimetable(model);
     }
 
@@ -78,72 +121,76 @@ public class ViewTimeTable extends JPanel {
 
         int studentId = SessionManager.getCurrentUserId();
 
-        // define order for days
-        Map<String, Integer> dayOrder = new HashMap<>();
-        dayOrder.put("Mon", 1);
-        dayOrder.put("Tue", 2);
-        dayOrder.put("Wed", 3);
-        dayOrder.put("Thu", 4);
-        dayOrder.put("Fri", 5);
-        dayOrder.put("Sat", 6);
-        dayOrder.put("Sun", 7);
+        // DAY ORDER (uppercase keys)
+        Map<String, Integer> dayOrder = Map.of(
+                "MON", 1, "TUE", 2, "WED", 3,
+                "THU", 4, "FRI", 5, "SAT", 6, "SUN", 7
+        );
 
         class Entry {
-            String day;
-            String time;
-            String room;
-            String code;
-            String title;
-            int dayIndex;
-            int timeInt;
+            String dayLabel, timeLabel, room, code, title;
+            int dayIdx, timeIdx;
         }
 
-        List<Entry> list = new java.util.ArrayList<>();
+        List<Entry> rows = new ArrayList<>();
 
         try {
-            List<Enrollment> enrollments = queryService.getMyEnrollments(studentId);
+            List<Enrollment> list = queryService.getMyEnrollments(studentId);
 
-            for (Enrollment e : enrollments) {
+            for (Enrollment en : list) {
 
-                Section sec = queryService.getSection(e.getSectionId());
-                if (sec == null) continue;
-
+                Section sec = queryService.getSection(en.getSectionId());
                 Course c = queryService.getCourseById(sec.getCourseId());
-                if (c == null) continue;
 
-                // parse day + time from "Mon 10:00"
-                String[] parts = sec.getDayTime().split(" ");
-                if (parts.length < 2) continue;
+                String raw = sec.getDayTime().trim().toUpperCase();
+                // EXAMPLES:
+                // "MON 11-1230"
+                // "TUE 10:00-11:30 @ C101"
 
-                String day = parts[0];
-                String time = parts[1];
-
-                int timeInt = Integer.parseInt(time.replace(":", "")); // 10:00 → 1000
+                // ------------ Extract DAY ------------
+                String day = raw.substring(0, 3);  // "MON"
                 int dayIdx = dayOrder.getOrDefault(day, 99);
 
-                Entry entry = new Entry();
-                entry.day = day;
-                entry.time = time;
-                entry.room = sec.getRoom();
-                entry.code = c.getCode();
-                entry.title = c.getTitle();
-                entry.dayIndex = dayIdx;
-                entry.timeInt = timeInt;
+                // ------------ Extract TIME ------------
+                String rawTime = raw.substring(3).trim();
 
-                list.add(entry);
+                // Remove room part after "@"
+                if (rawTime.contains("@")) {
+                    rawTime = rawTime.substring(0, rawTime.indexOf("@")).trim();
+                }
+
+                // Extract starting time
+                String start = rawTime.split("-")[0].trim();
+                start = start.replace(":", "");  // "10:00" → "1000"
+
+                if (start.length() == 3) start = "0" + start; // 900 → 0900
+
+                int timeIdx = 0;
+                try { timeIdx = Integer.parseInt(start); } catch (Exception ignored) {}
+
+                // -------- Create final row --------
+                Entry e = new Entry();
+                e.dayLabel = day;
+                e.timeLabel = rawTime;
+                e.room = sec.getRoom();
+                e.code = c.getCode();
+                e.title = c.getTitle();
+                e.dayIdx = dayIdx;
+                e.timeIdx = timeIdx;
+
+                rows.add(e);
             }
 
-            // sort by day then time
-            list.sort((a, b) -> {
-                if (a.dayIndex != b.dayIndex)
-                    return Integer.compare(a.dayIndex, b.dayIndex);
-                return Integer.compare(a.timeInt, b.timeInt);
+            // -------- SORT PROPERLY --------
+            rows.sort((a, b) -> {
+                if (a.dayIdx != b.dayIdx) return a.dayIdx - b.dayIdx;
+                return a.timeIdx - b.timeIdx;
             });
 
-            // add sorted rows
-            for (Entry e : list) {
+            // -------- ADD TO TABLE --------
+            for (Entry e : rows) {
                 model.addRow(new Object[]{
-                        e.day + " " + e.time,
+                        e.dayLabel + " " + e.timeLabel,
                         e.room,
                         e.code,
                         e.title
@@ -151,9 +198,25 @@ public class ViewTimeTable extends JPanel {
             }
 
         } catch (AccessException ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Access Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    ex.getMessage(),
+                    "Access Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
+    // -------- BUTTON STYLE --------
+    private void styleButton(JButton btn, Color normal, Color hover) {
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        btn.setForeground(Color.WHITE);
+        btn.setBackground(normal);
+        btn.setBorder(new EmptyBorder(10, 20, 10, 20));
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) { btn.setBackground(hover); }
+            public void mouseExited(java.awt.event.MouseEvent evt) { btn.setBackground(normal); }
+        });
+    }
 }

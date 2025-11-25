@@ -1,10 +1,13 @@
 package edu.univ.erp.ui.instructor;
 
+import edu.univ.erp.access.MaintenanceChecker;
+import edu.univ.erp.auth.SessionManager;
+import edu.univ.erp.data.NotificationsDAO;
 import edu.univ.erp.domain.Grade;
+import edu.univ.erp.domain.Notification;
+import edu.univ.erp.domain.Student;
 import edu.univ.erp.service.InstructorGradeService;
 import edu.univ.erp.service.InstructorQueryService;
-import edu.univ.erp.auth.SessionManager;
-import edu.univ.erp.access.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -17,6 +20,8 @@ public class GradeEntryDialog extends JDialog {
     private final int enrollmentId;
     private final InstructorGradeService gradeService;
     private final InstructorSectionStudents parentPanel;
+    private final InstructorQueryService queryService;
+    private final NotificationsDAO notificationsDAO;
 
     private static final String[] COMPONENTS = {
             "ASSIGNMENTS", "QUIZZES", "PROJECT", "MID", "END"
@@ -34,19 +39,20 @@ public class GradeEntryDialog extends JDialog {
         this.enrollmentId = enrollmentId;
         this.parentPanel = parentPanel;
         this.gradeService = new InstructorGradeService();
+        this.queryService = new InstructorQueryService();
+        this.notificationsDAO = new NotificationsDAO();
 
-        // SECURITY CHECKS
+        // Security checks
         if (!SessionManager.isLoggedIn()
                 || !"INSTRUCTOR".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
-            JOptionPane.showMessageDialog(this, "Access Denied.");
+            JOptionPane.showMessageDialog(this, "Access denied.");
             dispose();
             return;
         }
 
-        if (MaintenanceChecker.isMaintenanceOn()
-                && !"ADMIN".equals(SessionManager.getCurrentUserRole())) {
+        if (MaintenanceChecker.isMaintenanceOn()) {
             JOptionPane.showMessageDialog(this,
-                    "System in Maintenance — Grades cannot be edited.");
+                    "System in maintenance — grade editing disabled.");
             dispose();
             return;
         }
@@ -58,8 +64,7 @@ public class GradeEntryDialog extends JDialog {
     private void reloadExistingGrades() {
         existingMap.clear();
         try {
-            List<Grade> list =
-                    new InstructorQueryService().getGradesForEnrollment(enrollmentId);
+            List<Grade> list = queryService.getGradesForEnrollment(enrollmentId);
             for (Grade g : list) {
                 if (g.getComponent() != null)
                     existingMap.put(g.getComponent().toUpperCase(), g);
@@ -92,7 +97,6 @@ public class GradeEntryDialog extends JDialog {
 
         card.add(Box.createVerticalStrut(20));
 
-        // centered component dropdown
         compDropdown = new JComboBox<>(COMPONENTS);
         card.add(centerField("Component:", compDropdown));
         card.add(Box.createVerticalStrut(15));
@@ -105,8 +109,7 @@ public class GradeEntryDialog extends JDialog {
         card.add(centerField("Final Grade (A/B/C/D/F):", finalField));
         card.add(Box.createVerticalStrut(25));
 
-        JPanel btnRow = new JPanel();
-        btnRow.setLayout(new FlowLayout(FlowLayout.CENTER, 15, 0));
+        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
         btnRow.setOpaque(false);
 
         JButton saveBtn = styledBtn("Save");
@@ -116,7 +119,6 @@ public class GradeEntryDialog extends JDialog {
         btnRow.add(saveBtn);
         btnRow.add(computeBtn);
         btnRow.add(closeBtn);
-
         card.add(btnRow);
 
         compDropdown.addActionListener(e -> loadExistingForComponent());
@@ -127,35 +129,31 @@ public class GradeEntryDialog extends JDialog {
         loadExistingForComponent();
     }
 
-
-    // Small helper: Label + input stacked neatly
-    private JPanel labelField(String label, JComponent field) {
+    private JPanel centerField(String label, JComponent field) {
         JPanel p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setOpaque(false);
+        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
 
         JLabel l = new JLabel(label);
         l.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        l.setAlignmentX(Component.LEFT_ALIGNMENT);
+        l.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        field.setAlignmentX(Component.LEFT_ALIGNMENT);
+        field.setMaximumSize(new Dimension(300, 32));
+        field.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         p.add(l);
-        p.add(Box.createVerticalStrut(4));
+        p.add(Box.createVerticalStrut(5));
         p.add(field);
+
         return p;
     }
 
-    // Nice rounded buttons
     private JButton styledBtn(String text) {
         JButton b = new JButton(text);
         b.setFocusPainted(false);
         b.setForeground(Color.WHITE);
         b.setBackground(new Color(52, 152, 219));
         b.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        b.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
 
         b.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
@@ -177,53 +175,62 @@ public class GradeEntryDialog extends JDialog {
         scoreField.setText(g != null ? String.valueOf(g.getScore()) : "");
 
         Grade finalRow = existingMap.get("FINAL");
-        finalField.setText(finalRow != null && finalRow.getFinalGrade() != null
-                ? finalRow.getFinalGrade()
-                : "");
+        finalField.setText(finalRow != null ? finalRow.getFinalGrade() : "");
     }
 
     private void saveComponent() {
+
         String comp = (String) compDropdown.getSelectedItem();
+        if (comp == null) return;
+
         String scoreStr = scoreField.getText().trim();
         String finalStr = finalField.getText().trim();
 
-        if (comp == null) {
-            JOptionPane.showMessageDialog(this, "Select a component.");
-            return;
-        }
+        boolean anyUpdate = false;
 
         try {
             if (!scoreStr.isEmpty()) {
-                double score;
-                try { score = Double.parseDouble(scoreStr); }
-                catch (NumberFormatException nfe) {
-                    JOptionPane.showMessageDialog(this, "Score must be numeric.");
-                    return;
-                }
-
+                double score = Double.parseDouble(scoreStr);
                 if (score < 0 || score > 100) {
-                    JOptionPane.showMessageDialog(this, "Score must be 0–100.");
+                    JOptionPane.showMessageDialog(this, "Score must be 0–100");
                     return;
                 }
 
                 gradeService.addOrUpdateComponentGrade(enrollmentId, comp, score);
+                anyUpdate = true;
             }
 
             if (!finalStr.isEmpty()) {
                 String upper = finalStr.toUpperCase();
                 if (!upper.matches("[ABCDF]")) {
-                    JOptionPane.showMessageDialog(this,
-                            "Final grade must be A, B, C, D, or F.");
+                    JOptionPane.showMessageDialog(this, "Invalid final grade");
                     return;
                 }
+
                 gradeService.saveFinalGrade(enrollmentId, upper);
+                anyUpdate = true;
+            }
+
+            if (anyUpdate) {
+
+                Student s = queryService.getStudentForEnrollment(enrollmentId);
+
+                if (s != null) {
+                    Notification n = new Notification(
+                            s.getUserId(),       // target user
+                            null,                // no broadcast role
+                            "Grade Updated",
+                            "Your grade for " + comp + " has been updated."
+                    );
+
+                    notificationsDAO.addNotification(n);
+                }
             }
 
             reloadExistingGrades();
             loadExistingForComponent();
             parentPanel.reloadTable();
-
-            JOptionPane.showMessageDialog(this, "Saved successfully.");
+            JOptionPane.showMessageDialog(this, "Saved.");
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage());
@@ -233,11 +240,7 @@ public class GradeEntryDialog extends JDialog {
     private void computeFinal() {
         try {
             String letter = gradeService.autoComputeFinalLetterGrade(enrollmentId);
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Final Grade Computed: " + letter
-            );
+            JOptionPane.showMessageDialog(this, "Final Grade: " + letter);
 
             reloadExistingGrades();
             loadExistingForComponent();
@@ -247,26 +250,4 @@ public class GradeEntryDialog extends JDialog {
             JOptionPane.showMessageDialog(this, ex.getMessage());
         }
     }
-    private JPanel centerField(String label, JComponent field) {
-        JPanel panel = new JPanel();
-        panel.setOpaque(false);
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JLabel l = new JLabel(label, SwingConstants.CENTER);
-        l.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        l.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        field.setMaximumSize(new Dimension(300, 32));
-        field.setPreferredSize(new Dimension(300, 32));
-        field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        field.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        panel.add(l);
-        panel.add(Box.createVerticalStrut(5));
-        panel.add(field);
-
-        return panel;
-    }
-
 }

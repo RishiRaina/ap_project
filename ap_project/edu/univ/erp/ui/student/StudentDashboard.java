@@ -49,6 +49,7 @@ public class StudentDashboard extends JPanel {
         logoutBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         logoutBtn.addActionListener(e -> {
             SessionManager.clear();
+            // 🔴 FIX IS HERE:
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
         });
 
@@ -71,7 +72,8 @@ public class StudentDashboard extends JPanel {
                 "View Timetable",
                 "View Grades",
                 "Download Transcript (CSV)",
-                "Download Transcript (PDF)"
+                "Download Transcript (PDF)",
+                "Notifications"
         };
 
         for (String name : menuItems) {
@@ -155,6 +157,10 @@ public class StudentDashboard extends JPanel {
 
             case "Download Transcript (PDF)":
                 setCenter(new DownloadTranscriptPDF(mainFrame));
+                break;
+
+            case "Notifications":
+                setCenter(new StudentNotificationsPanel());
                 break;
         }
     }
