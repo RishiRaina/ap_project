@@ -20,8 +20,6 @@ public class StudentChangePasswordUI extends JPanel {
         this.root = root;
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
-
-        // ---------- HEADER ----------
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(new Color(52, 152, 219));
         header.setBorder(new EmptyBorder(10, 20, 10, 20));
@@ -30,11 +28,7 @@ public class StudentChangePasswordUI extends JPanel {
         title.setFont(new Font("Segoe UI", Font.BOLD, 24));
         title.setForeground(Color.WHITE);
         header.add(title, BorderLayout.WEST);
-
-        // No Logout button here — exactly like instructor version
         add(header, BorderLayout.NORTH);
-
-        // ---------- CENTER FORM PANEL ----------
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setBorder(new EmptyBorder(40, 40, 40, 40));
         formPanel.setBackground(Color.WHITE);
@@ -68,7 +62,7 @@ public class StudentChangePasswordUI extends JPanel {
         confirmPassField = makeField();
         formPanel.add(confirmPassField, gbc);
 
-        // STATUS LABEL
+
         gbc.gridx = 0;
         gbc.gridy++;
         gbc.gridwidth = 2;
@@ -78,11 +72,8 @@ public class StudentChangePasswordUI extends JPanel {
         formPanel.add(statusLabel, gbc);
 
         add(formPanel, BorderLayout.CENTER);
-
-        // ---------- BOTTOM BUTTONS ----------
         JPanel bottomPanel = new JPanel();
         bottomPanel.setBorder(new EmptyBorder(10, 0, 30, 0));
-
         JButton backBtn = new JButton("Back");
         backBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         backBtn.setBackground(new Color(52, 152, 219));
@@ -90,8 +81,6 @@ public class StudentChangePasswordUI extends JPanel {
         backBtn.setFocusPainted(false);
         backBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         backBtn.addActionListener(e -> root.refreshStudentDashboard());
-
-
         JButton saveBtn = new JButton("Save");
         saveBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         saveBtn.setBackground(new Color(46, 204, 113));
@@ -99,10 +88,8 @@ public class StudentChangePasswordUI extends JPanel {
         saveBtn.setFocusPainted(false);
         saveBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         saveBtn.addActionListener(e -> handlePasswordChange());
-
         bottomPanel.add(backBtn);
         bottomPanel.add(saveBtn);
-
         add(bottomPanel, BorderLayout.SOUTH);
     }
 

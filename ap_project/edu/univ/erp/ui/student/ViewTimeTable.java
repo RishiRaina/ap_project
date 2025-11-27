@@ -47,61 +47,40 @@ public class ViewTimeTable extends JPanel {
 
     public ViewTimeTable(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-
-        // -------- ROLE CHECK --------
-        if (!SessionManager.isLoggedIn()
-                || !"STUDENT".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
-
-            JOptionPane.showMessageDialog(this,
-                    "Access Denied: Students only.",
-                    "Access Error", JOptionPane.ERROR_MESSAGE);
-
+        if (!SessionManager.isLoggedIn() || !"STUDENT".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
+            JOptionPane.showMessageDialog(this, "Access Denied: Students only.", "Access Error", JOptionPane.ERROR_MESSAGE);
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
             return;
         }
-
-        // -------- BASE LAYOUT --------
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
-
-        // -------- MAINTENANCE BANNER --------
         if (MaintenanceChecker.isMaintenanceOn()) {
             JPanel bannerPanel = new JPanel(new BorderLayout());
             bannerPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
             bannerPanel.setBackground(new Color(255, 179, 71));
-
             JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
             banner.setFont(new Font("Segoe UI", Font.BOLD, 16));
-
             bannerPanel.add(banner);
             add(bannerPanel, BorderLayout.NORTH);
         }
-
-        // -------- TITLE --------
         JLabel title = new JLabel("Timetable", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
         title.setForeground(new Color(52, 152, 219));
         title.setBorder(new EmptyBorder(20, 0, 20, 0));
         add(title, BorderLayout.PAGE_START);
 
-        // -------- TABLE CARD --------
         RoundedPanel card = new RoundedPanel();
         card.setLayout(new BorderLayout());
         card.setBorder(new EmptyBorder(20, 40, 20, 40));
         add(card, BorderLayout.CENTER);
-
-        // -------- TABLE --------
         String[] cols = {"Day/Time", "Room", "Course Code", "Course Title"};
         DefaultTableModel model = new DefaultTableModel(cols, 0);
         JTable table = new JTable(model);
-
         table.setRowHeight(30);
         table.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 16));
 
         card.add(new JScrollPane(table), BorderLayout.CENTER);
-
-        // -------- BACK BUTTON --------
         JButton backBtn = new JButton("Back");
         styleButton(backBtn, new Color(52, 152, 219), new Color(41, 128, 185));
 
@@ -118,57 +97,32 @@ public class ViewTimeTable extends JPanel {
 
     private void loadTimetable(DefaultTableModel model) {
         model.setRowCount(0);
-
         int studentId = SessionManager.getCurrentUserId();
-
         // DAY ORDER (uppercase keys)
-        Map<String, Integer> dayOrder = Map.of(
-                "MON", 1, "TUE", 2, "WED", 3,
-                "THU", 4, "FRI", 5, "SAT", 6, "SUN", 7
-        );
-
+        Map<String, Integer> dayOrder = Map.of("MON", 1, "TUE", 2, "WED", 3, "THU", 4, "FRI", 5, "SAT", 6, "SUN", 7);
         class Entry {
             String dayLabel, timeLabel, room, code, title;
             int dayIdx, timeIdx;
         }
-
         List<Entry> rows = new ArrayList<>();
-
         try {
             List<Enrollment> list = queryService.getMyEnrollments(studentId);
-
             for (Enrollment en : list) {
-
                 Section sec = queryService.getSection(en.getSectionId());
                 Course c = queryService.getCourseById(sec.getCourseId());
 
                 String raw = sec.getDayTime().trim().toUpperCase();
-                // EXAMPLES:
-                // "MON 11-1230"
-                // "TUE 10:00-11:30 @ C101"
-
-                // ------------ Extract DAY ------------
                 String day = raw.substring(0, 3);  // "MON"
                 int dayIdx = dayOrder.getOrDefault(day, 99);
-
-                // ------------ Extract TIME ------------
                 String rawTime = raw.substring(3).trim();
-
-                // Remove room part after "@"
                 if (rawTime.contains("@")) {
                     rawTime = rawTime.substring(0, rawTime.indexOf("@")).trim();
                 }
-
-                // Extract starting time
                 String start = rawTime.split("-")[0].trim();
                 start = start.replace(":", "");  // "10:00" → "1000"
-
                 if (start.length() == 3) start = "0" + start; // 900 → 0900
-
                 int timeIdx = 0;
                 try { timeIdx = Integer.parseInt(start); } catch (Exception ignored) {}
-
-                // -------- Create final row --------
                 Entry e = new Entry();
                 e.dayLabel = day;
                 e.timeLabel = rawTime;
@@ -177,17 +131,12 @@ public class ViewTimeTable extends JPanel {
                 e.title = c.getTitle();
                 e.dayIdx = dayIdx;
                 e.timeIdx = timeIdx;
-
                 rows.add(e);
             }
-
-            // -------- SORT PROPERLY --------
             rows.sort((a, b) -> {
                 if (a.dayIdx != b.dayIdx) return a.dayIdx - b.dayIdx;
                 return a.timeIdx - b.timeIdx;
             });
-
-            // -------- ADD TO TABLE --------
             for (Entry e : rows) {
                 model.addRow(new Object[]{
                         e.dayLabel + " " + e.timeLabel,
@@ -198,15 +147,9 @@ public class ViewTimeTable extends JPanel {
             }
 
         } catch (AccessException ex) {
-            JOptionPane.showMessageDialog(this,
-                    ex.getMessage(),
-                    "Access Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Access Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
-    // -------- BUTTON STYLE --------
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btn.setForeground(Color.WHITE);

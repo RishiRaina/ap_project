@@ -21,7 +21,6 @@ public class DownloadTranscriptCSV extends JPanel {
     class RoundedPanel extends JPanel {
         private final int radius = 20;
         public RoundedPanel() { setOpaque(false); }
-
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -36,21 +35,14 @@ public class DownloadTranscriptCSV extends JPanel {
         this.mainFrame = mainFrame;
         this.transcriptService = new TranscriptService();
 
-        // -------- ROLE CHECK --------
-        if (!SessionManager.isLoggedIn()
-                || !"STUDENT".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
 
-            JOptionPane.showMessageDialog(this,
-                    "Access Denied: Students only.",
-                    "Access Error", JOptionPane.ERROR_MESSAGE);
+        if (!SessionManager.isLoggedIn() || !"STUDENT".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
+            JOptionPane.showMessageDialog(this, "Access Denied: Students only.", "Access Error", JOptionPane.ERROR_MESSAGE);
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
             return;
         }
-
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));  // soft grey
-
-        // -------- MAINTENANCE BANNER --------
         if (MaintenanceChecker.isMaintenanceOn()) {
             JPanel bp = new JPanel(new BorderLayout());
             bp.setBackground(new Color(255, 179, 71));
@@ -63,62 +55,45 @@ public class DownloadTranscriptCSV extends JPanel {
             bp.add(banner);
             add(bp, BorderLayout.NORTH);
         }
-
-        // -------- TITLE --------
         JLabel title = new JLabel("Transcript (CSV)", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
         title.setForeground(new Color(52, 152, 219));
         title.setBorder(new EmptyBorder(20, 0, 15, 0));
         add(title, BorderLayout.PAGE_START);
-
-        // -------- MAIN CARD --------
         RoundedPanel card = new RoundedPanel();
         card.setLayout(new BorderLayout());
         card.setBorder(new EmptyBorder(25, 40, 25, 40));
         add(card, BorderLayout.CENTER);
-
-        // -------- TABLE --------
         String[] cols = {"Course Code", "Title", "Credits", "Section", "Status", "Final Grade"};
 
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
-
         JTable table = new JTable(model);
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 15));
         table.setRowHeight(28);
-
         JScrollPane scroll = new JScrollPane(table);
         scroll.setBorder(null);
         card.add(scroll, BorderLayout.CENTER);
-
-        // -------- BUTTONS --------
         JButton exportBtn = new JButton("Download CSV");
         JButton backBtn = new JButton("Back");
-
         styleButton(exportBtn, new Color(46, 204, 113), new Color(39, 174, 96));
         styleButton(backBtn, new Color(52, 152, 219), new Color(41, 128, 185));
-
         JPanel bottom = new JPanel();
         bottom.setBackground(new Color(245, 245, 245));
         bottom.add(exportBtn);
         bottom.add(backBtn);
-
         add(bottom, BorderLayout.SOUTH);
-
         backBtn.addActionListener(e -> mainFrame.refreshStudentDashboard());
         exportBtn.addActionListener(e -> exportCSV());
-
         loadTranscript(model);
     }
 
     private void loadTranscript(DefaultTableModel model) {
         model.setRowCount(0);
-
         int studentId = SessionManager.getCurrentUserId();
         List<String[]> rows = transcriptService.getTranscriptRows(studentId);
-
         for (String[] row : rows) {
             model.addRow(row);
         }
@@ -126,22 +101,15 @@ public class DownloadTranscriptCSV extends JPanel {
 
     private void exportCSV() {
         int studentId = SessionManager.getCurrentUserId();
-
         JFileChooser chooser = new JFileChooser();
         chooser.setSelectedFile(new File("transcript.csv"));
-
         if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             boolean ok = transcriptService.exportTranscriptCSV(studentId,
                     chooser.getSelectedFile());
-
             if (ok) {
-                JOptionPane.showMessageDialog(this,
-                        "Transcript CSV downloaded!",
-                        "Success", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Transcript CSV downloaded!", "Success", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this,
-                        "Failed to save CSV.",
-                        "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Failed to save CSV.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

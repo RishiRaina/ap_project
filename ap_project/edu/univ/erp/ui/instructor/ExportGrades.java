@@ -21,12 +21,9 @@ public class ExportGrades extends JPanel {
     private final MainFrame mainFrame;
     private final InstructorQueryService queryService = new InstructorQueryService();
     private final CourseService courseService = new CourseService();
-
-    // ---------- Rounded Panel ----------
     class RoundedPanel extends JPanel {
         private int radius = 20;
         public RoundedPanel() { setOpaque(false); }
-
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -36,8 +33,6 @@ public class ExportGrades extends JPanel {
             g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius, radius);
         }
     }
-
-    // ---------- Constructor ----------
     public ExportGrades(MainFrame mainFrame) {
 
         this.mainFrame = mainFrame;
@@ -45,9 +40,7 @@ public class ExportGrades extends JPanel {
         setBackground(new Color(245, 245, 245));
 
         // Role Check
-        if (!SessionManager.isLoggedIn() ||
-                !"INSTRUCTOR".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
-
+        if (!SessionManager.isLoggedIn() || !"INSTRUCTOR".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
             JOptionPane.showMessageDialog(this, "Access Denied: Instructors only.");
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
             return;
@@ -58,7 +51,6 @@ public class ExportGrades extends JPanel {
             JPanel banner = new JPanel(new BorderLayout());
             banner.setBackground(new Color(255, 179, 71));
             banner.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
             JLabel lbl = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
             lbl.setFont(new Font("Segoe UI", Font.BOLD, 16));
             banner.add(lbl, BorderLayout.CENTER);
@@ -72,27 +64,17 @@ public class ExportGrades extends JPanel {
         title.setForeground(new Color(52, 152, 219));
         title.setBorder(BorderFactory.createEmptyBorder(25, 0, 25, 0));
         add(title, BorderLayout.PAGE_START);
-
-        // Main Card Panel
         RoundedPanel card = new RoundedPanel();
         card.setLayout(new GridLayout(3, 1, 25, 25));
         card.setBorder(BorderFactory.createEmptyBorder(50, 150, 50, 150));
-
-        // Label
         JLabel selLabel = new JLabel("Select Section:", SwingConstants.CENTER);
         selLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
-
-        // Dropdown
         JComboBox<Section> sectionDropdown = new JComboBox<>();
         sectionDropdown.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         sectionDropdown.setFocusable(false);
         sectionDropdown.setMaximumRowCount(7);
-
-        // Smaller + thinner box
         sectionDropdown.setPreferredSize(new Dimension(350, 32));
         sectionDropdown.setBorder(BorderFactory.createEmptyBorder(2, 4, 2, 4));
-
-        // Fill choices
         sectionDropdown.addItem(null);
         loadSectionChoices(sectionDropdown);
 
@@ -102,16 +84,12 @@ public class ExportGrades extends JPanel {
             public Component getListCellRendererComponent(
                     JList<?> list, Object value, int index,
                     boolean isSelected, boolean cellHasFocus) {
-
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
                 if (value instanceof Section) {
                     Section s = (Section) value;
                     Course c = courseService.getCourseById(s.getCourseId());
-
                     if (c != null)
-                        setText(c.getCode() + " — " + c.getTitle()
-                                + " | " + s.getDayTime() + " @ " + s.getRoom());
+                        setText(c.getCode() + " — " + c.getTitle() + " | " + s.getDayTime() + " @ " + s.getRoom());
                     else
                         setText("SECTION " + s.getSectionId());
 
@@ -127,30 +105,22 @@ public class ExportGrades extends JPanel {
         JPanel ddPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         ddPanel.setOpaque(false);
         ddPanel.add(sectionDropdown);
-
-        // Buttons
         JButton exportBtn = new JButton("Download CSV");
         JButton backBtn = new JButton("Back");
 
         styleButton(exportBtn, new Color(46, 204, 113), new Color(39, 174, 96));
         styleButton(backBtn, new Color(52, 152, 219), new Color(41, 128, 185));
-
-        // Button Panel — transparent so no grey background
         JPanel btnPanel = new JPanel(new FlowLayout());
         btnPanel.setOpaque(false);
         btnPanel.add(exportBtn);
         btnPanel.add(backBtn);
-
-        // Add everything
         card.add(selLabel);
         card.add(ddPanel);
         card.add(btnPanel);
 
         add(card, BorderLayout.CENTER);
 
-        // Button Actions
         backBtn.addActionListener(e -> mainFrame.refreshInstructorDashboard());
-
         exportBtn.addActionListener(e -> {
             Section sec = (Section) sectionDropdown.getSelectedItem();
             if (sec == null) {
@@ -165,7 +135,7 @@ public class ExportGrades extends JPanel {
         });
     }
 
-    // ---------- Load ComboBox Data ----------
+
     private void loadSectionChoices(JComboBox<Section> box) {
         try {
             int instructorId = SessionManager.getCurrentUserId();
@@ -178,7 +148,6 @@ public class ExportGrades extends JPanel {
         }
     }
 
-    // ---------- Button Styling ----------
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btn.setForeground(Color.WHITE);
@@ -193,7 +162,6 @@ public class ExportGrades extends JPanel {
         });
     }
 
-    // ---------- Export CSV ----------
     private void exportGrades(int sectionId) throws AccessException {
 
         Section sec = queryService.getSection(sectionId);

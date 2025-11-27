@@ -25,9 +25,7 @@ public class ViewGrades extends JPanel {
     // Rounded card panel (like Instructor UI)
     class RoundedPanel extends JPanel {
         private final int cornerRadius = 20;
-
         public RoundedPanel() { setOpaque(false); }
-
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -38,7 +36,7 @@ public class ViewGrades extends JPanel {
         }
     }
 
-    // Renderer for multi-line cell
+
     class MultilineCellRenderer extends JTextArea implements TableCellRenderer {
         public MultilineCellRenderer() {
             setLineWrap(true);
@@ -50,9 +48,7 @@ public class ViewGrades extends JPanel {
         public Component getTableCellRendererComponent(
                 JTable table, Object value, boolean isSelected,
                 boolean hasFocus, int row, int column) {
-
             setText(value != null ? value.toString() : "");
-
             if (isSelected) {
                 setBackground(table.getSelectionBackground());
                 setForeground(table.getSelectionForeground());
@@ -60,13 +56,10 @@ public class ViewGrades extends JPanel {
                 setBackground(Color.WHITE);
                 setForeground(Color.BLACK);
             }
-
-            // auto-adjust row height
             int preferredHeight = getPreferredSize().height;
             if (table.getRowHeight(row) < preferredHeight) {
                 table.setRowHeight(row, preferredHeight);
             }
-
             return this;
         }
     }
@@ -74,47 +67,32 @@ public class ViewGrades extends JPanel {
     public ViewGrades(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         this.queryService = new StudentQueryService();
-
-        // ------------ ROLE CHECK ------------
-        if (!SessionManager.isLoggedIn()
-                || !"STUDENT".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
-            JOptionPane.showMessageDialog(this, "Students only!", "Access Error",
-                    JOptionPane.ERROR_MESSAGE);
+        if (!SessionManager.isLoggedIn() || !"STUDENT".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
+            JOptionPane.showMessageDialog(this, "Students only!", "Access Error", JOptionPane.ERROR_MESSAGE);
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
             return;
         }
-
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
-
-        // ------------ MAINTENANCE BANNER ------------
         if (MaintenanceChecker.isMaintenanceOn()) {
             JPanel bannerPanel = new JPanel(new BorderLayout());
             bannerPanel.setBackground(new Color(255, 179, 71));
             bannerPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY",
-                    SwingConstants.CENTER);
+            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
             banner.setFont(new Font("Segoe UI", Font.BOLD, 16));
             bannerPanel.add(banner);
-
             add(bannerPanel, BorderLayout.NORTH);
         }
-
-        // ------------ TITLE ------------
         JLabel title = new JLabel("My Grades", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
         title.setForeground(new Color(52, 152, 219));
         title.setBorder(new EmptyBorder(20, 0, 20, 0));
 
         add(title, BorderLayout.PAGE_START);
-
-        // ------------ MAIN CARD ------------
         RoundedPanel card = new RoundedPanel();
         card.setLayout(new BorderLayout());
         card.setBorder(new EmptyBorder(25, 40, 25, 40));
-
-        // ------------ TABLE MODEL ------------
         String[] cols = {"Course", "Breakdown", "Final Grade"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
@@ -124,8 +102,6 @@ public class ViewGrades extends JPanel {
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 15));
         table.setRowHeight(28);
-
-        // Breakdown column uses multiline renderer
         table.getColumnModel().getColumn(1).setCellRenderer(new MultilineCellRenderer());
         table.getColumnModel().getColumn(1).setPreferredWidth(350);
 
@@ -133,8 +109,6 @@ public class ViewGrades extends JPanel {
         card.add(scroll, BorderLayout.CENTER);
 
         add(card, BorderLayout.CENTER);
-
-        // ------------ BACK BUTTON ------------
         JButton backBtn = new JButton("Back");
         styleButton(backBtn, new Color(52, 152, 219), new Color(41, 128, 185));
 
@@ -145,8 +119,6 @@ public class ViewGrades extends JPanel {
         add(bottom, BorderLayout.SOUTH);
 
         backBtn.addActionListener(e -> mainFrame.refreshStudentDashboard());
-
-        // Load rows
         loadGrades(model);
     }
 
@@ -192,7 +164,6 @@ public class ViewGrades extends JPanel {
         }
     }
 
-    // ------------ BUTTON STYLE ------------
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btn.setForeground(Color.WHITE);

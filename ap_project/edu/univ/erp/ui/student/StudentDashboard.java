@@ -9,30 +9,21 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class StudentDashboard extends JPanel {
-
     private final MainFrame mainFrame;
     private JPanel mainContent;
-
     public StudentDashboard(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
-
-        // ===================== HEADER =====================
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(new Color(52, 152, 219));
         header.setBorder(new EmptyBorder(10, 20, 10, 20));
-
         JLabel title = new JLabel("Student Dashboard");
         title.setFont(new Font("Segoe UI", Font.BOLD, 26));
         title.setForeground(Color.WHITE);
         header.add(title, BorderLayout.WEST);
-
-        // Buttons panel on top-right
         JPanel topButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         topButtons.setOpaque(false);
-
         JButton changePassBtn = new JButton("Change Password");
         changePassBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         changePassBtn.setForeground(Color.WHITE);
@@ -40,7 +31,6 @@ public class StudentDashboard extends JPanel {
         changePassBtn.setFocusPainted(false);
         changePassBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         changePassBtn.addActionListener(e -> setCenter(new StudentChangePasswordUI(mainFrame)));
-
         JButton logoutBtn = new JButton("Logout");
         logoutBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         logoutBtn.setForeground(Color.WHITE);
@@ -49,7 +39,6 @@ public class StudentDashboard extends JPanel {
         logoutBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         logoutBtn.addActionListener(e -> {
             SessionManager.clear();
-            // 🔴 FIX IS HERE:
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
         });
 
@@ -59,23 +48,13 @@ public class StudentDashboard extends JPanel {
         header.add(topButtons, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
 
-        // ===================== SIDEBAR =====================
+        //this is for the sidebar
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new GridLayout(0, 1, 0, 10));
         sidebar.setBackground(new Color(44, 62, 80));
         sidebar.setBorder(new EmptyBorder(20, 10, 20, 10));
 
-        String[] menuItems = {
-                "View Course Catalog",
-                "My Enrollments",
-                "Register for Section",
-                "View Timetable",
-                "View Grades",
-                "Download Transcript (CSV)",
-                "Download Transcript (PDF)",
-                "Notifications"
-        };
-
+        String[] menuItems = {"View Course Catalog", "My Enrollments", "Register for Section", "View Timetable", "View Grades", "Download Transcript (CSV)", "Download Transcript (PDF)", "Notifications"};
         for (String name : menuItems) {
             JButton btn = createSidebarButton(name);
             sidebar.add(btn);
@@ -83,25 +62,16 @@ public class StudentDashboard extends JPanel {
         }
 
         add(sidebar, BorderLayout.WEST);
-
-        // ===================== CENTER AREA =====================
         mainContent = new JPanel(new BorderLayout());
         mainContent.setBackground(new Color(245, 245, 245));
         add(mainContent, BorderLayout.CENTER);
-
-        // Default view: My Enrollments
         setCenter(new ViewMyEnrollments(mainFrame));
-
-        // ===================== MAINTENANCE BANNER =====================
         if (MaintenanceChecker.isMaintenanceOn()) {
             JPanel bannerPanel = new JPanel(new BorderLayout());
             bannerPanel.setBackground(new Color(255, 179, 71));
             bannerPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
-
-            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY",
-                    SwingConstants.CENTER);
+            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
             banner.setFont(new Font("Segoe UI", Font.BOLD, 16));
-
             bannerPanel.add(banner);
             add(bannerPanel, BorderLayout.SOUTH);
         }

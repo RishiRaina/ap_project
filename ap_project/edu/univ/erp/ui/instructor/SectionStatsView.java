@@ -43,8 +43,6 @@ public class SectionStatsView extends JPanel {
             this.max = max;
         }
     }
-
-    // ------- Rounded card panel -------
     class RoundedPanel extends JPanel {
         private final int cornerRadius = 20;
 
@@ -63,76 +61,43 @@ public class SectionStatsView extends JPanel {
     }
 
     public SectionStatsView(MainFrame mainFrame, int sectionId) {
-
         this.mainFrame = mainFrame;
         this.sectionId = sectionId;
         this.queryService = new InstructorQueryService();
 
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
-
-        // ---------------- ROLE CHECK ----------------
-        if (!SessionManager.isLoggedIn() ||
-                !"INSTRUCTOR".equals(SessionManager.getCurrentUserRole())) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Access Denied.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-
+        if (!SessionManager.isLoggedIn() || !"INSTRUCTOR".equals(SessionManager.getCurrentUserRole())) {
+            JOptionPane.showMessageDialog(this, "Access Denied.", "Error", JOptionPane.ERROR_MESSAGE);
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
             return;
         }
-
-        // ---------------- MAINTENANCE BANNER ----------------
         if (MaintenanceChecker.isMaintenanceOn()) {
             JPanel bannerPanel = new JPanel(new BorderLayout());
             bannerPanel.setBackground(new Color(255, 179, 71));
             bannerPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
-
-            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY",
-                    SwingConstants.CENTER);
+            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
             banner.setFont(new Font("Segoe UI", Font.BOLD, 16));
-
             bannerPanel.add(banner, BorderLayout.CENTER);
             add(bannerPanel, BorderLayout.NORTH);
         }
 
-        // ---------------- OWNERSHIP CHECK + STATS ----------------
+
         StatsData stats;
         try {
             Section sec = queryService.getSection(sectionId);
-
-            AccessControl.assertInstructorOwnsSection(
-                    SessionManager.getCurrentUserId(),
-                    sec.getInstructorId(),
-                    AccessControl.Actions.CLASS_STATS
-            );
-
-            // compute stats once
+            AccessControl.assertInstructorOwnsSection(SessionManager.getCurrentUserId(), sec.getInstructorId(), AccessControl.Actions.CLASS_STATS);
             stats = computeStats();
-
         } catch (AccessException ex) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    ex.getMessage(),
-                    "Access Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Access Error", JOptionPane.ERROR_MESSAGE);
             mainFrame.refreshInstructorDashboard();
             return;
         }
-
-        // ---------------- HEADER ----------------
         JLabel header = new JLabel("Class Statistics — Section " + sectionId, SwingConstants.CENTER);
         header.setFont(new Font("Segoe UI", Font.BOLD, 28));
         header.setForeground(new Color(52, 152, 219));
         header.setBorder(new EmptyBorder(20, 0, 20, 0));
         add(header, BorderLayout.PAGE_START);
-
-        // ---------------- STATS CARD (CENTER) ----------------
         RoundedPanel card = new RoundedPanel();
         card.setLayout(new BorderLayout());
         card.setBorder(new EmptyBorder(25, 40, 25, 40));
@@ -147,8 +112,6 @@ public class SectionStatsView extends JPanel {
         card.add(scroll, BorderLayout.CENTER);
 
         add(card, BorderLayout.CENTER);
-
-        // ---------------- FOOTER BUTTONS ----------------
         JButton exportBtn = new JButton("Export Stats PDF");
         JButton backBtn = new JButton("Back");
 
@@ -162,14 +125,12 @@ public class SectionStatsView extends JPanel {
         backBtn.addActionListener(e -> {
             InstructorStatsSectionSelect sel = new InstructorStatsSectionSelect(mainFrame);
 
-            // If we are inside InstructorDashboard, replace its center panel
             InstructorDashboard dash = (InstructorDashboard)
                     SwingUtilities.getAncestorOfClass(InstructorDashboard.class, this);
 
             if (dash != null) {
                 dash.setCenter(sel);
             } else {
-                // fallback: use mainFrame card layout
                 mainFrame.addScreen("instructor_stats_select_section", sel);
                 mainFrame.showScreen("instructor_stats_select_section");
             }
@@ -182,17 +143,12 @@ public class SectionStatsView extends JPanel {
 
         add(footer, BorderLayout.SOUTH);
     }
-
-    // ---------------- COMPUTE STATS ----------------
     private StatsData computeStats() throws AccessException {
 
         StatsData data = new StatsData();
-
         List<Enrollment> enrollments = queryService.getSectionEnrollments(sectionId);
         data.totalStudents = enrollments.size();
-
         Map<String, List<Double>> rawComponentScores = new HashMap<>();
-
         for (Enrollment e : enrollments) {
             List<Grade> grades = queryService.getGradesForEnrollment(e.getEnrollmentId());
 
@@ -221,29 +177,22 @@ public class SectionStatsView extends JPanel {
         for (Map.Entry<String, List<Double>> entry : rawComponentScores.entrySet()) {
             String comp = entry.getKey();
             List<Double> list = entry.getValue();
-
             double avg = list.stream().mapToDouble(a -> a).average().orElse(0);
             double min = list.stream().mapToDouble(a -> a).min().orElse(0);
             double max = list.stream().mapToDouble(a -> a).max().orElse(0);
-
             data.componentSummaries.put(comp, new ComponentSummary(avg, min, max));
         }
 
         return data;
     }
-
-    // ---------------- HTML FOR ON-SCREEN VIEW ----------------
+    //for on screen view
     private String generateStatsHTML(StatsData stats) {
 
         StringBuilder sb = new StringBuilder();
         sb.append("<html><body style='font-family: Segoe UI; font-size: 14px;'>");
-
-        // Section Summary
         sb.append("<h2 style='color:#3498db;'>Section Summary</h2>");
         sb.append("<b>Total Students:</b> ").append(stats.totalStudents).append("<br>");
         sb.append("<b>Students with Final Grade:</b> ").append(stats.studentsWithFinal).append("<br><br>");
-
-        // Final Grade Distribution
         sb.append("<h2 style='color:#3498db;'>Final Grade Distribution</h2>");
         if (stats.letterCount.isEmpty()) {
             sb.append("<i>No final grades entered yet.</i><br><br>");
@@ -256,7 +205,6 @@ public class SectionStatsView extends JPanel {
             sb.append("<br>");
         }
 
-        // Component Statistics
         sb.append("<h2 style='color:#3498db;'>Component Scores</h2>");
         if (stats.componentSummaries.isEmpty()) {
             sb.append("<i>No component scores entered yet.</i>");
@@ -275,7 +223,6 @@ public class SectionStatsView extends JPanel {
         return sb.toString();
     }
 
-    // ---------------- PLAIN TEXT FOR PDF ----------------
     private String generateStatsPlainText(StatsData stats) {
 
         StringBuilder sb = new StringBuilder();
@@ -319,19 +266,14 @@ public class SectionStatsView extends JPanel {
 
         return sb.toString();
     }
-
-    // ---------------- PDF EXPORT ----------------
     private void exportPDF(StatsData stats) {
 
         JFileChooser chooser = new JFileChooser();
         chooser.setSelectedFile(new File("section_" + sectionId + "_stats.pdf"));
 
         if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-
             File file = chooser.getSelectedFile();
             String body = generateStatsPlainText(stats);
-
-            // your updated util method: (File, int sectionId, String body)
             boolean ok = PDFutil.writeSectionStatsPDF(file, sectionId, body);
 
             JOptionPane.showMessageDialog(
@@ -340,8 +282,6 @@ public class SectionStatsView extends JPanel {
             );
         }
     }
-
-    // ---------------- STYLE BUTTON ----------------
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btn.setForeground(Color.WHITE);

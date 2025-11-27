@@ -21,8 +21,7 @@ public class ActionButtonEditor extends DefaultCellEditor {
     }
 
     @Override
-    public Component getTableCellEditorComponent(JTable table, Object value,
-                                                 boolean isSelected, int row, int column) {
+    public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
         this.row = row;
         button.setText(value != null ? value.toString() : "");
         clicked = true;
@@ -33,7 +32,6 @@ public class ActionButtonEditor extends DefaultCellEditor {
     public Object getCellEditorValue() {
         if (clicked) {
             try {
-                // Call the appropriate method based on parent class
                 if (parentPanel instanceof edu.univ.erp.ui.instructor.InstructorSections) {
                     ((edu.univ.erp.ui.instructor.InstructorSections) parentPanel).viewStudents(row);
                 }
@@ -43,7 +41,6 @@ public class ActionButtonEditor extends DefaultCellEditor {
                 else if (parentPanel instanceof edu.univ.erp.ui.instructor.InstructorStatsSectionSelect) {
                     ((edu.univ.erp.ui.instructor.InstructorStatsSectionSelect) parentPanel).viewStats(row);
                 }
-                // You can add more screens here if needed
 
             } catch (Exception ex) {
                 ex.printStackTrace();

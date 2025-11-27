@@ -23,14 +23,10 @@ public class InstructorSections extends JPanel {
     private final InstructorQueryService queryService;
     private final CourseService courseService;
 
-    private JTable sectionTable;  // reference for action buttons
-
-    // ------------------ Rounded Card Panel ------------------
+    private JTable sectionTable;
     class RoundedPanel extends JPanel {
         private final int cornerRadius = 20;
-
         public RoundedPanel() { setOpaque(false); }
-
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -41,55 +37,40 @@ public class InstructorSections extends JPanel {
         }
     }
 
-    // ------------------ Constructor ------------------
     public InstructorSections(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         this.queryService = new InstructorQueryService();
         this.courseService = new CourseService();
 
-        // -------- ROLE CHECK --------
-        if (!SessionManager.isLoggedIn() ||
-                !"INSTRUCTOR".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
+        if (!SessionManager.isLoggedIn() || !"INSTRUCTOR".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Access Denied: Instructors only.",
-                    "Access Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(this, "Access Denied: Instructors only.", "Access Error", JOptionPane.ERROR_MESSAGE);
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
             return;
         }
 
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
-
-        // ------------------ MAINTENANCE BANNER ------------------
         if (MaintenanceChecker.isMaintenanceOn()) {
             JPanel bannerPanel = new JPanel(new BorderLayout());
             bannerPanel.setBackground(new Color(255, 179, 71));
             bannerPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
-
             JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
             banner.setFont(new Font("Segoe UI", Font.BOLD, 16));
             bannerPanel.add(banner, BorderLayout.CENTER);
-
             add(bannerPanel, BorderLayout.NORTH);
         }
 
-        // ------------------ HEADER ------------------
         JLabel title = new JLabel("My Sections", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
         title.setForeground(new Color(52, 152, 219));
         title.setBorder(new EmptyBorder(20, 0, 20, 0));
         add(title, BorderLayout.PAGE_START);
-
-        // ------------------ TABLE CARD ------------------
         RoundedPanel card = new RoundedPanel();
         card.setLayout(new BorderLayout());
         card.setBorder(new EmptyBorder(20, 40, 20, 40));
 
-        // ------- IMPORTANT: Hidden ID column added at the end -------
+
         String[] cols = {"Section", "Course", "Title", "Day/Time", "Room", "Action", "SECTION_ID"};
 
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
@@ -103,22 +84,15 @@ public class InstructorSections extends JPanel {
         sectionTable.setRowHeight(30);
         sectionTable.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         sectionTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 16));
-
-        // Action button styling
         sectionTable.getColumn("Action").setCellRenderer(new ActionButtonRenderer());
         sectionTable.getColumn("Action").setCellEditor(new ActionButtonEditor(new JCheckBox(), this));
 
-        // Load content
         loadMySections(model);
-
-        // ----- Hide INTERNAL column (SECTION_ID) from view -----
         sectionTable.removeColumn(sectionTable.getColumnModel().getColumn(6));
 
         JScrollPane scroll = new JScrollPane(sectionTable);
         card.add(scroll, BorderLayout.CENTER);
         add(card, BorderLayout.CENTER);
-
-        // ------------------ BACK BUTTON ------------------
         JButton backBtn = new JButton("Back");
         styleButton(backBtn, new Color(52, 152, 219), new Color(41, 128, 185));
         backBtn.addActionListener(e -> mainFrame.refreshInstructorDashboard());
@@ -128,8 +102,6 @@ public class InstructorSections extends JPanel {
         bottom.add(backBtn);
         add(bottom, BorderLayout.SOUTH);
     }
-
-    // ------------------ Load Sections ------------------
     public void loadMySections(DefaultTableModel model) {
         model.setRowCount(0);
 
@@ -154,40 +126,26 @@ public class InstructorSections extends JPanel {
             }
 
         } catch (AccessException ex) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    ex.getMessage(),
-                    "Access Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Access Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    // ------------------ VIEW STUDENTS HANDLER ------------------
     public void viewStudents(int row) {
         try {
-            // Retrieve REAL sectionId from hidden column
+
             int sectionId = (int) sectionTable.getModel().getValueAt(row, 6);
-
             InstructorSectionStudents panel = new InstructorSectionStudents(mainFrame, sectionId);
-
-            // Display inside dashboard frame if possible
-            InstructorDashboard dash =
-                    (InstructorDashboard) SwingUtilities.getAncestorOfClass(InstructorDashboard.class, this);
-
+            InstructorDashboard dash = (InstructorDashboard) SwingUtilities.getAncestorOfClass(InstructorDashboard.class, this);
             if (dash != null) {
                 dash.setCenter(panel);
             } else {
                 mainFrame.addScreen("instructor_section_students", panel);
                 mainFrame.showScreen("instructor_section_students");
             }
-
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
-    // ------------------ Button Styling ------------------
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btn.setForeground(Color.WHITE);

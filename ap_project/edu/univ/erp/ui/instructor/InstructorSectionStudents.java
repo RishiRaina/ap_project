@@ -28,32 +28,21 @@ public class InstructorSectionStudents extends JPanel {
     private final UserAuthDAO userAuthDAO;
     private JTable studentTable;
 
-    // ---------------- Constructor ----------------
     public InstructorSectionStudents(MainFrame mainFrame, int sectionId) {
-
         this.mainFrame = mainFrame;
         this.sectionId = sectionId;
         this.queryService = new InstructorQueryService();
         this.userAuthDAO = new UserAuthDAO();
 
-        // Role check
-        if (!SessionManager.isLoggedIn() ||
-                !"INSTRUCTOR".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Access Denied: Instructors only.",
-                    "Access Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+        if (!SessionManager.isLoggedIn() || !"INSTRUCTOR".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
+
+            JOptionPane.showMessageDialog(this, "Access Denied: Instructors only.", "Access Error", JOptionPane.ERROR_MESSAGE);
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
             return;
         }
-
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
-
-        // ---------------- Maintenance Banner ----------------
         if (MaintenanceChecker.isMaintenanceOn()) {
             JPanel bannerPanel = new JPanel(new BorderLayout());
             bannerPanel.setBackground(new Color(255, 179, 71));
@@ -66,12 +55,10 @@ public class InstructorSectionStudents extends JPanel {
             add(bannerPanel, BorderLayout.NORTH);
         }
 
-        // ---------------- Header Section ----------------
-        String headerText;
 
+        String headerText;
         try {
             Section sec = queryService.getSection(sectionId);
-
             if (sec == null) {
                 headerText = "SECTION " + sectionId;
             } else {
@@ -88,10 +75,8 @@ public class InstructorSectionStudents extends JPanel {
         title.setBorder(new EmptyBorder(20, 0, 20, 0));
         add(title, BorderLayout.PAGE_START);
 
-        // ---------------- Table Area ----------------
         String[] cols = {
-                "Username", "Roll No", "Program", "Year",
-                "Final Grade", "Action", "ENROLLMENT_ID"
+                "Username", "Roll No", "Program", "Year", "Final Grade", "Action", "ENROLLMENT_ID"
         };
 
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
@@ -105,21 +90,15 @@ public class InstructorSectionStudents extends JPanel {
         studentTable.setRowHeight(30);
         studentTable.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         studentTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 16));
-
-        // Add action button
         studentTable.getColumn("Action")
                 .setCellRenderer(new ActionButtonRenderer());
         studentTable.getColumn("Action")
                 .setCellEditor(new ActionButtonEditor(new JCheckBox(), this));
 
         loadStudents(model);
-
-        // Hide ENROLLMENT_ID column
         studentTable.removeColumn(studentTable.getColumnModel().getColumn(6));
 
         add(new JScrollPane(studentTable), BorderLayout.CENTER);
-
-        // ---------------- Back Button ----------------
         JButton backBtn = new JButton("Back");
         styleButton(backBtn, new Color(52, 152, 219), new Color(41, 128, 185));
 
@@ -144,7 +123,6 @@ public class InstructorSectionStudents extends JPanel {
         add(bottom, BorderLayout.SOUTH);
     }
 
-    // ---------------- Load Students for Section ----------------
     public void loadStudents(DefaultTableModel model) {
         model.setRowCount(0);
 
@@ -200,50 +178,25 @@ public class InstructorSectionStudents extends JPanel {
             );
         }
     }
-
-    // ---------------- Enter Grades Action ----------------
     public void enterGrades(int row) {
-
-        // Maintenance check
-        if (MaintenanceChecker.isMaintenanceOn() &&
-                !"ADMIN".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Cannot edit grades during Maintenance.",
-                    "Maintenance ON",
-                    JOptionPane.WARNING_MESSAGE
-            );
+        if (MaintenanceChecker.isMaintenanceOn() && !"ADMIN".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
+            JOptionPane.showMessageDialog(this, "Cannot edit grades during Maintenance.", "Maintenance ON", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
             // Retrieve enrollmentId from hidden model
-            int enrollmentId = (int)
-                    studentTable.getModel().getValueAt(row, 6);
-
-            new GradeEntryDialog(
-                    SwingUtilities.getWindowAncestor(this),
-                    enrollmentId,
-                    this
-            ).setVisible(true);
+            int enrollmentId = (int) studentTable.getModel().getValueAt(row, 6);
+            new GradeEntryDialog(SwingUtilities.getWindowAncestor(this), enrollmentId, this).setVisible(true);
 
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Unexpected error: " + ex.getMessage(),
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(this, "Unexpected error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    // ---------------- Reload Table ----------------
     public void reloadTable() {
         loadStudents((DefaultTableModel) studentTable.getModel());
     }
-
-    // ---------------- Button Styling ----------------
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btn.setForeground(Color.WHITE);

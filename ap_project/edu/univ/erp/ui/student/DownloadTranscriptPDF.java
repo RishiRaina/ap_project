@@ -36,59 +36,34 @@ public class DownloadTranscriptPDF extends JPanel {
         this.mainFrame = mainFrame;
         this.ts = new TranscriptService();
 
-        // -------- ROLE CHECK --------
-        if (!SessionManager.isLoggedIn() ||
-                !"STUDENT".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
 
-            JOptionPane.showMessageDialog(this,
-                    "Access Denied: Students only.",
-                    "Access Error", JOptionPane.ERROR_MESSAGE);
-
+        if (!SessionManager.isLoggedIn() || !"STUDENT".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
+            JOptionPane.showMessageDialog(this, "Access Denied: Students only.", "Access Error", JOptionPane.ERROR_MESSAGE);
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
             return;
         }
-
-        // -------- BASE LAYOUT --------
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245)); // soft grey background
-
-        // -------- MAINTENANCE BANNER --------
         if (MaintenanceChecker.isMaintenanceOn()) {
             JPanel bp = new JPanel(new BorderLayout());
             bp.setBackground(new Color(255, 179, 71));
             bp.setBorder(new EmptyBorder(10, 10, 10, 10));
-
-            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY",
-                    SwingConstants.CENTER);
+            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
             banner.setFont(new Font("Segoe UI", Font.BOLD, 16));
-
             bp.add(banner);
             add(bp, BorderLayout.NORTH);
         }
-
-        // -------- TITLE --------
         JLabel title = new JLabel("Transcript (PDF)", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
         title.setForeground(new Color(52, 152, 219));
         title.setBorder(new EmptyBorder(20, 0, 20, 0));
         add(title, BorderLayout.PAGE_START);
-
-        // -------- MAIN CARD --------
         RoundedPanel card = new RoundedPanel();
         card.setLayout(new BorderLayout());
         card.setBorder(new EmptyBorder(25, 40, 25, 40));
         add(card, BorderLayout.CENTER);
 
-        // -------- TABLE (with SECTION column added) --------
-        String[] cols = {
-                "Course Code",
-                "Title",
-                "Credits",
-                "Section",
-                "Status",
-                "Final Grade"
-        };
-
+        String[] cols = {"Course Code", "Title", "Credits", "Section", "Status", "Final Grade"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -97,12 +72,9 @@ public class DownloadTranscriptPDF extends JPanel {
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 15));
         table.setRowHeight(28);
-
         JScrollPane scroll = new JScrollPane(table);
         scroll.setBorder(null);
         card.add(scroll, BorderLayout.CENTER);
-
-        // -------- BUTTONS --------
         JButton exportBtn = new JButton("Download PDF");
         JButton backBtn = new JButton("Back");
 
@@ -123,13 +95,9 @@ public class DownloadTranscriptPDF extends JPanel {
     }
 
     private void loadTranscript(DefaultTableModel model) {
-
         model.setRowCount(0);
         int studentId = SessionManager.getCurrentUserId();
-
-        // rows already include SECTION field now
         List<String[]> rows = ts.getTranscriptRows(studentId);
-
         for (String[] row : rows) {
             model.addRow(row);
         }
@@ -137,22 +105,14 @@ public class DownloadTranscriptPDF extends JPanel {
 
     private void exportPDF() {
         int studentId = SessionManager.getCurrentUserId();
-
         JFileChooser chooser = new JFileChooser();
         chooser.setSelectedFile(new File("transcript.pdf"));
-
         if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-
             boolean ok = ts.exportTranscriptPDF(studentId, chooser.getSelectedFile());
-
             if (ok) {
-                JOptionPane.showMessageDialog(this,
-                        "Transcript PDF downloaded!",
-                        "Success", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Transcript PDF downloaded!", "Success", JOptionPane.INFORMATION_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this,
-                        "Failed to save PDF.",
-                        "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Failed to save PDF.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

@@ -19,9 +19,7 @@ public class ViewCourseCatalog extends JPanel {
     // Same instructor-style rounded card
     class RoundedPanel extends JPanel {
         private final int cornerRadius = 20;
-
         public RoundedPanel() { setOpaque(false); }
-
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
@@ -35,51 +33,33 @@ public class ViewCourseCatalog extends JPanel {
     public ViewCourseCatalog(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
         this.courseService = new CourseService();
+        if (!SessionManager.isLoggedIn() || !"STUDENT".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
 
-        // ---------- ROLE CHECK ----------
-        if (!SessionManager.isLoggedIn()
-                || !"STUDENT".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Access Denied: Students Only!",
-                    "Access Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(this, "Access Denied: Students Only!", "Access Error", JOptionPane.ERROR_MESSAGE);
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
             return;
         }
 
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
-
-        // ---------- MAINTENANCE BANNER ----------
         if (MaintenanceChecker.isMaintenanceOn()) {
             JPanel bannerPanel = new JPanel(new BorderLayout());
             bannerPanel.setBackground(new Color(255, 179, 71));
             bannerPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
-
-            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY",
-                    SwingConstants.CENTER);
+            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
             banner.setFont(new Font("Segoe UI", Font.BOLD, 16));
-
             bannerPanel.add(banner, BorderLayout.CENTER);
             add(bannerPanel, BorderLayout.NORTH);
         }
-
-        // ---------- TITLE ----------
         JLabel title = new JLabel("Course Catalog", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
         title.setForeground(new Color(52, 152, 219));
         title.setBorder(new EmptyBorder(20, 0, 20, 0));
         add(title, BorderLayout.PAGE_START);
 
-        // ---------- CARD PANEL ----------
         RoundedPanel card = new RoundedPanel();
         card.setLayout(new BorderLayout());
         card.setBorder(new EmptyBorder(25, 40, 25, 40));
-
-        // ---------- TABLE ----------
         String[] cols = {"Code", "Title", "Credits"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
@@ -93,31 +73,21 @@ public class ViewCourseCatalog extends JPanel {
         card.add(new JScrollPane(table), BorderLayout.CENTER);
         add(card, BorderLayout.CENTER);
 
-        // ---------- BACK BUTTON ----------
         JButton backBtn = new JButton("Back");
         styleButton(backBtn, new Color(52, 152, 219), new Color(41, 128, 185));
 
         JPanel bottom = new JPanel();
         bottom.setBackground(new Color(245, 245, 245));
         bottom.add(backBtn);
-
         add(bottom, BorderLayout.SOUTH);
-
         backBtn.addActionListener(e -> mainFrame.refreshStudentDashboard());
-
-        // load
         loadCourses(model);
     }
 
     private void loadCourses(DefaultTableModel model) {
         model.setRowCount(0);
-
         for (Course c : courseService.getAllCourses()) {
-            model.addRow(new Object[]{
-                    c.getCode().toUpperCase(),
-                    c.getTitle(),
-                    c.getCredits()
-            });
+            model.addRow(new Object[]{c.getCode().toUpperCase(), c.getTitle(), c.getCredits()});
         }
     }
 

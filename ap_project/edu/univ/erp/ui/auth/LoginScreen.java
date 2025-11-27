@@ -21,10 +21,7 @@ public class LoginScreen extends JPanel {
 
         JPanel card = new JPanel(new GridBagLayout());
         card.setBackground(Color.WHITE);
-        card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(220, 220, 220)),
-                BorderFactory.createEmptyBorder(40, 60, 40, 60)
-        ));
+        card.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(new Color(220, 220, 220)), BorderFactory.createEmptyBorder(40, 60, 40, 60)));
         card.setPreferredSize(new Dimension(450, 380));
 
         GridBagConstraints c = new GridBagConstraints();
@@ -39,7 +36,6 @@ public class LoginScreen extends JPanel {
         c.gridwidth = 2;
         card.add(title, c);
         c.gridwidth = 1;
-
         JLabel userLabel = new JLabel("Username");
         userLabel.setFont(new Font("Segoe UI", Font.BOLD, 15));
         JTextField userField = createField();
@@ -47,34 +43,27 @@ public class LoginScreen extends JPanel {
         c.gridx = 0;
         c.gridy = 1;
         card.add(userLabel, c);
-
         c.gridx = 1;
         card.add(userField, c);
 
         JLabel passLabel = new JLabel("Password");
         passLabel.setFont(new Font("Segoe UI", Font.BOLD, 15));
         JPasswordField passField = createPasswordField();
-
         c.gridx = 0;
         c.gridy = 2;
         card.add(passLabel, c);
-
         c.gridx = 1;
         card.add(passField, c);
-
         JLabel errorLabel = new JLabel("", SwingConstants.CENTER);
         errorLabel.setForeground(new Color(192, 57, 43));
         errorLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
-
         c.gridx = 0;
         c.gridy = 3;
         c.gridwidth = 2;
         card.add(errorLabel, c);
         c.gridwidth = 1;
-
         JButton loginBtn = new JButton("Login");
         styleButton(loginBtn);
-
         c.gridx = 0;
         c.gridy = 4;
         c.gridwidth = 2;

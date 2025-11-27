@@ -19,10 +19,7 @@ public class InstructorStatsSectionSelect extends JPanel {
 
     private final MainFrame mainFrame;
     private final InstructorQueryService queryService;
-
     private JTable sectionTable;
-
-    // -------- Rounded card --------
     class RoundedPanel extends JPanel {
         private final int radius = 20;
         public RoundedPanel() { setOpaque(false); }
@@ -44,21 +41,13 @@ public class InstructorStatsSectionSelect extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
 
-        // -------- ROLE CHECK --------
-        if (!SessionManager.isLoggedIn() ||
-                !"INSTRUCTOR".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Access Denied: Instructors only.",
-                    "Access Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+        if (!SessionManager.isLoggedIn() || !"INSTRUCTOR".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
+
+            JOptionPane.showMessageDialog(this, "Access Denied: Instructors only.", "Access Error", JOptionPane.ERROR_MESSAGE);
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
             return;
         }
-
-        // -------- Maintenance Banner --------
         if (MaintenanceChecker.isMaintenanceOn()) {
             JPanel bannerPanel = new JPanel(new BorderLayout());
             bannerPanel.setBackground(new Color(255, 179, 71));
@@ -72,24 +61,17 @@ public class InstructorStatsSectionSelect extends JPanel {
             add(bannerPanel, BorderLayout.NORTH);
         }
 
-        // -------- Header --------
+
         JLabel title = new JLabel("Select Section for Statistics", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
         title.setForeground(new Color(52, 152, 219));
         title.setBorder(new EmptyBorder(20, 0, 20, 0));
         add(title, BorderLayout.PAGE_START);
-
-        // -------- Card Container --------
         RoundedPanel card = new RoundedPanel();
         card.setLayout(new BorderLayout());
         card.setBorder(new EmptyBorder(20, 40, 20, 40));
 
-        // -------- Table Columns (Same as InstructorSections) --------
-        String[] cols = {
-                "Section", "Day/Time", "Room",
-                "Action", "SECTION_ID" // hidden
-        };
-
+        String[] cols = {"Section", "Day/Time", "Room", "Action", "SECTION_ID"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -101,22 +83,13 @@ public class InstructorStatsSectionSelect extends JPanel {
         sectionTable.setRowHeight(30);
         sectionTable.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         sectionTable.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 16));
-
-        // Action Button
         sectionTable.getColumn("Action").setCellRenderer(new ActionButtonRenderer());
         sectionTable.getColumn("Action").setCellEditor(new ActionButtonEditor(new JCheckBox(), this));
-
-        // Load actual data
         loadSections(model);
-
-        // Hide the SECTION_ID column properly
         sectionTable.removeColumn(sectionTable.getColumnModel().getColumn(4));
-
         JScrollPane scroll = new JScrollPane(sectionTable);
         card.add(scroll, BorderLayout.CENTER);
         add(card, BorderLayout.CENTER);
-
-        // -------- Back Button --------
         JButton backBtn = new JButton("Back");
         styleButton(backBtn, new Color(52, 152, 219), new Color(41, 128, 185));
         backBtn.addActionListener(e -> mainFrame.refreshInstructorDashboard());
@@ -126,37 +99,22 @@ public class InstructorStatsSectionSelect extends JPanel {
         bottom.add(backBtn);
         add(bottom, BorderLayout.SOUTH);
     }
-
-    // -------- Load Sections (same style as InstructorSections) --------
     private void loadSections(DefaultTableModel model) {
         model.setRowCount(0);
-
         try {
             int instructorId = SessionManager.getCurrentUserId();
             List<Section> list = queryService.getMySections(instructorId);
-
             for (Section s : list) {
 
-                model.addRow(new Object[]{
-                        s.toString().toUpperCase(),    // Example: "12 | CS201 - MON 10:00 @ C102"
-                        s.getDayTime().toUpperCase(),
-                        s.getRoom().toUpperCase(),
-                        "View Stats",
-                        s.getSectionId()               // hidden real ID
-                });
+                model.addRow(new Object[]{s.toString().toUpperCase(), s.getDayTime().toUpperCase(), s.getRoom().toUpperCase(), "View Stats", s.getSectionId()});
             }
 
         } catch (AccessException ex) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    ex.getMessage(),
-                    "Access Error",
-                    JOptionPane.ERROR_MESSAGE
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Access Error", JOptionPane.ERROR_MESSAGE
             );
         }
     }
 
-    // -------- Action when clicking View Stats --------
     public void viewStats(int row) {
         try {
             int sectionId = (int) sectionTable.getModel().getValueAt(row, 4);

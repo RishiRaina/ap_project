@@ -43,38 +43,23 @@ public class ViewMyEnrollments extends JPanel {
         this.mainFrame = mainFrame;
         this.queryService = new StudentQueryService();
         this.regService = new StudentRegistrationService();
-
-        // ----- ROLE CHECK -----
-        if (!SessionManager.isLoggedIn() ||
-                !"STUDENT".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
-
-            JOptionPane.showMessageDialog(
-                    this, "Access Denied: Students Only",
-                    "Access Error", JOptionPane.ERROR_MESSAGE
-            );
+        if (!SessionManager.isLoggedIn() || !"STUDENT".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
+            JOptionPane.showMessageDialog(this, "Access Denied: Students Only", "Access Error", JOptionPane.ERROR_MESSAGE);
             mainFrame.showScreen(MainFrame.LOGIN_SCREEN);
             return;
         }
 
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
-
-        // ----- MAINTENANCE BANNER -----
         if (MaintenanceChecker.isMaintenanceOn()) {
-
             JPanel bannerPanel = new JPanel(new BorderLayout());
             bannerPanel.setBackground(new Color(255, 179, 71));
             bannerPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
-
-            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY",
-                    SwingConstants.CENTER);
+            JLabel banner = new JLabel("System Under Maintenance — VIEW ONLY", SwingConstants.CENTER);
             banner.setFont(new Font("Segoe UI", Font.BOLD, 16));
-
             bannerPanel.add(banner, BorderLayout.CENTER);
             add(bannerPanel, BorderLayout.NORTH);
         }
-
-        // ----- TITLE -----
         JLabel title = new JLabel("My Enrollments", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
         title.setForeground(new Color(52, 152, 219));
@@ -82,13 +67,9 @@ public class ViewMyEnrollments extends JPanel {
 
         add(title, BorderLayout.PAGE_START);
 
-        // ----- CARD PANEL -----
         RoundedPanel card = new RoundedPanel();
         card.setLayout(new BorderLayout());
         card.setBorder(new EmptyBorder(25, 40, 25, 40));
-
-        // ----- TABLE MODEL -----
-        // Column 0 = hidden EnrollmentID
         String[] cols = {"EnrollmentID", "Course", "Section", "Status", "Drop"};
 
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
@@ -108,31 +89,20 @@ public class ViewMyEnrollments extends JPanel {
         table.getColumnModel().getColumn(0).setMinWidth(0);
         table.getColumnModel().getColumn(0).setMaxWidth(0);
         table.getColumnModel().getColumn(0).setPreferredWidth(0);
-
-        // Button
         table.getColumn("Drop").setCellRenderer(new ButtonRenderer());
         table.getColumn("Drop").setCellEditor(new ButtonEditor(new JCheckBox(), this));
 
         card.add(new JScrollPane(table), BorderLayout.CENTER);
         add(card, BorderLayout.CENTER);
-
-        // ----- BACK BUTTON -----
         JButton backBtn = new JButton("Back");
         styleButton(backBtn, new Color(52, 152, 219), new Color(41, 128, 185));
-
         JPanel bottom = new JPanel();
         bottom.setBackground(new Color(245, 245, 245));
         bottom.add(backBtn);
-
         add(bottom, BorderLayout.SOUTH);
-
         backBtn.addActionListener(e -> mainFrame.refreshStudentDashboard());
-
-        // Load rows
         loadEnrollments(model);
     }
-
-    // ----- LOAD ENROLLMENTS -----
     public void loadEnrollments(DefaultTableModel model) {
 
         model.setRowCount(0);
@@ -159,52 +129,26 @@ public class ViewMyEnrollments extends JPanel {
             }
 
         } catch (AccessException ex) {
-            JOptionPane.showMessageDialog(
-                    this, ex.getMessage(),
-                    "Access Error", JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Access Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    // ----- DROP ENROLLMENT -----
     public void dropEnrollment(int enrollmentId) {
-
-        if (MaintenanceChecker.isMaintenanceOn() &&
-                !"ADMIN".equals(SessionManager.getCurrentUserRole())) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Dropping NOT allowed during Maintenance!",
-                    "Maintenance", JOptionPane.WARNING_MESSAGE
-            );
+        if (MaintenanceChecker.isMaintenanceOn() && !"ADMIN".equals(SessionManager.getCurrentUserRole())) {
+            JOptionPane.showMessageDialog(this, "Dropping NOT allowed during Maintenance!", "Maintenance", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         int studentId = SessionManager.getCurrentUserId();
-
         try {
             regService.drop(studentId, enrollmentId);
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Enrollment dropped!",
-                    "Success",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-
+            JOptionPane.showMessageDialog(this, "Enrollment dropped!", "Success", JOptionPane.INFORMATION_MESSAGE);
             loadEnrollments((DefaultTableModel) table.getModel());
-
         } catch (AccessException ex) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    ex.getMessage(),
-                    "Drop Failed",
-                    JOptionPane.ERROR_MESSAGE
-            );
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Drop Failed", JOptionPane.ERROR_MESSAGE);
         }
     }
-
-    // ----- STYLE BUTTON -----
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btn.setForeground(Color.WHITE);
