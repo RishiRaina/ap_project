@@ -14,7 +14,7 @@ public class ToggleMaintenanceUI extends JPanel {
     private AdminService adminService = new AdminService();
     private JLabel statusLabel;
 
-    // ---------- Rounded Panel Class ----------
+
     class RoundedPanel extends JPanel {
         private int cornerRadius = 20;
 
@@ -36,14 +36,14 @@ public class ToggleMaintenanceUI extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245)); // soft gray background
 
-        // ---------- Header ----------
+
         JLabel title = new JLabel("Toggle Maintenance Mode", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 26));
         title.setForeground(new Color(52, 152, 219));
         title.setBorder(BorderFactory.createEmptyBorder(20, 0, 10, 0));
         add(title, BorderLayout.NORTH);
 
-        // ---------- Status Banner Panel ----------
+
         RoundedPanel statusPanel = new RoundedPanel();
         statusPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         statusPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
@@ -61,7 +61,7 @@ public class ToggleMaintenanceUI extends JPanel {
 
         updateStatusLabel(); // initialize status
 
-        // ---------- Buttons Panel ----------
+
         RoundedPanel buttonPanel = new RoundedPanel();
         buttonPanel.setLayout(new FlowLayout());
         buttonPanel.setBackground(new Color(245, 245, 245));
@@ -76,7 +76,7 @@ public class ToggleMaintenanceUI extends JPanel {
         buttonPanel.add(back);
         add(buttonPanel, BorderLayout.SOUTH);
 
-        // ---------- Action Listeners ----------
+
         toggle.addActionListener(e -> {
             try {
                 adminService.toggleMaintenance();
@@ -90,7 +90,7 @@ public class ToggleMaintenanceUI extends JPanel {
         back.addActionListener(e -> mainFrame.refreshAdminDashboard());
     }
 
-    // ---------- Button Styling ----------
+
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btn.setForeground(Color.WHITE);
@@ -110,7 +110,7 @@ public class ToggleMaintenanceUI extends JPanel {
         });
     }
 
-    // ---------- Update Status ----------
+
     private void updateStatusLabel() {
         boolean isOn = MaintenanceChecker.isMaintenanceOn();
         statusLabel.setText(isOn ? "Maintenance Mode: ON" : "Maintenance Mode: OFF");

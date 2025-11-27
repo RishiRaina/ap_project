@@ -16,7 +16,7 @@ public class DeleteCourseUI extends JPanel {
     private AdminService adminService = new AdminService();
     private CourseService courseService = new CourseService();
 
-    // ---------- ROUNDED PANEL CLASS ----------
+
     class RoundedPanel extends JPanel {
         private int cornerRadius = 20;
 
@@ -39,7 +39,7 @@ public class DeleteCourseUI extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245)); // Soft background
 
-        // ---------- HEADER ----------
+
         JPanel header = new JPanel();
         header.setBackground(new Color(231, 76, 60)); // Red header for delete
         header.setBorder(BorderFactory.createEmptyBorder(25, 0, 25, 0));
@@ -50,11 +50,11 @@ public class DeleteCourseUI extends JPanel {
         header.add(title);
         add(header, BorderLayout.NORTH);
 
-        // ---------- MAIN WRAPPER ----------
+
         JPanel wrapper = new JPanel(new GridBagLayout());
         wrapper.setBackground(new Color(245, 245, 245));
 
-        // ---------- FORM CARD ----------
+
         RoundedPanel form = new RoundedPanel();
         form.setLayout(new GridLayout(1, 2, 15, 15));
         form.setBorder(BorderFactory.createEmptyBorder(40, 50, 40, 50));
@@ -62,27 +62,27 @@ public class DeleteCourseUI extends JPanel {
         Font labelFont = new Font("Segoe UI", Font.BOLD, 16);
         Font inputFont = new Font("Segoe UI", Font.PLAIN, 15);
 
-        // --- Course dropdown with placeholder ---
+
         JLabel courseLabel = new JLabel("Select Course:");
         courseLabel.setFont(labelFont);
 
         JComboBox<Course> courseBox = new JComboBox<>();
         courseBox.setFont(inputFont);
 
-        // Method to populate dropdown
+
         Runnable refreshCourseDropdown = () -> {
             courseBox.removeAllItems();
-            courseBox.addItem(null); // placeholder
+            courseBox.addItem(null);
             List<Course> courses = courseService.getAllCourses();
             for (Course c : courses) {
                 courseBox.addItem(c);
             }
         };
 
-        // Populate initially
+
         refreshCourseDropdown.run();
 
-        // Renderer to show "CODE - Title"
+
         courseBox.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index,
@@ -101,7 +101,7 @@ public class DeleteCourseUI extends JPanel {
         form.add(courseLabel);
         form.add(courseBox);
 
-        // ---------- BUTTONS ----------
+
         JButton deleteBtn = new JButton("Delete");
         JButton back = new JButton("Back");
 
@@ -117,12 +117,12 @@ public class DeleteCourseUI extends JPanel {
         add(wrapper, BorderLayout.CENTER);
         add(buttons, BorderLayout.SOUTH);
 
-        // ---------- ACTION LISTENERS ----------
+
         deleteBtn.addActionListener(e -> {
             try {
                 Course selectedCourse = (Course) courseBox.getSelectedItem();
 
-                // Validate placeholder selection
+
                 if (selectedCourse == null) {
                     JOptionPane.showMessageDialog(this, "Please select a course to delete!");
                     return;
@@ -130,7 +130,7 @@ public class DeleteCourseUI extends JPanel {
 
                 if (adminService.deleteCourse(selectedCourse.getCode())) {
                     JOptionPane.showMessageDialog(this, "Course Deleted Successfully!");
-                    refreshCourseDropdown.run(); // Refresh dropdown after deletion
+                    refreshCourseDropdown.run();
                 } else {
                     JOptionPane.showMessageDialog(this, "Failed to Delete!");
                 }
@@ -143,7 +143,7 @@ public class DeleteCourseUI extends JPanel {
         back.addActionListener(e -> mainFrame.refreshAdminDashboard());
     }
 
-    // ---------- BUTTON STYLING ----------
+
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btn.setForeground(Color.WHITE);

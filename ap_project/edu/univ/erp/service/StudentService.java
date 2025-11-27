@@ -32,7 +32,7 @@ public class StudentService {
             authConn.setAutoCommit(false);
             erpConn.setAutoCommit(false);
 
-            // Insert user into auth_db
+
             UserAuth user = new UserAuth();
             user.setUsername(username);
             user.setRole("STUDENT");
@@ -41,7 +41,7 @@ public class StudentService {
 
             if (!userAuthDAO.addUser(user)) throw new SQLException("Failed to add user to auth_db");
 
-            // Insert student into ERP DB
+
             student.setUserId(user.getUserId());
             if (!studentDAO.addStudent(student, erpConn)) throw new SQLException("Failed to add student to ERP DB");
 

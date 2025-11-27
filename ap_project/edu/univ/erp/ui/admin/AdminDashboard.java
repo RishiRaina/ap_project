@@ -20,7 +20,7 @@ public class AdminDashboard extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
 
-        // ===================== HEADER =====================
+
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(new Color(52, 152, 219));
         header.setBorder(new EmptyBorder(10, 20, 10, 20));
@@ -30,7 +30,7 @@ public class AdminDashboard extends JPanel {
         title.setForeground(Color.WHITE);
         header.add(title, BorderLayout.WEST);
 
-        // top buttons
+
         JPanel topButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         topButtons.setOpaque(false);
 
@@ -66,7 +66,7 @@ public class AdminDashboard extends JPanel {
         header.add(topButtons, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
 
-        // ===================== SIDEBAR =====================
+
         JPanel sidebar = new JPanel(new GridLayout(0, 1, 0, 10));
         sidebar.setBackground(new Color(44, 62, 80));
         sidebar.setBorder(new EmptyBorder(20, 10, 20, 10));
@@ -77,7 +77,8 @@ public class AdminDashboard extends JPanel {
                 "Add Student", "Add Instructor",
                 "Enroll Student", "Unenroll Student",
                 "View All Students", "View All Instructors",
-                "Toggle Maintenance Mode","Send Notification"
+                "Toggle Maintenance Mode", "Send Notification",
+                "Upgrade Grade"  // <-- new button
         };
 
         for (String m : menu) {
@@ -88,10 +89,9 @@ public class AdminDashboard extends JPanel {
 
         add(sidebar, BorderLayout.WEST);
 
-        // ===================== CENTER AREA =====================
+
         mainContent = new JPanel(new BorderLayout());
         mainContent.setBackground(new Color(245, 245, 245));
-
         add(mainContent, BorderLayout.CENTER);
     }
 
@@ -161,11 +161,12 @@ public class AdminDashboard extends JPanel {
             case "Toggle Maintenance Mode":
                 openContent(new ToggleMaintenanceUI(mainFrame));
                 break;
-
             case "Send Notification":
                 openContent(new AdminNotificationBroadcastUI());
                 break;
-
+            case "Upgrade Grade":
+                openContent(new UpgradeGradeUI(mainFrame)); // <-- new upgrade grade UI
+                break;
         }
     }
 

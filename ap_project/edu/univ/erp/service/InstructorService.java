@@ -37,10 +37,10 @@ public class InstructorService {
             authConn.setAutoCommit(false);
             erpConn.setAutoCommit(false);
 
-            // 1. Hash password
+
             String passwordHash = org.mindrot.jbcrypt.BCrypt.hashpw(rawPassword, org.mindrot.jbcrypt.BCrypt.gensalt());
 
-            // 2. Add to auth_db
+
             UserAuth user = new UserAuth();
             user.setUsername(username);
             user.setPasswordHash(passwordHash);
@@ -49,9 +49,9 @@ public class InstructorService {
 
             if (!userAuthDAO.addUser(user)) throw new SQLException("Failed to add user to auth_db");
 
-            // 3. Add to instructors table in erp_db
+
             Instructor inst = new Instructor();
-            inst.setUserId(user.getUserId());  // Use user_id from auth_db
+            inst.setUserId(user.getUserId());
             inst.setDepartment(department);
 
             if (!instructorDAO.addInstructor(inst)) throw new SQLException("Failed to add instructor to ERP DB");

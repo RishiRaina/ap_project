@@ -33,7 +33,7 @@ public class SectionService {
         if (text == null || text.trim().isEmpty()) return null;
 
         try {
-            // Expect format: "12 | CSE101 - DSA (Mon 10:00)"
+
             String idPart = text.split("\\|")[0].trim();
             int sectionId = Integer.parseInt(idPart);
             return getSectionById(sectionId);

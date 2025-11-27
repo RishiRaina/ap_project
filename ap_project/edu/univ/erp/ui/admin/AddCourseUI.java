@@ -13,7 +13,7 @@ public class AddCourseUI extends JPanel {
 
     private AdminService adminService = new AdminService();
 
-    // Rounded panel for the card
+
     class RoundedPanel extends JPanel {
         private int cornerRadius = 20;
 
@@ -36,7 +36,7 @@ public class AddCourseUI extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245)); // Soft background
 
-        // ---------- HEADER PANEL ----------
+
         JPanel header = new JPanel();
         header.setBackground(new Color(52, 152, 219));  // Modern blue
         header.setBorder(BorderFactory.createEmptyBorder(25, 0, 25, 0));
@@ -48,11 +48,11 @@ public class AddCourseUI extends JPanel {
 
         add(header, BorderLayout.NORTH);
 
-        // ---------- MAIN CENTER WRAPPER ----------
+
         JPanel wrapper = new JPanel(new GridBagLayout());
         wrapper.setBackground(new Color(245, 245, 245));
 
-        // ---------- FORM CARD ----------
+
         RoundedPanel form = new RoundedPanel();
         form.setLayout(new GridLayout(4, 2, 20, 20)); // increased spacing
         form.setBorder(BorderFactory.createEmptyBorder(60, 100, 60, 100)); // bigger padding
@@ -78,7 +78,7 @@ public class AddCourseUI extends JPanel {
         titleField.setFont(inputFont);
         setPlaceholder(titleField, "Enter course title");
 
-        // ---------- Credits dropdown ----------
+
         JComboBox<String> creditsBox = new JComboBox<>();
         creditsBox.setFont(inputFont);
         creditsBox.addItem("Select Credits");
@@ -96,7 +96,7 @@ public class AddCourseUI extends JPanel {
         form.add(creditsLabel);
         form.add(creditsBox);
 
-        // ---------- BUTTONS ----------
+
         JButton submit = new JButton("Add Course");
         JButton back = new JButton("Back");
 
@@ -109,14 +109,14 @@ public class AddCourseUI extends JPanel {
         wrapper.add(form);
         add(wrapper, BorderLayout.CENTER);
 
-        // ---------- ACTION LISTENERS ----------
+
         submit.addActionListener(e -> {
             try {
                 String code = codeField.getText().trim();
                 String ctitle = titleField.getText().trim();
                 String creditsStr = (String) creditsBox.getSelectedItem();
 
-                // --- VALIDATE EMPTY OR PLACEHOLDER ---
+
                 if (code.equals("") || code.equals("Enter course code")) {
                     JOptionPane.showMessageDialog(this, "Please enter a valid course code.");
                     return;
@@ -127,7 +127,7 @@ public class AddCourseUI extends JPanel {
                     return;
                 }
 
-                // --- ALPHANUMERIC ONLY ---
+
                 if (!isValidAlphaNumeric(code)) {
                     JOptionPane.showMessageDialog(this,
                             "Course code must be alphanumeric only .");
@@ -140,7 +140,7 @@ public class AddCourseUI extends JPanel {
                     return;
                 }
 
-                // --- CREDITS CHECK ---
+
                 if (creditsStr.equals("Select Credits")) {
                     JOptionPane.showMessageDialog(this, "Please select credits.");
                     return;
@@ -167,7 +167,7 @@ public class AddCourseUI extends JPanel {
         back.addActionListener(e -> mainFrame.refreshAdminDashboard());
     }
 
-    // ---------- BUTTON STYLING ----------
+
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btn.setForeground(Color.WHITE);
@@ -187,7 +187,7 @@ public class AddCourseUI extends JPanel {
         });
     }
 
-    // ---------- HELPER: PLACEHOLDER ----------
+
     private void setPlaceholder(JTextField field, String placeholder) {
         field.setForeground(Color.GRAY);
         field.setText(placeholder);
@@ -210,7 +210,7 @@ public class AddCourseUI extends JPanel {
         });
     }
 
-    // ---------- HELPER: ALPHANUMERIC ONLY ----------
+
     private boolean isValidAlphaNumeric(String s) {
         return s.matches("^[a-zA-Z0-9 ]+$");
         // alphanumeric only

@@ -137,7 +137,7 @@ public class InstructorDAO {
 
     public String getUsernameById(int userId) {
         String sql = "SELECT username FROM users_auth WHERE user_id = ?";
-        try (Connection conn = AuthDatabaseConnection.getConnection();  // use auth_db connection
+        try (Connection conn = AuthDatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, userId);

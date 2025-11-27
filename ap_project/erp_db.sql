@@ -1,3 +1,6 @@
+CREATE DATABASE ERP_DB;
+USE ERP_DB;
+
 CREATE TABLE IF NOT EXISTS students (
   user_id INT PRIMARY KEY,
   roll_no VARCHAR(50),
@@ -37,11 +40,13 @@ CREATE TABLE IF NOT EXISTS sections (
   year INT,
   registration_deadline DATE,
   FOREIGN KEY (course_id)
-    REFERENCES courses(course_id),
+    REFERENCES courses(course_id)
+    ON DELETE CASCADE,
   FOREIGN KEY (instructor_id)
     REFERENCES instructors(user_id)
     ON DELETE SET NULL
 );
+
 
 
 CREATE TABLE IF NOT EXISTS enrollments (

@@ -26,7 +26,7 @@ public class RestoreUI extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
 
-        // ---------- HEADER ----------
+
         JPanel header = new JPanel();
         header.setBackground(new Color(52, 152, 219));
         header.setBorder(BorderFactory.createEmptyBorder(25, 0, 25, 0));
@@ -36,7 +36,7 @@ public class RestoreUI extends JPanel {
         header.add(title);
         add(header, BorderLayout.NORTH);
 
-        // ---------- FORM ----------
+
         JPanel wrapper = new JPanel(new GridBagLayout());
         wrapper.setBackground(new Color(245, 245, 245));
 
@@ -59,7 +59,7 @@ public class RestoreUI extends JPanel {
         wrapper.add(form);
         add(wrapper, BorderLayout.CENTER);
 
-        // ---------- BUTTONS ----------
+
         JPanel buttons = new JPanel();
         buttons.setBackground(new Color(245, 245, 245));
 
@@ -69,7 +69,7 @@ public class RestoreUI extends JPanel {
         buttons.add(backBtn);
         add(buttons, BorderLayout.SOUTH);
 
-        // ---------- ACTIONS ----------
+
         restoreBtn.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to restore the database?", "Confirm Restore", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
