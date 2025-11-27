@@ -77,7 +77,8 @@ public class AdminDashboard extends JPanel {
                 "Add Student", "Add Instructor",
                 "Enroll Student", "Unenroll Student",
                 "View All Students", "View All Instructors",
-                "Toggle Maintenance Mode","Send Notification"
+                "Toggle Maintenance Mode", "Send Notification",
+                "Upgrade Grade"  // <-- new button
         };
 
         for (String m : menu) {
@@ -91,7 +92,6 @@ public class AdminDashboard extends JPanel {
         // ===================== CENTER AREA =====================
         mainContent = new JPanel(new BorderLayout());
         mainContent.setBackground(new Color(245, 245, 245));
-
         add(mainContent, BorderLayout.CENTER);
     }
 
@@ -161,11 +161,12 @@ public class AdminDashboard extends JPanel {
             case "Toggle Maintenance Mode":
                 openContent(new ToggleMaintenanceUI(mainFrame));
                 break;
-
             case "Send Notification":
                 openContent(new AdminNotificationBroadcastUI());
                 break;
-
+            case "Upgrade Grade":
+                openContent(new UpgradeGradeUI(mainFrame)); // <-- new upgrade grade UI
+                break;
         }
     }
 

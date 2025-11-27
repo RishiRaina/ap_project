@@ -6,6 +6,7 @@ import edu.univ.erp.data.NotificationsDAO;
 import edu.univ.erp.domain.Grade;
 import edu.univ.erp.domain.Notification;
 import edu.univ.erp.domain.Student;
+import edu.univ.erp.service.AdminGradeService;
 import edu.univ.erp.service.InstructorGradeService;
 import edu.univ.erp.service.InstructorQueryService;
 
@@ -18,10 +19,13 @@ import java.util.List;
 public class GradeEntryDialog extends JDialog {
 
     private final int enrollmentId;
-    private final InstructorGradeService gradeService;
     private final InstructorSectionStudents parentPanel;
     private final InstructorQueryService queryService;
     private final NotificationsDAO notificationsDAO;
+    private final boolean adminMode;
+
+    private final InstructorGradeService instructorGradeService;
+    private final AdminGradeService adminGradeService;
 
     private static final String[] COMPONENTS = {
             "ASSIGNMENTS", "QUIZZES", "PROJECT", "MID", "END"
@@ -30,37 +34,79 @@ public class GradeEntryDialog extends JDialog {
     private JComboBox<String> compDropdown;
     private JTextField scoreField;
     private JTextField finalField;
-
     private HashMap<String, Grade> existingMap = new HashMap<>();
 
+    // ---------------- Instructor Constructor ----------------
     public GradeEntryDialog(Window owner, int enrollmentId, InstructorSectionStudents parentPanel) {
         super(owner, "Enter Grades", ModalityType.APPLICATION_MODAL);
 
         this.enrollmentId = enrollmentId;
         this.parentPanel = parentPanel;
-        this.gradeService = new InstructorGradeService();
+        this.adminMode = false;
+
+        this.instructorGradeService = new InstructorGradeService();
+        this.adminGradeService = null;
         this.queryService = new InstructorQueryService();
         this.notificationsDAO = new NotificationsDAO();
 
-        // Security checks
-        if (!SessionManager.isLoggedIn()
-                || !"INSTRUCTOR".equalsIgnoreCase(SessionManager.getCurrentUserRole())) {
-            JOptionPane.showMessageDialog(this, "Access denied.");
-            dispose();
-            return;
-        }
-
-        if (MaintenanceChecker.isMaintenanceOn()) {
-            JOptionPane.showMessageDialog(this,
-                    "System in maintenance — grade editing disabled.");
-            dispose();
-            return;
-        }
-
+        checkAccess();
         reloadExistingGrades();
         buildUI(owner);
     }
 
+    // ---------------- Admin Constructor ----------------
+    public GradeEntryDialog(Window owner, int enrollmentId, boolean adminMode) {
+        super(owner, "Enter Grades", ModalityType.APPLICATION_MODAL);
+
+        this.enrollmentId = enrollmentId;
+        this.parentPanel = null;
+        this.adminMode = adminMode;
+
+        this.instructorGradeService = null;
+        this.adminGradeService = new AdminGradeService();
+        this.queryService = new InstructorQueryService();
+        this.notificationsDAO = new NotificationsDAO();
+
+        checkAccess();
+        reloadExistingGrades();
+        buildUI(owner);
+    }
+
+    // ---------------- ACCESS CHECK ----------------
+    private void checkAccess() {
+
+        if (!SessionManager.isLoggedIn()) {
+            JOptionPane.showMessageDialog(this, "You must be logged in.");
+            dispose();
+            return;
+        }
+
+        String role = SessionManager.getCurrentUserRole().toUpperCase();
+
+        // Instructor mode → must be instructor
+        if (!adminMode && !role.equals("INSTRUCTOR")) {
+            JOptionPane.showMessageDialog(this, "Access denied — instructor only.");
+            dispose();
+            return;
+        }
+
+        // Admin mode → admin is allowed no matter what
+        if (adminMode && !role.equals("ADMIN")) {
+            JOptionPane.showMessageDialog(this,
+                    "Access denied — admin only mode.");
+            dispose();
+            return;
+        }
+
+        // Instructor blocked during maintenance
+        if (!adminMode && MaintenanceChecker.isMaintenanceOn()) {
+            JOptionPane.showMessageDialog(this,
+                    "System in maintenance — grade editing disabled.");
+            dispose();
+        }
+    }
+
+    // ---------------- LOAD EXISTING GRADES ----------------
     private void reloadExistingGrades() {
         existingMap.clear();
         try {
@@ -72,8 +118,8 @@ public class GradeEntryDialog extends JDialog {
         } catch (Exception ignored) {}
     }
 
+    // ---------------- BUILD UI ----------------
     private void buildUI(Window owner) {
-
         setSize(520, 440);
         setLocationRelativeTo(owner);
         setResizable(false);
@@ -156,17 +202,14 @@ public class GradeEntryDialog extends JDialog {
         b.setFont(new Font("Segoe UI", Font.BOLD, 14));
 
         b.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                b.setBackground(new Color(41, 128, 185));
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                b.setBackground(new Color(52, 152, 219));
-            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) { b.setBackground(new Color(41, 128, 185)); }
+            public void mouseExited(java.awt.event.MouseEvent evt) { b.setBackground(new Color(52, 152, 219)); }
         });
 
         return b;
     }
 
+    // ---------------- LOAD EXISTING COMPONENT ----------------
     private void loadExistingForComponent() {
         String comp = (String) compDropdown.getSelectedItem();
         if (comp == null) return;
@@ -178,14 +221,13 @@ public class GradeEntryDialog extends JDialog {
         finalField.setText(finalRow != null ? finalRow.getFinalGrade() : "");
     }
 
+    // ---------------- SAVE ----------------
     private void saveComponent() {
-
         String comp = (String) compDropdown.getSelectedItem();
         if (comp == null) return;
 
         String scoreStr = scoreField.getText().trim();
         String finalStr = finalField.getText().trim();
-
         boolean anyUpdate = false;
 
         try {
@@ -196,7 +238,11 @@ public class GradeEntryDialog extends JDialog {
                     return;
                 }
 
-                gradeService.addOrUpdateComponentGrade(enrollmentId, comp, score);
+                boolean ok;
+                if (adminMode) ok = adminGradeService.addOrUpdateComponentGrade(enrollmentId, comp, score);
+                else ok = instructorGradeService.addOrUpdateComponentGrade(enrollmentId, comp, score);
+
+                if (!ok) throw new Exception("Failed to save component score.");
                 anyUpdate = true;
             }
 
@@ -207,29 +253,32 @@ public class GradeEntryDialog extends JDialog {
                     return;
                 }
 
-                gradeService.saveFinalGrade(enrollmentId, upper);
+                boolean ok;
+                if (adminMode) ok = adminGradeService.saveFinalGrade(enrollmentId, upper);
+                else ok = instructorGradeService.saveFinalGrade(enrollmentId, upper);
+
+                if (!ok) throw new Exception("Failed to save final grade.");
                 anyUpdate = true;
             }
 
             if (anyUpdate) {
-
                 Student s = queryService.getStudentForEnrollment(enrollmentId);
-
                 if (s != null) {
                     Notification n = new Notification(
-                            s.getUserId(),       // target user
-                            null,                // no broadcast role
+                            s.getUserId(),
+                            null,
                             "Grade Updated",
                             "Your grade for " + comp + " has been updated."
                     );
-
                     notificationsDAO.addNotification(n);
                 }
             }
 
             reloadExistingGrades();
             loadExistingForComponent();
-            parentPanel.reloadTable();
+
+            if (!adminMode && parentPanel != null) parentPanel.reloadTable();
+
             JOptionPane.showMessageDialog(this, "Saved.");
 
         } catch (Exception ex) {
@@ -237,14 +286,22 @@ public class GradeEntryDialog extends JDialog {
         }
     }
 
+    // ---------------- AUTO COMPUTE FINAL ----------------
     private void computeFinal() {
         try {
-            String letter = gradeService.autoComputeFinalLetterGrade(enrollmentId);
+            String letter;
+
+            if (adminMode)
+                letter = adminGradeService.autoComputeFinalLetterGrade(enrollmentId);
+            else
+                letter = instructorGradeService.autoComputeFinalLetterGrade(enrollmentId);
+
             JOptionPane.showMessageDialog(this, "Final Grade: " + letter);
 
             reloadExistingGrades();
             loadExistingForComponent();
-            parentPanel.reloadTable();
+
+            if (!adminMode && parentPanel != null) parentPanel.reloadTable();
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage());
