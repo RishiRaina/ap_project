@@ -30,7 +30,7 @@ public class AdminDashboard extends JPanel {
         title.setForeground(Color.WHITE);
         header.add(title, BorderLayout.WEST);
 
-        // ===================== TOP BUTTONS =====================
+        // top buttons
         JPanel topButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         topButtons.setOpaque(false);
 

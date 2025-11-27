@@ -9,9 +9,6 @@ public class MainLauncher {
     public static void main(String[] args) {
 
         MainFrame frame = new MainFrame();
-
-
-        // Only load login screen at startup
         frame.addScreen(MainFrame.LOGIN_SCREEN, new LoginScreen(frame));
 
         frame.setVisible(true);
