@@ -57,7 +57,7 @@ public class UserAuthDAO {
             System.err.println("Error fetching userId for username " + username + ": " + e.getMessage());
         }
 
-        return -1; // not found
+        return -1;
     }
 
     public String getUsernameByUserId(int userId) {
@@ -208,7 +208,7 @@ public class UserAuthDAO {
             System.err.println("Error fetching username for userId " + userId + ": " + e.getMessage());
         }
 
-        return null; // null if user not found
+        return null;
     }
 
 }

@@ -187,7 +187,7 @@ public class AddStudentUI extends JPanel {
         });
     }
 
-    // ---------- Placeholder Helper ----------
+
     private void addPlaceholder(JTextField field, String placeholder) {
         field.setForeground(Color.GRAY);
         field.setText(placeholder);

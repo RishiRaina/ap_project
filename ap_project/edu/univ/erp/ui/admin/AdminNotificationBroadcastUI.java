@@ -28,7 +28,7 @@ public class AdminNotificationBroadcastUI extends JPanel {
         form.setBackground(Color.WHITE);
         form.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        // target selection
+
         JPanel targetRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
         targetRow.setOpaque(false);
 
@@ -43,7 +43,7 @@ public class AdminNotificationBroadcastUI extends JPanel {
 
         form.add(targetRow);
 
-        // title field
+
         JPanel titleRow = new JPanel(new BorderLayout());
         titleRow.setOpaque(false);
         JLabel l1 = new JLabel("Title:");
@@ -56,7 +56,7 @@ public class AdminNotificationBroadcastUI extends JPanel {
         form.add(Box.createVerticalStrut(10));
         form.add(titleRow);
 
-        // message area
+
         JPanel msgRow = new JPanel(new BorderLayout());
         msgRow.setOpaque(false);
         JLabel l2 = new JLabel("Message:");
@@ -73,7 +73,7 @@ public class AdminNotificationBroadcastUI extends JPanel {
         form.add(Box.createVerticalStrut(10));
         form.add(msgRow);
 
-        // send button
+
         JButton sendBtn = new JButton("Send Notification");
         sendBtn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         sendBtn.setBackground(new Color(46, 204, 113));

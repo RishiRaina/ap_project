@@ -53,7 +53,7 @@ public class AssignInstructorUI extends JPanel {
         Font labelFont = new Font("Segoe UI", Font.BOLD, 16);
         Font inputFont = new Font("Segoe UI", Font.PLAIN, 15);
 
-        // Course
+
         JLabel courseLabel = new JLabel("Select Course:");
         courseLabel.setFont(labelFont);
 
@@ -77,7 +77,7 @@ public class AssignInstructorUI extends JPanel {
             }
         });
 
-        // Section
+
         JLabel sectionLabel = new JLabel("Select Section:");
         sectionLabel.setFont(labelFont);
 
@@ -108,7 +108,7 @@ public class AssignInstructorUI extends JPanel {
             }
         });
 
-        // Instructor
+
         JLabel instructorLabel = new JLabel("Select Instructor:");
         instructorLabel.setFont(labelFont);
 
@@ -131,7 +131,7 @@ public class AssignInstructorUI extends JPanel {
             }
         });
 
-        // Add components
+
         form.add(courseLabel); form.add(courseDropdown);
         form.add(sectionLabel); form.add(sectionDropdown);
         form.add(instructorLabel); form.add(instructorDropdown);

@@ -59,28 +59,28 @@ public class EnrollStudentUI extends JPanel {
         Font labelFont = new Font("Segoe UI", Font.BOLD, 16);
         Font inputFont = new Font("Segoe UI", Font.PLAIN, 15);
 
-        // Course
+
         JLabel courseLabel = new JLabel("Select Course:");
         courseLabel.setFont(labelFont);
 
         courseCombo = new JComboBox<>();
         courseCombo.setFont(inputFont);
 
-        // Section
+
         JLabel sectionLabel = new JLabel("Select Section:");
         sectionLabel.setFont(labelFont);
 
         sectionCombo = new JComboBox<>();
         sectionCombo.setFont(inputFont);
 
-        // Student
+
         JLabel studentLabel = new JLabel("Select Student:");
         studentLabel.setFont(labelFont);
 
         studentCombo = new JComboBox<>();
         studentCombo.setFont(inputFont);
 
-        // Add to form
+
         form.add(courseLabel); form.add(courseCombo);
         form.add(sectionLabel); form.add(sectionCombo);
         form.add(studentLabel); form.add(studentCombo);

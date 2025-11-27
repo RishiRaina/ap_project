@@ -6,7 +6,7 @@ import java.util.*;
 
 public class StudentDAO {
 
-    // Updated: Accept existing Connection for transaction management
+
     public boolean addStudent(Student s, Connection conn) throws SQLException {
         String sql = "INSERT INTO students (user_id, roll_no, program, year) VALUES (?, ?, ?, ?)";
 

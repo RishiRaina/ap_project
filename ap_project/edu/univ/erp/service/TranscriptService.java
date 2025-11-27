@@ -16,7 +16,7 @@ public class TranscriptService {
     private final CourseDAO courseDAO = new CourseDAO();
     private final StudentDAO studentDAO = new StudentDAO();
 
-    //row building
+
     public List<String[]> getTranscriptRows(int studentId) {
         List<String[]> rows = new ArrayList<>();
         List<Enrollment> enrollments = enrollmentDAO.getEnrollmentsByStudent(studentId);
@@ -57,7 +57,7 @@ public class TranscriptService {
         List<String[]> rows = getTranscriptRows(studentId);
         return PDFutil.writeTranscriptPDF(file, s.getRollNo(), rows);
     }
-    //final grade getter from here
+
     private String extractFinalLetter(List<Grade> grades) {
 
         for (Grade g : grades) {

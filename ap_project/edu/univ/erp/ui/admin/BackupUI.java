@@ -26,7 +26,7 @@ public class BackupUI extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
 
-        // ---------- HEADER ----------
+
         JPanel header = new JPanel();
         header.setBackground(new Color(52, 152, 219));
         header.setBorder(BorderFactory.createEmptyBorder(25, 0, 25, 0));
@@ -36,7 +36,7 @@ public class BackupUI extends JPanel {
         header.add(title);
         add(header, BorderLayout.NORTH);
 
-        // ---------- FORM ----------
+
         JPanel wrapper = new JPanel(new GridBagLayout());
         wrapper.setBackground(new Color(245, 245, 245));
 
@@ -59,7 +59,7 @@ public class BackupUI extends JPanel {
         wrapper.add(form);
         add(wrapper, BorderLayout.CENTER);
 
-        // ---------- BUTTONS ----------
+
         JPanel buttons = new JPanel();
         buttons.setBackground(new Color(245, 245, 245));
 
@@ -69,7 +69,7 @@ public class BackupUI extends JPanel {
         buttons.add(backBtn);
         add(buttons, BorderLayout.SOUTH);
 
-        // ---------- ACTIONS ----------
+
         backupBtn.addActionListener(e -> {
             boolean ok = backupDAO.backupAll();
             if (ok) {

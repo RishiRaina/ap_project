@@ -16,7 +16,7 @@ public class StudentRegistrationService {
     private CourseDAO courseDAO = new CourseDAO();
     private NotificationsDAO notificationsDAO = new NotificationsDAO();
 
-    // REGISTER for section
+
     public void register(int studentId, int sectionId) throws AccessException {
 
         AccessControl.assertAllowedWithMaintenance(
@@ -51,9 +51,7 @@ public class StudentRegistrationService {
         if (!ok)
             throw new AccessException("Failed to register.");
 
-        // ---------------- NOTIFICATIONS ----------------
 
-        // 1. notify STUDENT
         notificationsDAO.addNotification(new Notification(
                 studentId,
                 null,
@@ -61,7 +59,7 @@ public class StudentRegistrationService {
                 "You have successfully registered in section " + sectionId
         ));
 
-        // 2. notify INSTRUCTOR
+
         int instructorUserId = sectionDAO.getInstructorUserId(sectionId);
 
         notificationsDAO.addNotification(new Notification(
@@ -71,7 +69,7 @@ public class StudentRegistrationService {
                 "A student has registered in your section " + sectionId
         ));
 
-        // 3. class full now?
+
         int after = enrollmentDAO.getEnrollmentsBySection(sectionId).size();
         if (after == sec.getCapacity()) {
 
@@ -85,7 +83,7 @@ public class StudentRegistrationService {
     }
 
 
-    // DROP section
+
     public void drop(int studentId, int enrollmentId) throws AccessException {
 
         AccessControl.assertAllowedWithMaintenance(
@@ -112,9 +110,7 @@ public class StudentRegistrationService {
         if (!removed)
             throw new AccessException("Drop failed.");
 
-        // ---------------- NOTIFICATIONS ----------------
 
-        // Notify student
         notificationsDAO.addNotification(new Notification(
                 studentId,
                 null,
@@ -122,7 +118,7 @@ public class StudentRegistrationService {
                 "You dropped section " + sec.getSectionId()
         ));
 
-        // Notify instructor
+
         int instructorUserId = sectionDAO.getInstructorUserId(sec.getSectionId());
 
         notificationsDAO.addNotification(new Notification(

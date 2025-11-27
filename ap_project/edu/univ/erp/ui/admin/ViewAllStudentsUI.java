@@ -16,7 +16,7 @@ public class ViewAllStudentsUI extends JPanel {
 
     private AdminService adminService = new AdminService();
 
-    // ---------- Rounded Panel Class ----------
+
     class RoundedPanel extends JPanel {
         private int cornerRadius = 20;
 
@@ -39,14 +39,14 @@ public class ViewAllStudentsUI extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245)); // Soft gray background
 
-        // ---------- Header ----------
+
         JLabel title = new JLabel("All Students", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
         title.setForeground(new Color(52, 152, 219));
         title.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
         add(title, BorderLayout.NORTH);
 
-        // ---------- Table ----------
+
         DefaultTableModel model = new DefaultTableModel(
                 new String[]{"Username", "Roll No", "Program", "Year"}, 0
         );
@@ -68,7 +68,7 @@ public class ViewAllStudentsUI extends JPanel {
 
         add(tablePanel, BorderLayout.CENTER);
 
-        // ---------- Buttons ----------
+
         JButton back = new JButton("Back");
         styleButton(back, new Color(52, 152, 219), new Color(41, 128, 185));
 
@@ -79,7 +79,7 @@ public class ViewAllStudentsUI extends JPanel {
 
         back.addActionListener(e -> mainFrame.refreshAdminDashboard());
 
-        // ---------- Load Data ----------
+
         List<Student> students = adminService.getAllStudents();
         for (Student s : students) {
             String username = adminService.getUsernameById(s.getUserId()).toUpperCase();;
@@ -92,7 +92,7 @@ public class ViewAllStudentsUI extends JPanel {
         }
     }
 
-    // ---------- Button Styling ----------
+
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btn.setForeground(Color.WHITE);

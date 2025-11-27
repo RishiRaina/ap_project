@@ -39,7 +39,7 @@ public class NotificationsDAO {
         }
     }
 
-    // IMPORTANT: this is what your GradeEntryDialog is calling
+
     public void addNotification(Notification n) {
         insertNotification(n);
     }

@@ -42,7 +42,7 @@ public class UpgradeGradeUI extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
 
-        // -------- HEADER --------
+
         JPanel header = new JPanel();
         header.setBackground(new Color(52, 152, 219));
         header.setBorder(BorderFactory.createEmptyBorder(25, 0, 25, 0));
@@ -54,7 +54,7 @@ public class UpgradeGradeUI extends JPanel {
 
         add(header, BorderLayout.NORTH);
 
-        // -------- WRAPPER + FORM --------
+
         JPanel wrapper = new JPanel(new GridBagLayout());
         wrapper.setBackground(new Color(245, 245, 245));
 
@@ -65,25 +65,25 @@ public class UpgradeGradeUI extends JPanel {
         Font labelFont = new Font("Segoe UI", Font.BOLD, 16);
         Font inputFont = new Font("Segoe UI", Font.PLAIN, 15);
 
-        // Course
+
         JLabel courseLabel = new JLabel("Select Course:");
         courseLabel.setFont(labelFont);
         courseCombo = new JComboBox<>();
         courseCombo.setFont(inputFont);
 
-        // Section
+
         JLabel sectionLabel = new JLabel("Select Section:");
         sectionLabel.setFont(labelFont);
         sectionCombo = new JComboBox<>();
         sectionCombo.setFont(inputFont);
 
-        // Student
+
         JLabel studentLabel = new JLabel("Select Student:");
         studentLabel.setFont(labelFont);
         studentCombo = new JComboBox<>();
         studentCombo.setFont(inputFont);
 
-        // Add to form
+
         form.add(courseLabel); form.add(courseCombo);
         form.add(sectionLabel); form.add(sectionCombo);
         form.add(studentLabel); form.add(studentCombo);
@@ -91,7 +91,7 @@ public class UpgradeGradeUI extends JPanel {
         wrapper.add(form);
         add(wrapper, BorderLayout.CENTER);
 
-        // -------- BUTTONS --------
+
         JButton openBtn = new JButton("Open Grade Entry Window");
         styleButton(openBtn, new Color(46, 204, 113), new Color(39, 174, 96));
 
@@ -105,7 +105,7 @@ public class UpgradeGradeUI extends JPanel {
 
         add(bottom, BorderLayout.SOUTH);
 
-        // -------- ACTIONS --------
+
         backBtn.addActionListener(e -> mainFrame.refreshAdminDashboard());
 
         loadCourses();
@@ -127,7 +127,7 @@ public class UpgradeGradeUI extends JPanel {
         openBtn.addActionListener(e -> openGradeEntry());
     }
 
-    // -------- LOADERS --------
+
 
     private void loadCourses() {
         courseCombo.removeAllItems();
@@ -183,7 +183,7 @@ public class UpgradeGradeUI extends JPanel {
         };
     }
 
-    // -------- OPEN GRADE ENTRY --------
+
 
     private void openGradeEntry() {
         StudentItem st = (StudentItem) studentCombo.getSelectedItem();
@@ -201,7 +201,7 @@ public class UpgradeGradeUI extends JPanel {
         dlg.setVisible(true);
     }
 
-    // -------- DATA CLASSES --------
+
 
     class CourseItem {
         int courseId;
@@ -224,7 +224,7 @@ public class UpgradeGradeUI extends JPanel {
         public String toString() { return name; }
     }
 
-    // -------- BUTTON STYLE --------
+
 
     private void styleButton(JButton btn, Color normal, Color hover) {
         btn.setFont(new Font("Segoe UI", Font.BOLD, 15));

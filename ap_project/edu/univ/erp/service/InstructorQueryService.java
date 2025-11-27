@@ -16,19 +16,16 @@ public class InstructorQueryService {
     private StudentDAO studentDAO = new StudentDAO();
     private GradeDAO gradeDAO = new GradeDAO();
 
-    // Get all sections taught by instructor
     public List<Section> getMySections(int instructorId) throws AccessException {
         AccessControl.assertAllowed(AccessControl.Role.INSTRUCTOR, AccessControl.Actions.VIEW_SECTIONS);
         return sectionDAO.getSectionsByInstructor(instructorId);
     }
 
-    // Get enrollments in a section
     public List<Enrollment> getSectionEnrollments(int sectionId) throws AccessException {
         AccessControl.assertAllowed(AccessControl.Role.INSTRUCTOR, AccessControl.Actions.VIEW_SECTIONS);
         return enrollmentDAO.getEnrollmentsBySection(sectionId);
     }
 
-    // Course for section
     public Course getCourseForSection(int sectionId) throws AccessException {
         AccessControl.assertAllowed(
                 AccessControl.Role.INSTRUCTOR,
@@ -38,7 +35,6 @@ public class InstructorQueryService {
         return (sec != null) ? courseDAO.getCourseById(sec.getCourseId()) : null;
     }
 
-    // Student for enrollment
     public Student getStudentForEnrollment(int enrollmentId) throws AccessException {
         AccessControl.assertAllowed(AccessControl.Role.INSTRUCTOR, AccessControl.Actions.VIEW_SECTIONS);
         Enrollment e = enrollmentDAO.getEnrollmentById(enrollmentId);
@@ -46,13 +42,11 @@ public class InstructorQueryService {
         return studentDAO.getStudentById(e.getStudentId());
     }
 
-    // get grades for enrollment
     public List<Grade> getGradesForEnrollment(int enrollmentId) throws AccessException {
         AccessControl.assertAllowed(AccessControl.Role.INSTRUCTOR, AccessControl.Actions.VIEW_SECTIONS);
         return gradeDAO.getGradesByEnrollment(enrollmentId);
     }
 
-    // get section object
     public Section getSection(int sectionId) throws AccessException {
         AccessControl.assertAllowed(AccessControl.Role.INSTRUCTOR, AccessControl.Actions.VIEW_SECTIONS);
         return sectionDAO.getSectionById(sectionId);

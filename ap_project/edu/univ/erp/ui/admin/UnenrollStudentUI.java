@@ -26,7 +26,7 @@ public class UnenrollStudentUI extends JPanel {
     private EnrollmentService enrollmentService = new EnrollmentService();
     private UserAuthService userAuthService = new UserAuthService();
 
-    // ---------- ROUNDED PANEL ----------
+
     class RoundedPanel extends JPanel {
         private int cornerRadius = 20;
 
@@ -46,7 +46,7 @@ public class UnenrollStudentUI extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
 
-        // ---------- HEADER ----------
+
         JPanel header = new JPanel();
         header.setBackground(new Color(52, 152, 219));
         header.setBorder(BorderFactory.createEmptyBorder(25, 0, 25, 0));
@@ -57,7 +57,7 @@ public class UnenrollStudentUI extends JPanel {
         header.add(title);
         add(header, BorderLayout.NORTH);
 
-        // ---------- WRAPPER PANEL ----------
+
         JPanel wrapper = new JPanel(new GridBagLayout());
         wrapper.setBackground(new Color(245, 245, 245));
 
@@ -68,7 +68,7 @@ public class UnenrollStudentUI extends JPanel {
         Font labelFont = new Font("Segoe UI", Font.BOLD, 16);
         Font inputFont = new Font("Segoe UI", Font.PLAIN, 15);
 
-        // ---------- COURSE ----------
+
         JLabel courseLabel = new JLabel("Select Course:");
         courseLabel.setFont(labelFont);
 
@@ -87,7 +87,7 @@ public class UnenrollStudentUI extends JPanel {
             }
         });
 
-        // ---------- SECTION ----------
+
         JLabel sectionLabel = new JLabel("Select Section:");
         sectionLabel.setFont(labelFont);
 
@@ -115,7 +115,7 @@ public class UnenrollStudentUI extends JPanel {
             }
         });
 
-        // ---------- STUDENT ----------
+
         JLabel studentLabel = new JLabel("Select Student:");
         studentLabel.setFont(labelFont);
 
@@ -150,7 +150,7 @@ public class UnenrollStudentUI extends JPanel {
             }
         });
 
-        // ---------- ADD FIELDS TO FORM ----------
+
         form.add(courseLabel); form.add(courseBox);
         form.add(sectionLabel); form.add(sectionBox);
         form.add(studentLabel); form.add(studentBox);
@@ -158,7 +158,7 @@ public class UnenrollStudentUI extends JPanel {
         wrapper.add(form);
         add(wrapper, BorderLayout.CENTER);
 
-        // ---------- BUTTONS ----------
+
         JPanel btnPanel = new JPanel();
         btnPanel.setBackground(new Color(245, 245, 245));
         btnPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 30, 0));
@@ -174,7 +174,7 @@ public class UnenrollStudentUI extends JPanel {
 
         add(btnPanel, BorderLayout.SOUTH);
 
-        // ---------- ACTIONS ----------
+
         unenrollBtn.addActionListener(e -> {
             Enrollment en = (Enrollment) studentBox.getSelectedItem();
             if (en == null) {

@@ -21,7 +21,7 @@ public class ChangePasswordUI extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
 
-        // ---------- HEADER ----------
+
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(new Color(52, 152, 219));
         header.setBorder(new EmptyBorder(10, 20, 10, 20));
@@ -31,11 +31,11 @@ public class ChangePasswordUI extends JPanel {
         title.setForeground(Color.WHITE);
         header.add(title, BorderLayout.WEST);
 
-        // Top-right buttons panel
+
         JPanel topButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         topButtons.setOpaque(false);
 
-        // Logout button
+
         JButton logoutBtn = new JButton("Logout");
         logoutBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         logoutBtn.setForeground(Color.WHITE);
@@ -52,7 +52,7 @@ public class ChangePasswordUI extends JPanel {
 
         add(header, BorderLayout.NORTH);
 
-        // ---------- CENTER FORM PANEL ----------
+
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setBorder(new EmptyBorder(40, 40, 40, 40));
         formPanel.setBackground(Color.WHITE);
@@ -62,28 +62,28 @@ public class ChangePasswordUI extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.WEST;
 
-        // OLD PASSWORD
+
         gbc.gridx = 0; gbc.gridy = 0;
         formPanel.add(makeLabel("Old Password:"), gbc);
         gbc.gridx = 1;
         oldPassField = makeField();
         formPanel.add(oldPassField, gbc);
 
-        // NEW PASSWORD
+
         gbc.gridx = 0; gbc.gridy++;
         formPanel.add(makeLabel("New Password:"), gbc);
         gbc.gridx = 1;
         newPassField = makeField();
         formPanel.add(newPassField, gbc);
 
-        // CONFIRM PASSWORD
+
         gbc.gridx = 0; gbc.gridy++;
         formPanel.add(makeLabel("Confirm Password:"), gbc);
         gbc.gridx = 1;
         confirmPassField = makeField();
         formPanel.add(confirmPassField, gbc);
 
-        // STATUS LABEL
+
         gbc.gridx = 0; gbc.gridy++;
         gbc.gridwidth = 2;
         statusLabel = new JLabel("");
@@ -93,7 +93,7 @@ public class ChangePasswordUI extends JPanel {
 
         add(formPanel, BorderLayout.CENTER);
 
-        // ---------- BOTTOM BUTTONS ----------
+
         JPanel bottomPanel = new JPanel();
         bottomPanel.setBorder(new EmptyBorder(10, 0, 30, 0));
 

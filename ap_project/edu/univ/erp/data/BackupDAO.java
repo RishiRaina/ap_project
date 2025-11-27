@@ -15,12 +15,12 @@ public class BackupDAO {
     private final String BACKUP_FOLDER = "backups/";
 
     public BackupDAO() {
-        // Ensure backup folder exists
+
         File folder = new File(BACKUP_FOLDER);
         if (!folder.exists()) folder.mkdirs();
     }
 
-    // ------------------- BACKUP -------------------
+
     public boolean backupAll() {
         try (Connection authConn = DriverManager.getConnection(AUTH_DB_URL, DB_USER, DB_PASS);
              Connection erpConn = DriverManager.getConnection(ERP_DB_URL, DB_USER, DB_PASS)) {
@@ -34,7 +34,7 @@ public class BackupDAO {
             backupTable(erpConn, "grades", "grades.csv");
             backupSettings(erpConn);
 
-            // Save last backup time
+
             saveLastBackupTime(erpConn);
 
             return true;
@@ -51,14 +51,14 @@ public class BackupDAO {
         int colCount = meta.getColumnCount();
 
         try (PrintWriter writer = new PrintWriter(new File(BACKUP_FOLDER + fileName))) {
-            // Write header
+
             for (int i = 1; i <= colCount; i++) {
                 writer.print(meta.getColumnName(i));
                 if (i < colCount) writer.print(",");
             }
             writer.println();
 
-            // Write rows
+
             while (rs.next()) {
                 for (int i = 1; i <= colCount; i++) {
                     writer.print(rs.getString(i) == null ? "" : rs.getString(i));
@@ -96,12 +96,11 @@ public class BackupDAO {
         return "Never";
     }
 
-    // ------------------- RESTORE -------------------
     public boolean restoreAll() {
         try (Connection authConn = DriverManager.getConnection(AUTH_DB_URL, DB_USER, DB_PASS);
              Connection erpConn = DriverManager.getConnection(ERP_DB_URL, DB_USER, DB_PASS)) {
 
-            // Disable FK checks for restore
+
             erpConn.createStatement().execute("SET FOREIGN_KEY_CHECKS=0");
             authConn.createStatement().execute("SET FOREIGN_KEY_CHECKS=0");
 

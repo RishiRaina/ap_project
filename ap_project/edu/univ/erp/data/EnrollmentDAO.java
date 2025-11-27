@@ -156,7 +156,7 @@ public class EnrollmentDAO {
 
     public boolean enrollStudentInSection(int studentId, int sectionId) {
 
-        // First check if already enrolled to avoid duplicates
+
         if (isStudentAlreadyEnrolledInSection(studentId, sectionId)) {
             System.out.println("Student is already enrolled in this section.");
             return false;

@@ -5,15 +5,15 @@ import java.sql.Timestamp;
 public class Notification {
 
     private int id;
-    private Integer targetUserId;   // null for broadcasts
-    private String targetRole;      // STUDENT / INSTRUCTOR / ADMIN / ALL / null
+    private Integer targetUserId;
+    private String targetRole;
     private String title;
     private String message;
     private Timestamp createdAt;
 
     public Notification() {}
 
-    // Constructor used while INSERTING
+
     public Notification(Integer targetUserId,
                         String targetRole,
                         String title,
@@ -24,7 +24,7 @@ public class Notification {
         this.message = message;
     }
 
-    // Getters + Setters
+
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }

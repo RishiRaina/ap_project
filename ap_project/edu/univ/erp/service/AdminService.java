@@ -35,7 +35,7 @@ public class AdminService {
         AccessControl.assertAllowedWithMaintenance(AccessControl.Role.ADMIN, action);
     }
 
-    // Admin operations
+
     public boolean addAdmin(Admin a) {
         return adminDAO.addAdmin(a);
     }
@@ -45,7 +45,7 @@ public class AdminService {
     }
 
 
-    // Course operations
+
     public boolean addCourse(Course c) {
         return courseDAO.addCourse(c);
     }
@@ -59,7 +59,7 @@ public class AdminService {
     }
 
 
-    // Section operations
+
     public boolean addSection(Section s, String courseCode) {
         return sectionDAO.addSection(s, courseCode);
     }
@@ -84,12 +84,12 @@ public class AdminService {
         return enrollmentDAO.removeStudentFromSection(sectionId, studentId);
     }
 
-    // 1️⃣ Drop student from a section (unenroll only)
+
     public boolean dropStudentFromSection(int sectionId, int studentId) {
         return enrollmentDAO.removeStudentFromSection(sectionId, studentId);
     }
 
-    // 2️⃣ Delete student completely from system
+
     public boolean deleteStudent(int userId) {
         // Delete from auth_db, cascades will remove from ERP DB
         return UserAuthDAO.deleteUser(userId);
@@ -105,7 +105,7 @@ public class AdminService {
     }
 
 
-    // Instructor operation
+
 
     public boolean addInstructor(String username, String rawPassword, String department) {
         return instructorService.addInstructor(username, rawPassword, department);

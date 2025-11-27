@@ -12,7 +12,7 @@ public class AdminGradeService {
     private GradeDAO gradeDAO = new GradeDAO();
     private EnrollmentDAO enrollmentDAO = new EnrollmentDAO();
 
-    // Admin manually enters or updates component marks
+
     public boolean addOrUpdateComponentGrade(int enrollmentId, String component, double score) throws AccessException {
 
         AccessControl.assertAllowed(AccessControl.Role.ADMIN, AccessControl.Actions.ENTER_SCORES);
@@ -36,7 +36,7 @@ public class AdminGradeService {
         return gradeDAO.addGrade(g);
     }
 
-    // Admin manually assigns a final letter grade
+
     public boolean saveFinalGrade(int enrollmentId, String finalGrade) throws AccessException {
 
         AccessControl.assertAllowed(AccessControl.Role.ADMIN, AccessControl.Actions.COMPUTE_FINAL_GRADES);
@@ -58,7 +58,7 @@ public class AdminGradeService {
         return gradeDAO.addGrade(g);
     }
 
-    // Admin auto-computes final letter grade based on components
+
     public String autoComputeFinalLetterGrade(int enrollmentId) throws AccessException {
 
         AccessControl.assertAllowed(AccessControl.Role.ADMIN, AccessControl.Actions.COMPUTE_FINAL_GRADES);

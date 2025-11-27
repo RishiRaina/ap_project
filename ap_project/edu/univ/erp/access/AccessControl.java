@@ -64,14 +64,14 @@ public class AccessControl {
         role_permissions.put(Role.ADMIN, Set.of(
                 Actions.LOGIN, Actions.LOGOUT,
 
-                // Admin grade permissions (missing earlier)
+
                 Actions.VIEW_SECTIONS,
                 Actions.ENTER_SCORES,
                 Actions.COMPUTE_FINAL_GRADES,
                 Actions.EXPORT_GRADES_CSV,
                 Actions.IMPORT_GRADES_CSV,
 
-                // Course, user, section management
+
                 Actions.ADD_USERS,
                 Actions.CREATE_COURSE,
                 Actions.EDIT_COURSE,
@@ -79,17 +79,17 @@ public class AccessControl {
                 Actions.EDIT_SECTION,
                 Actions.ASSIGN_INSTRUCTOR,
 
-                // System-level actions
+
                 Actions.TOGGLE_MAINTENANCE,
                 Actions.BACKUP_DB,
                 Actions.RESTORE_DB,
 
-                // Export permissions
+
                 Actions.EXPORT_CLASS_LIST_CSV,
                 Actions.EXPORT_TRANSCRIPT_CSV,
                 Actions.EXPORT_TRANSCRIPT_PDF,
 
-                // Account controls
+
                 Actions.CHANGE_PASSWORD,
                 Actions.LOCK_ACCOUNT
         ));

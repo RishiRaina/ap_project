@@ -14,7 +14,7 @@ public class SectionDAO {
 
         try (Connection conn = ERPDatabaseConnection.getConnection()) {
 
-            // 1. Fetch course_id using course_code
+
             int courseId = -1;
             try (PreparedStatement ps = conn.prepareStatement(findCourseSql)) {
                 ps.setString(1, courseCode);
@@ -27,7 +27,7 @@ public class SectionDAO {
                 }
             }
 
-            // 2. Insert the new section
+
             try (PreparedStatement ps = conn.prepareStatement(insertSql)) {
 
                 ps.setInt(1, courseId);
@@ -112,7 +112,7 @@ public class SectionDAO {
         return list;
     }
 
-    // NEW METHOD — Get instructor's user_id for a given section
+
     public int getInstructorUserId(int sectionId) {
         String sql = "SELECT instructor_id FROM sections WHERE section_id = ?";
 
